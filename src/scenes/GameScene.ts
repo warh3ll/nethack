@@ -68,6 +68,7 @@ export class GameScene extends Phaser.Scene {
 
     this.paused = false;
     this.input.keyboard!.on('keydown-ESC', this.togglePause, this);
+    this.input.keyboard!.on('keydown-P', this.togglePause, this);
 
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
@@ -153,7 +154,7 @@ export class GameScene extends Phaser.Scene {
         .container(0, 0, [
           this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6).setOrigin(0),
           this.add
-            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc to resume', {
+            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc or P to resume', {
               fontFamily: 'monospace',
               fontSize: '24px',
               color: '#2ef2ff',
