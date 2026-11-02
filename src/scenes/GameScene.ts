@@ -3,6 +3,8 @@ import { SPAWNING, STARTING_SKILL } from '../data/balance';
 import { Bullet } from '../entities/Bullet';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
+import { PrimaryGun } from '../entities/PrimaryGun';
+import { PRIMARY_GUN } from '../data/guns';
 import { Weapon } from '../entities/Weapon';
 
 export class GameScene extends Phaser.Scene {
@@ -10,6 +12,7 @@ export class GameScene extends Phaser.Scene {
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
   private weapons: Weapon[] = [];
+  private primaryGun!: PrimaryGun;
   private background!: Phaser.GameObjects.TileSprite;
   private hud!: Phaser.GameObjects.Text;
   private hpBar!: Phaser.GameObjects.Graphics;
@@ -18,6 +21,8 @@ export class GameScene extends Phaser.Scene {
   private nextSpawnAt = 0;
   private kills = 0;
   private gameOver = false;
+  private paused = false;
+  private pauseOverlay?: Phaser.GameObjects.Container;
 
   constructor() {
     super('game');
@@ -39,6 +44,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.weapons = [new Weapon(STARTING_SKILL, this.player, this.enemies, this.bullets)];
+    this.primaryGun = new PrimaryGun(PRIMARY_GUN, this.player, this.bullets, this.cameras.main, this.input.activePointer);
 
     this.physics.add.overlap(this.bullets, this.enemies, (a, b) => {
       const bullet = (a instanceof Bullet ? a : b) as Bullet;
@@ -60,17 +66,21 @@ export class GameScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(100);
 
+    this.paused = false;
+    this.input.keyboard!.on('keydown-ESC', this.togglePause, this);
+
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
   }
 
   update(time: number, delta: number) {
     this.background.setTilePosition(this.cameras.main.scrollX, this.cameras.main.scrollY);
-    if (this.gameOver) return;
+    if (this.gameOver || this.paused) return;
 
     this.elapsedMs += delta;
     this.player.update();
     for (const w of this.weapons) w.update(time);
+    this.primaryGun.update(time);
     this.spawnEnemies(time);
 
     for (const obj of this.enemies.getChildren()) {
@@ -129,6 +139,37 @@ export class GameScene extends Phaser.Scene {
     const restart = () => this.scene.restart();
     this.input.keyboard!.once('keydown-R', restart);
     this.input.once('pointerdown', restart);
+  }
+
+  private togglePause() {
+    if (this.gameOver) return;
+    this.paused = !this.paused;
+    if (this.paused) {
+      this.physics.pause();
+      this.tweens.pauseAll();
+      this.time.paused = true;
+      const cam = this.cameras.main;
+      this.pauseOverlay = this.add
+        .container(0, 0, [
+          this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6).setOrigin(0),
+          this.add
+            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc to resume', {
+              fontFamily: 'monospace',
+              fontSize: '24px',
+              color: '#2ef2ff',
+              align: 'center',
+            })
+            .setOrigin(0.5),
+        ])
+        .setScrollFactor(0)
+        .setDepth(150);
+    } else {
+      this.physics.resume();
+      this.tweens.resumeAll();
+      this.time.paused = false;
+      this.pauseOverlay?.destroy();
+      this.pauseOverlay = undefined;
+    }
   }
 
   private onResize(size: Phaser.Structs.Size) {
