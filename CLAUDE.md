@@ -2,6 +2,9 @@
 
 Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up choices, boss on a timer) for the browser. Phaser 4 + TypeScript + Vite. Earlier prototype was in Godot; this is the restart.
 
+## Game design
+`docs/GAME_DESIGN.md` is the source of truth for what the game is meant to be. Read it before building or changing a feature. If a request conflicts with it (or touches something marked TBD), say so and ask rather than silently deciding. Henrik edits it; Claude only suggests changes.
+
 ## Roles
 - Henrik: game design, assets, balancing. Claude writes most of the code.
 - Keep tuning numbers in `src/data/` (`balance.ts`, `skills.ts`) so Henrik can balance without touching logic. Never hard-code a balance value in game code.
