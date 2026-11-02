@@ -1,0 +1,26 @@
+# nethack
+
+Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up choices, boss on a timer) for the browser. Phaser 4 + TypeScript + Vite. Earlier prototype was in Godot; this is the restart.
+
+## Roles
+- Henrik: game design, assets, balancing. Claude writes most of the code.
+- Keep tuning numbers in `src/data/` (`balance.ts`, `skills.ts`) so Henrik can balance without touching logic. Never hard-code a balance value in game code.
+
+## Architecture rules (carried over from the Godot version)
+- Skills are data: per-level stat rows read via `getSkillStats(id, level)`.
+- Passive stat bonuses are re-summed from scratch on every change, never adjusted incrementally.
+- Object pooling from day one: enemies and bullets come from Phaser groups (`group.get()`), and are disabled, not destroyed.
+- Enemies move straight at the player; no pathfinding by design.
+- Prototype scope: one character, one starting skill, 5 skill slots, 10 skills total (6 weapons, 4 passives).
+
+## Working style
+- Small, runnable milestones: every change should leave the game playable.
+- Placeholder art is generated in `src/scenes/BootScene.ts`; real assets load there under the same texture keys.
+
+## Commands
+- `npm run dev`: dev server with hot reload
+- `npm run build`: typecheck + production build into `dist/` (uploadable to itch.io as HTML5)
+- `npm run typecheck`
+
+## Release
+Repo stays private. Eventual release on itch.io, not GitHub Pages.
