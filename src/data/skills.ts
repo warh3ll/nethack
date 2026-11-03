@@ -29,7 +29,7 @@ export interface PassiveStats {
   maxHp?: number;
   /** Percent extra move speed (10 = +10%). */
   moveSpeedPct?: number;
-  /** Percent extra damage for everything the player fires (weapons and primary gun). */
+  /** Percent extra damage for everything the player's weapons fire. */
   damagePct?: number;
 }
 

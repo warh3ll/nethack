@@ -5,8 +5,6 @@ import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
-import { PrimaryGun } from '../entities/PrimaryGun';
-import { PRIMARY_GUN } from '../data/guns';
 import { Weapon } from '../entities/Weapon';
 import { Progression, type Upgrade } from '../systems/Progression';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
@@ -17,7 +15,6 @@ export class GameScene extends Phaser.Scene {
   private bullets!: Phaser.Physics.Arcade.Group;
   private progression!: Progression;
   private weapons: Weapon[] = [];
-  private primaryGun!: PrimaryGun;
   private background!: Phaser.GameObjects.TileSprite;
   private hud!: Phaser.GameObjects.Text;
   private hpBar!: Phaser.GameObjects.Graphics;
@@ -57,7 +54,6 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.weapons = [new Weapon(STARTING_SKILL, this.player, this.enemies, this.bullets, stats)];
-    this.primaryGun = new PrimaryGun(PRIMARY_GUN, this.player, this.bullets, this.cameras.main, this.input.activePointer, stats);
 
     this.physics.add.overlap(this.bullets, this.enemies, (a, b) => {
       const bullet = (a instanceof Bullet ? a : b) as Bullet;
@@ -98,7 +94,6 @@ export class GameScene extends Phaser.Scene {
     this.elapsedMs += delta;
     this.player.update();
     for (const w of this.weapons) w.update(time);
-    this.primaryGun.update(time);
     this.spawnEnemies(time);
 
     for (const obj of this.enemies.getChildren()) {

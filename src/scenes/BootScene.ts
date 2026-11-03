@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { ENEMIES, PLAYER } from '../data/balance';
-import { GUNS } from '../data/guns';
 import { SKILLS } from '../data/skills';
 
 /**
@@ -32,11 +31,6 @@ export class BootScene extends Phaser.Scene {
       if (s.kind !== 'weapon') continue;
       g.fillStyle(s.color).fillRect(0, 0, 10, 4);
       g.generateTexture(`bullet-${key}`, 10, 4).clear();
-    }
-
-    for (const [key, gun] of Object.entries(GUNS)) {
-      g.fillStyle(gun.color).fillRect(0, 0, gun.bulletWidth, gun.bulletHeight);
-      g.generateTexture(`bullet-${key}`, gun.bulletWidth, gun.bulletHeight).clear();
     }
 
     // Background grid tile.
