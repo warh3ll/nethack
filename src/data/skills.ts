@@ -1,6 +1,10 @@
 // ─────────────────────────────────────────────────────────────
 // SKILLS: each skill is data. `levels[0]` is level 1, `levels[1]` level 2, ...
 // The code reads stats via getSkillStats(id, level), so adding a level is just adding a row.
+// A skill's max level is simply how many rows it has.
+//
+// Skills marked `placeholder: true` (and "[PH]" in the name) are stand-ins so the
+// level-up picker has something to offer. Replace or delete them as real skills are designed.
 // ─────────────────────────────────────────────────────────────
 
 export interface WeaponStats {
@@ -16,13 +20,40 @@ export interface WeaponStats {
   range: number;
 }
 
-export interface SkillData {
+/**
+ * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
+ * (not the step from the previous level). Bonuses from all passives are added together.
+ */
+export interface PassiveStats {
+  /** Flat extra max HP. */
+  maxHp?: number;
+  /** Percent extra move speed (10 = +10%). */
+  moveSpeedPct?: number;
+  /** Percent extra damage for everything the player fires (weapons and primary gun). */
+  damagePct?: number;
+  /** Percent extra XP pickup (magnet) radius. */
+  magnetPct?: number;
+}
+
+interface SkillBase {
   name: string;
-  kind: 'weapon' | 'passive';
   description: string;
   color: number;
+  /** Stand-in until the real skill list is designed. */
+  placeholder?: boolean;
+}
+
+export interface WeaponSkill extends SkillBase {
+  kind: 'weapon';
   levels: WeaponStats[];
 }
+
+export interface PassiveSkill extends SkillBase {
+  kind: 'passive';
+  levels: PassiveStats[];
+}
+
+export type SkillData = WeaponSkill | PassiveSkill;
 
 export const SKILLS: Record<string, SkillData> = {
   autoPistol: {
@@ -38,11 +69,78 @@ export const SKILLS: Record<string, SkillData> = {
       { damage: 10, cooldownMs: 400, projectileSpeed: 600, pierce: 2, projectiles: 2, spreadDeg: 8, range: 500 },
     ],
   },
+
+  // ── Placeholders ───────────────────────────────────────────
+  phScatter: {
+    name: '[PH] Scatter Gun',
+    kind: 'weapon',
+    placeholder: true,
+    description: 'Placeholder weapon. Short-range spread at the nearest enemy.',
+    color: 0xc77dff,
+    levels: [
+      { damage: 4, cooldownMs: 1100, projectileSpeed: 480, pierce: 0, projectiles: 3, spreadDeg: 15, range: 280 },
+      { damage: 5, cooldownMs: 1000, projectileSpeed: 480, pierce: 0, projectiles: 4, spreadDeg: 14, range: 300 },
+      { damage: 6, cooldownMs: 900, projectileSpeed: 500, pierce: 1, projectiles: 5, spreadDeg: 13, range: 320 },
+    ],
+  },
+  phPlating: {
+    name: '[PH] Armor Plating',
+    kind: 'passive',
+    placeholder: true,
+    description: 'Placeholder passive. More max HP.',
+    color: 0x9aa7c7,
+    levels: [{ maxHp: 20 }, { maxHp: 40 }, { maxHp: 60 }],
+  },
+  phServos: {
+    name: '[PH] Leg Servos',
+    kind: 'passive',
+    placeholder: true,
+    description: 'Placeholder passive. Faster movement.',
+    color: 0x2ef2ff,
+    levels: [{ moveSpeedPct: 8 }, { moveSpeedPct: 16 }, { moveSpeedPct: 24 }],
+  },
+  phOverclock: {
+    name: '[PH] Overclock',
+    kind: 'passive',
+    placeholder: true,
+    description: 'Placeholder passive. More damage from everything you fire.',
+    color: 0xff9d2e,
+    levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
+  },
+  phSiphon: {
+    name: '[PH] Data Siphon',
+    kind: 'passive',
+    placeholder: true,
+    description: 'Placeholder passive. Pulls XP from further away.',
+    color: 0x5cff9d,
+    levels: [{ magnetPct: 30 }, { magnetPct: 60 }, { magnetPct: 90 }],
+  },
 };
 
-export function getSkillStats(id: string, level: number): WeaponStats {
+/** Offered when every owned skill is maxed and no slot is free (or no skill is left to offer). */
+export const FALLBACK_UPGRADE = {
+  name: 'Patch Up',
+  description: 'Restore HP.',
+  heal: 30,
+};
+
+export function getSkillStats(id: string, level: number): WeaponStats | PassiveStats {
   const skill = SKILLS[id];
   if (!skill) throw new Error(`Unknown skill "${id}"`);
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1;
   return skill.levels[i];
+}
+
+export function getWeaponStats(id: string, level: number): WeaponStats {
+  if (SKILLS[id]?.kind !== 'weapon') throw new Error(`"${id}" is not a weapon skill`);
+  return getSkillStats(id, level) as WeaponStats;
+}
+
+export function getPassiveStats(id: string, level: number): PassiveStats {
+  if (SKILLS[id]?.kind !== 'passive') throw new Error(`"${id}" is not a passive skill`);
+  return getSkillStats(id, level) as PassiveStats;
+}
+
+export function maxSkillLevel(id: string): number {
+  return SKILLS[id].levels.length;
 }

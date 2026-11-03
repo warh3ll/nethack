@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { getSkillStats } from '../data/skills';
+import { getWeaponStats } from '../data/skills';
+import type { PlayerStats } from '../systems/Progression';
 import type { Bullet } from './Bullet';
 import type { Enemy } from './Enemy';
 
@@ -13,10 +14,11 @@ export class Weapon {
     private owner: Phaser.GameObjects.Components.Transform,
     private enemies: Phaser.Physics.Arcade.Group,
     private bullets: Phaser.Physics.Arcade.Group,
+    private playerStats: PlayerStats,
   ) {}
 
   get stats() {
-    return getSkillStats(this.skillId, this.level);
+    return getWeaponStats(this.skillId, this.level);
   }
 
   update(time: number) {
@@ -32,7 +34,7 @@ export class Weapon {
       const offset = (i - (s.projectiles - 1) / 2) * spread;
       const b = this.bullets.get() as Bullet | null;
       if (!b) return; // pool exhausted
-      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage, s.pierce, s.range, `bullet-${this.skillId}`);
+      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, s.range, `bullet-${this.skillId}`);
     }
   }
 

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GUNS } from '../data/guns';
+import type { PlayerStats } from '../systems/Progression';
 import type { Bullet } from './Bullet';
 
 /** A gun the player aims with the mouse and fires with the left button (hold to keep firing). */
@@ -12,6 +13,7 @@ export class PrimaryGun {
     private bullets: Phaser.Physics.Arcade.Group,
     private camera: Phaser.Cameras.Scene2D.Camera,
     private pointer: Phaser.Input.Pointer,
+    private playerStats: PlayerStats,
   ) {}
 
   get stats() {
@@ -30,7 +32,7 @@ export class PrimaryGun {
       const offset = (i - (s.projectiles - 1) / 2) * spread;
       const b = this.bullets.get() as Bullet | null;
       if (!b) return; // pool exhausted
-      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage, s.pierce, s.range, `bullet-${this.gunId}`);
+      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, s.range, `bullet-${this.gunId}`);
     }
   }
 }
