@@ -50,8 +50,9 @@ export const SPAWNING = {
 
 export const STARTING_SKILL = 'autoPistol'
 
-/** How many skills (weapons + passives together) the player can hold. */
-export const SKILL_SLOTS = 5
+/** Skill slots: weapons (and other active skills) and passives each have their own group. */
+export const WEAPON_SLOTS = 5
+export const PASSIVE_SLOTS = 5
 
 export const LEVELING = {
   /** Highest player level. Reaching it stops XP gain and level-ups. */
