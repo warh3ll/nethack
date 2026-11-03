@@ -33,7 +33,7 @@ Rules to check every feature against. Edit these first.
 8. Extract by inputing the extraction code snippet after the final objective
 9. In the main menu, players can buy items that make their next runs more fun or more badass
 
-TBD: whether kills still drop XP and trigger level-ups, or whether caches are the only source of upgrades (see open questions).
+**Decided:** for now XP comes from kills, and level-ups offer upgrade choices. Caches are an additional source (section 5).
 
 ## 4. Player
 
@@ -51,10 +51,10 @@ TBD: whether kills still drop XP and trigger level-ups, or whether caches are th
 
 ## 5. Skills and progression
 
-- **Slots:** 5 skill slots and 5 passive slots (these should be visualized in the UI)
+- **Slots:** 10 total: 5 weapon/skill slots and 5 passive slots (these should be visualized in the UI). The two groups are separate: once all 5 weapon/skill slots are filled, level-ups only offer new passives or upgrades to weapons/skills the player already has (and vice versa). Data caches follow the same rules, except the player gets no choice.
 - **Kinds:** weapons, passives, and skills
 - **Where they come from:** data caches found randomly on the map. Caches should be rare, can also drop from enemies in rare cases.
-- **Prototype roster:** 10 skills, 6 weapons and 4 passives (only the Auto-Pistol exists so far). TBD: where nethacking skills fit in that count.
+- **Prototype roster:** 11 skills, 6 weapons and 5 passives (only the Auto-Pistol exists so far). The fifth passive is Health Regen. Nethacking skills use the weapon/skill slots; Henrik will clarify how they fit in the count later.
 - Each skill has per-level stat rows, defined in data (`src/data/skills.ts`).
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
@@ -69,6 +69,7 @@ TBD: whether kills still drop XP and trigger level-ups, or whether caches are th
 | TBD         | weapon  |                                                                      |         |
 | TBD         | weapon  |                                                                      |         |
 | TBD         | weapon  |                                                                      |         |
+| Health Regen | passive | Increases the player's passive health regeneration                  |         |
 | TBD         | passive |                                                                      |         |
 | TBD         | passive |                                                                      |         |
 | TBD         | passive |                                                                      |         |
@@ -88,7 +89,7 @@ TBD: level cap per skill, evolutions/combinations, what happens when all slots a
 ## 7. Run structure and objectives
 
 - A run is one attempt made of **3-5 objectives**, completed in sequence. These are known and should be visible in the UI.
-- The map is explored freely; the player must find where the next objective is, the map has a large boundary, and it should take some time to walk from edge to edge.
+- The map is explored freely; the player must find where the next objective is, the map has a large hard boundary, and it should take some time to walk from edge to edge. **Decided (tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Objectives are placed inside it.
 - Some objectives are **timed**. A **run clock is always visible in the UI**.
 - **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
@@ -105,6 +106,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - The player must **stay within a certain range** of the target while the hack runs. Leaving the range pauses it, deteriorates very slowly until the player comes back inside range
 - A **percentage status bar** shows hack progress.
 - The player will keep auto-shooting while hacking, so hacking happens under pressure from enemy hordes.
+- **Input priority (decided):** the player can still move during a hack, but while a typing prompt is active, typing takes priority over movement keys. WASD letters go to the prompt, while the arrow keys keep moving the player.
 - Hacking draws enemies near slightly faster, any damage to the player will halt progress by 0.2 seconds
 - **Interaction prompts:** during a server hack the player is forced to interact 2-3 times: typing an IP address, a password, injecting a very short code snippet or similar, and possibly physically smacking the server (see Hack server in section 7). TBD: exact prompt list, and what failure costs (progress loss, damage, reset).
   - **IP address** - the player needs to type an IP address that appears over the objective, hacking progression is halted until it is complete - format is xxx.xxx.xxx.xxx (but with numbers)
@@ -128,9 +130,9 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 5 slots, 10 skills (6 weapons, 4 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, and a short run of objectives including at least one hacking objective.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 weapon/skill, 5 passive), 11 skills (6 weapons, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, and a short run of objectives including at least one hacking objective.
 
-**Out of scope for now:** TBD (e.g. multiple characters, meta progression, multiplayer, mobile).
+**Out of scope for now:** TBD (e.g. multiple characters, multiplayer, mobile). Meta progression is in scope.
 
 ## 12. Technical constraints that shape design
 
@@ -144,7 +146,39 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 ## 13. Open questions
 
-- Do kills still give XP and level-ups, or are data caches the only source of upgrades?
-- Map: one big scrolling map, or generated per run? Size, and how objectives and caches are placed.
-- Do nethacking skills use the 5 skill slots?
+- Map: fixed or generated per run? How objectives and caches are placed inside the 10000x10000 px map.
 - Objective list and how they differ from each other.
+
+### Added by Claude (please answer inline or strike out)
+
+**Progression and skills**
+- Section 5 says "Kinds: weapons, passives, and skills", but the skill table only has weapon and passive. What separates a "skill" from a weapon? Are nethacking skills active abilities (cooldown, button press) or auto-firing like weapons?
+- Level-ups and caches share the same slot rules. Do caches draw from a rarer/stronger pool, or the same one?
+- What happens when a level-up offers nothing useful (all slots full and maxed)? Heal, credits, reroll?
+- Can the player pick "nothing" or reroll the 3 choices? (Relates to pillar 3.)
+
+**Map and objectives**
+- How is the player guided to the objective: marker, compass arrow, vague hint (distance only), or nothing? Does guidance differ per objective type?
+- Map edge: plain invisible wall, or something diegetic (firewall, grid edge)? Is 10000x10000 px right? Walk time at current player speed will tell us; a target of roughly 60-90 s edge to edge is my suggestion.
+- Are objective locations visible from the start, revealed one at a time, or only when the previous is done?
+- What does failing a timed objective do: instant loss, penalty (time, credits, harder next objective), or skipped?
+- Run length target (minutes) and how many objectives for the prototype (3?). Does enemy difficulty scale with the run clock, with objective number, or both?
+- Goon: does it stand guard at the dossier or hunt the player? "Move straight at the player" is a stated rule, but "guards" suggests otherwise (aggro radius?).
+- Brute-force outposts: are they destructible structures with HP, or enemy spawners that go down when something is cleared? What do they shoot/spawn?
+
+**Hacking**
+- Arrow keys still move the player during a prompt, but WASD letters go to the prompt. What about the Smack prompt, which uses Space? (Space is not a movement key, so it should be fine, but worth confirming.)
+- Is the prompt sequence random per hack, a fixed order, or chosen by server difficulty? Can the same prompt appear twice?
+- Is typing case-sensitive and are typos forgiven (backspace, restart on mistake)? Non-US keyboard layouts (e.g. Swedish) make `!?-$#@&` awkward; do we keep those characters?
+- What does "damage halts progress 0.2 s" do during a prompt: nothing, or does it interrupt the prompt?
+
+**Economy and meta**
+- Credits: auto-picked up (magnet radius) or walked over? Do they persist on death 100%, or is there a bonus for extracting?
+- Does extraction have its own gameplay (timed typing under fire, a safe zone) or is it a final prompt? What does a successful run give beyond a death run?
+- "Very rare permanent upgrades" from caches: are they permanent for the whole save, or just for the character? Where is that stored (browser localStorage is the only option on itch.io, so clearing site data would wipe it)?
+- Equipment: are items fixed-stat purchases, or do they have tiers/rarities/random rolls? One of each slot purchasable once, or upgradable?
+- Dash: which key, cooldown, and does it grant invulnerability?
+
+**Scope and consistency**
+- Meta progression is now in scope. Is the main-menu shop part of the prototype or a later milestone?
+- Win/lose screens: what stats do we show (kills, credits, time, level)?
