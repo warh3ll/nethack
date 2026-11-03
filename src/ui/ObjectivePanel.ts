@@ -37,12 +37,14 @@ export class ObjectivePanel {
 
   private layout() {
     const x = this.scene.scale.width - MARGIN - WIDTH;
+    // On a phone the top-left HUD (bars + stats line) spans most of the width, so sit below it.
+    const top = this.scene.scale.width < 600 ? 64 : MARGIN;
     const height = PAD * 2 + HEADER_H + this.rows.length * ROW_H;
     this.bg.clear();
-    this.bg.fillStyle(0x0a0e1e, 0.75).fillRect(x, MARGIN, WIDTH, height);
-    this.bg.lineStyle(2, 0x2a3358, 1).strokeRect(x + 1, MARGIN + 1, WIDTH - 2, height - 2);
-    this.header.setPosition(x + PAD, MARGIN + PAD);
-    this.rows.forEach((row, i) => row.setPosition(x + PAD, MARGIN + PAD + HEADER_H + i * ROW_H));
+    this.bg.fillStyle(0x0a0e1e, 0.75).fillRect(x, top, WIDTH, height);
+    this.bg.lineStyle(2, 0x2a3358, 1).strokeRect(x + 1, top + 1, WIDTH - 2, height - 2);
+    this.header.setPosition(x + PAD, top + PAD);
+    this.rows.forEach((row, i) => row.setPosition(x + PAD, top + PAD + HEADER_H + i * ROW_H));
   }
 
   /** Call every frame; only touches the text objects when something changed. */
