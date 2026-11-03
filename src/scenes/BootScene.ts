@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ENEMIES, PLAYER } from '../data/balance';
+import { ENEMIES, PLAYER, XP_PICKUPS } from '../data/balance';
 import { GUNS } from '../data/guns';
 import { SKILLS } from '../data/skills';
 
@@ -29,6 +29,7 @@ export class BootScene extends Phaser.Scene {
     }
 
     for (const [key, s] of Object.entries(SKILLS)) {
+      if (s.kind !== 'weapon') continue;
       g.fillStyle(s.color).fillRect(0, 0, 10, 4);
       g.generateTexture(`bullet-${key}`, 10, 4).clear();
     }
@@ -37,6 +38,10 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(gun.color).fillRect(0, 0, gun.bulletWidth, gun.bulletHeight);
       g.generateTexture(`bullet-${key}`, gun.bulletWidth, gun.bulletHeight).clear();
     }
+
+    // XP shard: small diamond.
+    g.fillStyle(XP_PICKUPS.color).fillTriangle(5, 0, 10, 6, 0, 6).fillTriangle(0, 6, 10, 6, 5, 12);
+    g.generateTexture('xp-shard', 10, 12).clear();
 
     // Background grid tile.
     const t = 64;

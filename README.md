@@ -11,13 +11,13 @@ npm run dev     # opens the game in your browser
 
 While `npm run dev` runs, saving any file reloads the game instantly.
 
-Controls: WASD or arrow keys to move. Weapons fire on their own.
+Controls: WASD or arrow keys to move, aim and hold the left mouse button to fire the rifle. Auto-weapons fire on their own. Walk over the green XP shards enemies drop; on a level-up, click an upgrade card or press 1-3. Esc or P pauses.
 
 ## Balancing
 All tuning numbers live in two files, with no game logic in them:
 
-- `src/data/balance.ts`: player stats, enemy types, spawn rate
-- `src/data/skills.ts`: skills and their per-level stats
+- `src/data/balance.ts`: player stats, enemy types and their XP, spawn rate, max level and XP curve, skill slots, XP pickups
+- `src/data/skills.ts`: skills (weapons and passives) and their per-level stats; ones marked `[PH]` are placeholders
 
 ## Builds
 `npm run build` produces a `dist/` folder that can be uploaded to itch.io as an HTML5 game.
@@ -26,4 +26,6 @@ Every push and pull request also builds on GitHub: open the run under the **Acti
 ## Code layout
 - `src/scenes/BootScene.ts`: creates placeholder graphics (swap in real art here)
 - `src/scenes/GameScene.ts`: the run: spawning, collisions, HUD, game over
-- `src/entities/`: player, enemies, bullets, weapons (enemies and bullets are pooled)
+- `src/entities/`: player, enemies, bullets, weapons, XP shards (enemies, bullets and shards are pooled)
+- `src/systems/Progression.ts`: XP, levels, owned skills, upgrade offers, passive stat re-summing
+- `src/ui/LevelUpPicker.ts` and `src/effects/levelUpFx.ts`: the upgrade choice screen and the yellow level-up burst
