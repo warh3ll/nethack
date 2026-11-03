@@ -51,7 +51,7 @@ function describe(u: Upgrade) {
   return { tag, name: s.name, body: `${s.description}\n\n${statLines(u.skillId, u.toLevel)}`, color: s.color };
 }
 
-/** Modal "pick 1 of N upgrades" screen. Click a card or press its number key. */
+/** Modal "pick 1 of N upgrades" screen. Click or tap a card, or press its number key. */
 export class LevelUpPicker {
   private root: Phaser.GameObjects.Container;
   private onKey: (e: KeyboardEvent) => void;
@@ -80,18 +80,15 @@ export class LevelUpPicker {
       .setOrigin(0.5, 0);
     this.root.add(title);
 
-    // Cards side by side, or stacked when the screen is too narrow.
+    // Cards side by side, or stacked when the screen is too narrow (phone portrait).
     const gap = 16;
     const n = upgrades.length;
     const stacked = W < 3 * 220 + 4 * gap;
     const cw = stacked ? Math.min(360, W - 2 * gap) : 220;
-    const ch = stacked ? Math.min(185, (H - 140) / n - gap) : 230;
-    const totalW = stacked ? cw : n * cw + (n - 1) * gap;
-    const totalH = stacked ? n * ch + (n - 1) * gap : ch;
-    const top = Math.max(100, (H - totalH) / 2 + 30);
-    title.setY(top - 80);
 
     let picked = false;
+    /** Card index the current press started on. A card is picked on release over the same card, like a button. */
+    let pressed = -1;
     const armedAt = scene.time.now + ARM_DELAY_MS;
     const pick = (u: Upgrade) => {
       if (picked || scene.time.now < armedAt) return;
@@ -100,37 +97,68 @@ export class LevelUpPicker {
       onPick(u);
     };
 
-    upgrades.forEach((u, i) => {
+    // Build the card texts first so each card can be sized to fit its text.
+    const cards = upgrades.map((u, i) => {
       const d = describe(u);
-      const x = stacked ? (W - cw) / 2 : (W - totalW) / 2 + i * (cw + gap);
-      const y = stacked ? top + i * (ch + gap) : top;
-
-      const bg = scene.add.rectangle(x, y, cw, ch, 0x0d1226).setOrigin(0).setStrokeStyle(2, d.color, 0.8);
-      const stripe = scene.add.rectangle(x, y, cw, 4, d.color).setOrigin(0);
       const css = `#${d.color.toString(16).padStart(6, '0')}`;
-      const key = scene.add.text(x + cw - 12, y + 12, `${i + 1}`, { fontFamily: 'monospace', fontSize: '16px', color: '#5a6a99' }).setOrigin(1, 0);
-      const tag = scene.add.text(x + 12, y + 14, d.tag, { fontFamily: 'monospace', fontSize: '12px', color: css });
-      const name = scene.add.text(x + 12, y + 32, d.name, {
+      const key = scene.add.text(0, 0, `${i + 1}`, { fontFamily: 'monospace', fontSize: '16px', color: '#5a6a99' }).setOrigin(1, 0);
+      const tag = scene.add.text(0, 0, d.tag, { fontFamily: 'monospace', fontSize: '12px', color: css });
+      const name = scene.add.text(0, 0, d.name, {
         fontFamily: 'monospace',
         fontSize: '17px',
         color: '#ffffff',
         wordWrap: { width: cw - 24 },
       });
-      const body = scene.add.text(x + 12, y + 32 + name.height + 8, d.body, {
+      const body = scene.add.text(0, 0, d.body, {
         fontFamily: 'monospace',
         fontSize: '12px',
         color: '#c8f7ff',
         wordWrap: { width: cw - 24 },
         lineSpacing: 2,
       });
+      return { u, d, key, tag, name, body, need: 32 + name.height + 8 + body.height + 14 };
+    });
+
+    // Side by side: one shared height. Stacked: each card only as tall as its text, to fit a phone screen.
+    const rowH = Math.max(230, ...cards.map((c) => c.need));
+    const heights = cards.map((c) => (stacked ? c.need : rowH));
+    const totalW = stacked ? cw : n * cw + (n - 1) * gap;
+    const cardsH = stacked ? heights.reduce((a, b) => a + b, 0) + (n - 1) * gap : rowH;
+    const titleH = title.height + 16;
+    const top = Math.max(12, (H - titleH - cardsH) / 2);
+    title.setY(top);
+
+    let y = top + titleH;
+    cards.forEach((c, i) => {
+      const { u, d, key, tag, name, body } = c;
+      const ch = heights[i];
+      const x = stacked ? (W - cw) / 2 : (W - totalW) / 2 + i * (cw + gap);
+
+      const bg = scene.add.rectangle(x, y, cw, ch, 0x0d1226).setOrigin(0).setStrokeStyle(2, d.color, 0.8);
+      const stripe = scene.add.rectangle(x, y, cw, 4, d.color).setOrigin(0);
+      key.setPosition(x + cw - 12, y + 12);
+      tag.setPosition(x + 12, y + 14);
+      name.setPosition(x + 12, y + 32);
+      body.setPosition(x + 12, y + 32 + name.height + 8);
       this.root.add([bg, stripe, key, tag, name, body]);
+      if (stacked) y += ch + gap;
 
       // Children of a scrollFactor-0 container need their own scrollFactor 0, or hit-testing drifts with the camera.
       bg.setScrollFactor(0)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => bg.setFillStyle(0x1a2140))
-        .on('pointerout', () => bg.setFillStyle(0x0d1226))
-        .on('pointerdown', () => pick(u));
+        .on('pointerout', () => {
+          bg.setFillStyle(0x0d1226);
+          if (pressed === i) pressed = -1; // slid off the card: cancel, so a stray swipe doesn't pick
+        })
+        .on('pointerdown', () => {
+          pressed = i;
+          bg.setFillStyle(0x1a2140);
+        })
+        .on('pointerup', () => {
+          if (pressed === i) pick(u);
+          pressed = -1;
+        });
     });
 
     this.onKey = (e: KeyboardEvent) => {
