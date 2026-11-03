@@ -65,13 +65,17 @@ TBD: level cap per skill, evolutions/combinations, what happens when all slots a
 - Move straight at the player; no pathfinding, by design.
 - Deal contact damage.
 - **Drone:** basic swarm enemy *(in game)*.
+- **Goon:** miniboss-like brute with more health and damage than normal mobs; guards a dossier in the Goon objective (section 7).
 - TBD: further enemy types, elites, how enemy variety scales with time.
 
 ## 7. Run structure and objectives
 - A run is one attempt made of **3-5 objectives**, completed in sequence.
 - The map is explored freely; the player must find where the next objective is.
 - Some objectives are **timed**. A **run clock is always visible in the UI**.
-- **Objective types:** TBD, to be specified later. Known so far: hacking ICE-protected servers or objectives (section 8). Candidates to decide: boss fight, defend a point, retrieve an item, eliminate a target.
+- **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
+  1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
+  2. **Goon:** a brute of some sort, kind of like a miniboss, guards a dossier containing an encryption key. The goon has more health and damage than normal mobs.
+  3. **Brute-force:** the player attacks a location that has several layers or outposts. The outposts also spawn enemies when the player is close. Once all of them are down, the player can steal company secrets from within.
 - **Lose:** HP reaches 0. TBD: what a failed timed objective does (instant loss, penalty, or skipped).
 - **Win:** complete the final objective. TBD: run length target, difficulty ramp across objectives.
 - The earlier "boss on a timer" idea is now just one possible objective type (TBD).
@@ -82,7 +86,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - The player must **stay within a certain range** of the target while the hack runs. Leaving the range pauses or breaks it. TBD: which one, and the range size.
 - A **percentage status bar** shows hack progress.
 - The player **can shoot while hacking**, so hacking happens under pressure from enemy hordes.
-- **Interaction prompts:** at points during the hack the player may have to type something or react with a key press to continue. TBD: prompt types (typed words/commands, timed key presses), what failure costs (progress loss, damage, reset), and how often prompts appear.
+- **Interaction prompts:** during a server hack the player is forced to interact 2-3 times: typing an IP address, a password, a very short code snippet or similar, and possibly physically smacking the server (see Hack server in section 7). TBD: exact prompt list, and what failure costs (progress loss, damage, reset).
 - TBD: hack duration, whether enemies are drawn toward or spawn extra during a hack, and how nethacking skills affect hacks (faster, wider range, fewer prompts).
 
 ## 9. Meta progression
