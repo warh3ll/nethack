@@ -26,14 +26,20 @@ export class Player extends Phaser.Physics.Arcade.Image {
     return this.hp <= 0;
   }
 
-  update() {
+  /** `stick` is the touch joystick (length 0..1); it's used when no movement key is held. */
+  update(stick?: Phaser.Math.Vector2) {
     const k = this.keys;
     const dir = new Phaser.Math.Vector2(
       (k.right.isDown || k.d.isDown ? 1 : 0) - (k.left.isDown || k.a.isDown ? 1 : 0),
       (k.down.isDown || k.s.isDown ? 1 : 0) - (k.up.isDown || k.w.isDown ? 1 : 0),
     );
-    // Normalize so diagonals aren't faster.
-    dir.normalize().scale(this.stats.moveSpeed);
+    if (dir.lengthSq() > 0) {
+      // Normalize so diagonals aren't faster.
+      dir.normalize();
+    } else if (stick) {
+      dir.copy(stick).limit(1);
+    }
+    dir.scale(this.stats.moveSpeed);
     this.setVelocity(dir.x, dir.y);
     if (dir.lengthSq() > 0) this.setRotation(dir.angle());
   }

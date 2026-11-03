@@ -68,3 +68,15 @@ export const LEVELING = {
   /** Upgrade choices offered on each level-up. */
   choices: 3,
 }
+
+/** On-screen joystick for touch play. Appears wherever the thumb lands. */
+export const TOUCH_JOYSTICK = {
+  /** How far (px) the knob can travel from the base. Dragging this far = full speed. */
+  radius: 60,
+  /** Fraction of the radius that counts as "not moving", so a resting thumb doesn't drift. */
+  deadZone: 0.15,
+  /** true: speed scales with how far the knob is pushed. false: any push beyond the dead zone is full speed. */
+  analog: true,
+  /** When the thumb drags past the radius, the base follows it so the stick never "runs out". */
+  baseFollows: true,
+}

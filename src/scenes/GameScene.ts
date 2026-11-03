@@ -9,6 +9,10 @@ import { Weapon } from '../entities/Weapon';
 import { Progression, type Upgrade } from '../systems/Progression';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
 import { SkillBar } from '../ui/SkillBar';
+import { TouchJoystick } from '../ui/TouchJoystick';
+
+/** Ignore taps this long after the game-over screen appears, so a thumb still steering doesn't skip it. */
+const RESTART_ARM_DELAY_MS = 800;
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -21,6 +25,8 @@ export class GameScene extends Phaser.Scene {
   private hpBar!: Phaser.GameObjects.Graphics;
   private xpBar!: Phaser.GameObjects.Graphics;
   private skillBar!: SkillBar;
+  private joystick!: TouchJoystick;
+  private pauseButton!: Phaser.GameObjects.Container;
 
   private elapsedMs = 0;
   private nextSpawnAt = 0;
@@ -77,7 +83,8 @@ export class GameScene extends Phaser.Scene {
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.xpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hud = this.add
-      .text(16, 40, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff' })
+      // Wraps on narrow (phone) screens instead of running under the pause button.
+      .text(16, 40, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff', wordWrap: { width: this.scale.width - 80 } })
       .setScrollFactor(0)
       .setDepth(100);
 
@@ -86,6 +93,9 @@ export class GameScene extends Phaser.Scene {
     this.paused = false;
     this.input.keyboard!.on('keydown-ESC', this.togglePause, this);
     this.input.keyboard!.on('keydown-P', this.togglePause, this);
+    this.pauseButton = this.createPauseButton();
+
+    this.joystick = new TouchJoystick(this, () => !this.gameOver && !this.paused && !this.levelingUp);
 
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
@@ -96,7 +106,7 @@ export class GameScene extends Phaser.Scene {
     if (this.gameOver || this.paused || this.levelingUp) return;
 
     this.elapsedMs += delta;
-    this.player.update();
+    this.player.update(this.joystick.vector);
     for (const w of this.weapons) w.update(time);
     this.spawnEnemies(time);
 
@@ -116,6 +126,7 @@ export class GameScene extends Phaser.Scene {
     this.pendingLevelUps += gained;
     if (this.levelingUp) return; // already showing the picker; the extra levels queue up
     this.levelingUp = true;
+    this.joystick.release();
     this.physics.pause();
     this.drawHud();
     playLevelUpFx(this, this.player, this.progression.level);
@@ -195,33 +206,42 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.75).setOrigin(0).setScrollFactor(0).setDepth(199);
     this.add
-      .text(cam.width / 2, cam.height / 2, `SYSTEM FAILURE\n\nlevel ${this.progression.level}   kills ${this.kills}\n\npress R or click to reboot`, {
+      .text(cam.width / 2, cam.height / 2, `SYSTEM FAILURE\n\nlevel ${this.progression.level}   kills ${this.kills}\n\npress R or tap\nto reboot`, {
         fontFamily: 'monospace',
-        fontSize: '24px',
+        fontSize: cam.width < 420 ? '20px' : '24px',
         color: '#ff2e88',
         align: 'center',
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(200);
+    this.joystick.release();
+    this.pauseButton.setVisible(false);
     const restart = () => this.scene.restart();
     this.input.keyboard!.once('keydown-R', restart);
-    this.input.once('pointerdown', restart);
+    this.time.delayedCall(RESTART_ARM_DELAY_MS, () => this.input.once('pointerdown', restart));
   }
 
   private togglePause() {
     if (this.gameOver || this.levelingUp) return;
     this.paused = !this.paused;
     if (this.paused) {
+      this.joystick.release();
       this.physics.pause();
       this.tweens.pauseAll();
       this.time.paused = true;
       const cam = this.cameras.main;
       this.pauseOverlay = this.add
         .container(0, 0, [
-          this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6).setOrigin(0),
+          // Tap anywhere to resume (touch has no Esc key).
           this.add
-            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc or P to resume', {
+            .rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6)
+            .setOrigin(0)
+            .setScrollFactor(0)
+            .setInteractive()
+            .on('pointerdown', () => this.togglePause()),
+          this.add
+            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc or P\nor tap to resume', {
               fontFamily: 'monospace',
               fontSize: '24px',
               color: '#2ef2ff',
@@ -240,7 +260,25 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /** Top-right pause button, mainly for touch screens (no Esc key there). */
+  private createPauseButton() {
+    const size = 40;
+    const bg = this.add.rectangle(0, 0, size, size, 0x0d1226, 0.7).setOrigin(0).setStrokeStyle(2, 0x2ef2ff, 0.6);
+    const bars = this.add.graphics().fillStyle(0x2ef2ff, 0.9).fillRect(13, 11, 5, 18).fillRect(22, 11, 5, 18);
+    const button = this.add.container(this.scale.width - size - 12, 12, [bg, bars]).setScrollFactor(0).setDepth(140);
+    // Children of a scrollFactor-0 container need their own scrollFactor 0, or hit-testing drifts with the camera.
+    bg.setScrollFactor(0);
+    bars.setScrollFactor(0);
+    // A bit bigger than it looks, so it's easy to hit with a thumb.
+    bg.setInteractive(new Phaser.Geom.Rectangle(-8, -8, size + 16, size + 16), Phaser.Geom.Rectangle.Contains).on('pointerdown', () => {
+      if (!this.paused) this.togglePause();
+    });
+    return button;
+  }
+
   private onResize(size: Phaser.Structs.Size) {
     this.background.setSize(size.width, size.height);
+    this.pauseButton.setPosition(size.width - 52, 12);
+    this.hud.setWordWrapWidth(size.width - 80);
   }
 }

@@ -8,6 +8,8 @@ const GAP = 6;
 /** Extra space between the weapon group and the passive group. */
 const GROUP_GAP = 22;
 const MARGIN_BOTTOM = 16;
+/** Keep at least this much space on each side; the bar shrinks to fit narrow (phone) screens. */
+const MARGIN_SIDE = 8;
 const EMPTY_COLOR = 0x2a3358;
 
 interface Slot {
@@ -21,6 +23,8 @@ interface Slot {
 export class SkillBar {
   private gfx: Phaser.GameObjects.Graphics;
   private slots: Slot[] = [];
+  /** Current slot size in px (BOX, or smaller on narrow screens). */
+  private box = BOX;
 
   constructor(
     private scene: Phaser.Scene,
@@ -44,24 +48,32 @@ export class SkillBar {
     const weapons = this.progression.ownedOfKind('weapon');
     const passives = this.progression.ownedOfKind('passive');
 
-    const totalW = (WEAPON_SLOTS + PASSIVE_SLOTS) * BOX + (WEAPON_SLOTS + PASSIVE_SLOTS - 2) * GAP + GROUP_GAP;
+    const n = WEAPON_SLOTS + PASSIVE_SLOTS;
+    const fullW = n * BOX + (n - 2) * GAP + GROUP_GAP;
+    const k = Math.min(1, (this.scene.scale.width - 2 * MARGIN_SIDE) / fullW);
+    this.box = Math.floor(BOX * k);
+    const gap = Math.max(2, Math.floor(GAP * k));
+    const groupGap = Math.floor(GROUP_GAP * k);
+    const totalW = n * this.box + (n - 2) * gap + groupGap;
     let x = Math.round((this.scene.scale.width - totalW) / 2);
-    const y = this.scene.scale.height - MARGIN_BOTTOM - BOX;
+    const y = this.scene.scale.height - MARGIN_BOTTOM - this.box;
+    for (const s of this.slots) s.letter.setFontSize(Math.round(20 * Math.max(k, 0.6)));
 
     this.gfx.clear();
     let slotIndex = 0;
     const drawGroup = (count: number, owned: string[]) => {
       for (let i = 0; i < count; i++) {
         this.drawSlot(slotIndex++, x, y, owned[i]);
-        x += BOX + GAP;
+        x += this.box + gap;
       }
-      x += GROUP_GAP - GAP;
+      x += groupGap - gap;
     };
     drawGroup(WEAPON_SLOTS, weapons);
     drawGroup(PASSIVE_SLOTS, passives);
   }
 
   private drawSlot(index: number, x: number, y: number, skillId?: string) {
+    const BOX = this.box;
     const { letter } = this.slots[index];
     if (!skillId) {
       this.gfx.fillStyle(0x0a0e1e, 0.55).fillRect(x, y, BOX, BOX);
