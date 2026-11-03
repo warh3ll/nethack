@@ -67,7 +67,7 @@ export class LevelUpPicker {
     const H = cam.height;
     this.root = scene.add.container(0, 0).setScrollFactor(0).setDepth(160);
 
-    const dim = scene.add.rectangle(0, 0, W, H, 0x05060a, 0.7).setOrigin(0).setInteractive();
+    const dim = scene.add.rectangle(0, 0, W, H, 0x05060a, 0.7).setOrigin(0).setScrollFactor(0).setInteractive();
     this.root.add(dim);
 
     const title = scene.add
@@ -125,7 +125,9 @@ export class LevelUpPicker {
       });
       this.root.add([bg, stripe, key, tag, name, body]);
 
-      bg.setInteractive({ useHandCursor: true })
+      // Children of a scrollFactor-0 container need their own scrollFactor 0, or hit-testing drifts with the camera.
+      bg.setScrollFactor(0)
+        .setInteractive({ useHandCursor: true })
         .on('pointerover', () => bg.setFillStyle(0x1a2140))
         .on('pointerout', () => bg.setFillStyle(0x0d1226))
         .on('pointerdown', () => pick(u));
