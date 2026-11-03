@@ -4,6 +4,8 @@ import type { PlayerStats } from '../systems/Progression';
 
 export class Player extends Phaser.Physics.Arcade.Image {
   hp: number;
+  /** While true (a hack prompt wants typing), the WASD letters don't move the player; the arrow keys still do. */
+  typingLock = false;
   private invulnerableUntil = 0;
   private keys: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd', Phaser.Input.Keyboard.Key>;
 
@@ -28,9 +30,10 @@ export class Player extends Phaser.Physics.Arcade.Image {
 
   update() {
     const k = this.keys;
+    const letters = !this.typingLock;
     const dir = new Phaser.Math.Vector2(
-      (k.right.isDown || k.d.isDown ? 1 : 0) - (k.left.isDown || k.a.isDown ? 1 : 0),
-      (k.down.isDown || k.s.isDown ? 1 : 0) - (k.up.isDown || k.w.isDown ? 1 : 0),
+      (k.right.isDown || (letters && k.d.isDown) ? 1 : 0) - (k.left.isDown || (letters && k.a.isDown) ? 1 : 0),
+      (k.down.isDown || (letters && k.s.isDown) ? 1 : 0) - (k.up.isDown || (letters && k.w.isDown) ? 1 : 0),
     );
     // Normalize so diagonals aren't faster.
     dir.normalize().scale(this.stats.moveSpeed);
