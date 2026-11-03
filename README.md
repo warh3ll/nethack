@@ -11,7 +11,7 @@ npm run dev     # opens the game in your browser
 
 While `npm run dev` runs, saving any file reloads the game instantly.
 
-Controls: WASD or arrow keys to move, aim and hold the left mouse button to fire the rifle. Auto-weapons fire on their own. Kills give XP; on a level-up, click an upgrade card or press 1-3. Esc or P pauses.
+Controls: WASD or arrow keys to move. There is no manual attack: every weapon fires on its own, starting with the Auto-Pistol. Kills give XP; on a level-up, click an upgrade card or press 1-3. Esc or P pauses.
 
 ## Balancing
 All tuning numbers live in two files, with no game logic in them:

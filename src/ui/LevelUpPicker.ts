@@ -18,7 +18,7 @@ const LABELS: Record<string, string> = {
 /** Stats shown on a new weapon's card (the rest are noise at a glance). */
 const NEW_WEAPON_KEYS = ['damage', 'cooldownMs', 'projectiles', 'range'];
 
-/** Ignore clicks and key presses this long after the picker opens, so a held fire button or mashed key doesn't pick by accident. */
+/** Ignore clicks and key presses this long after the picker opens, so a click or mashed key from just before doesn't pick by accident. */
 const ARM_DELAY_MS = 300;
 
 /** Stat lines for a card: the new skill's stats, or "damage 5 > 6" for what changes on a level-up. */
