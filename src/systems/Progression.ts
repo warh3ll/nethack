@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { LEVELING, PLAYER, SKILL_SLOTS } from '../data/balance';
+import { LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance';
 import { FALLBACK_UPGRADE, SKILLS, getPassiveStats, maxSkillLevel } from '../data/skills';
 
 /** The player's live stats: base values from balance.ts plus all passive bonuses. */
@@ -57,16 +57,25 @@ export class Progression {
     return gained;
   }
 
+  /** Owned skill ids of one kind, in pickup order. Each kind has its own slot group. */
+  ownedOfKind(kind: 'weapon' | 'passive'): string[] {
+    return [...this.skills.keys()].filter((id) => SKILLS[id].kind === kind);
+  }
+
+  hasFreeSlot(kind: 'weapon' | 'passive'): boolean {
+    const slots = kind === 'weapon' ? WEAPON_SLOTS : PASSIVE_SLOTS;
+    return this.ownedOfKind(kind).length < slots;
+  }
+
   /** Random distinct upgrade choices: level-ups for owned skills, plus new skills while a slot is free. */
   rollUpgrades(count = LEVELING.choices): Upgrade[] {
     const options: Upgrade[] = [];
     for (const [id, lvl] of this.skills) {
       if (lvl < maxSkillLevel(id)) options.push({ type: 'skill', skillId: id, toLevel: lvl + 1 });
     }
-    if (this.skills.size < SKILL_SLOTS) {
-      for (const id of Object.keys(SKILLS)) {
-        if (!this.skills.has(id)) options.push({ type: 'skill', skillId: id, toLevel: 1 });
-      }
+    for (const id of Object.keys(SKILLS)) {
+      if (this.skills.has(id) || !this.hasFreeSlot(SKILLS[id].kind)) continue;
+      options.push({ type: 'skill', skillId: id, toLevel: 1 });
     }
     if (options.length === 0) return [{ type: 'heal', amount: FALLBACK_UPGRADE.heal }];
     return Phaser.Utils.Array.Shuffle(options).slice(0, count);

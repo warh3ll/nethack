@@ -8,6 +8,7 @@ import { Player } from '../entities/Player';
 import { Weapon } from '../entities/Weapon';
 import { Progression, type Upgrade } from '../systems/Progression';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
+import { SkillBar } from '../ui/SkillBar';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -19,6 +20,7 @@ export class GameScene extends Phaser.Scene {
   private hud!: Phaser.GameObjects.Text;
   private hpBar!: Phaser.GameObjects.Graphics;
   private xpBar!: Phaser.GameObjects.Graphics;
+  private skillBar!: SkillBar;
 
   private elapsedMs = 0;
   private nextSpawnAt = 0;
@@ -78,6 +80,8 @@ export class GameScene extends Phaser.Scene {
       .text(16, 40, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff' })
       .setScrollFactor(0)
       .setDepth(100);
+
+    this.skillBar = new SkillBar(this, this.progression);
 
     this.paused = false;
     this.input.keyboard!.on('keydown-ESC', this.togglePause, this);
@@ -139,6 +143,7 @@ export class GameScene extends Phaser.Scene {
     }
     const hpBefore = this.player.maxHp;
     this.progression.apply(u);
+    this.skillBar.refresh();
     // Extra max HP from a passive comes with that much HP, so it isn't an empty bar.
     if (this.player.maxHp > hpBefore) this.player.heal(this.player.maxHp - hpBefore);
 
