@@ -31,6 +31,8 @@ export const HACK = {
   damageHaltMs: 200,
   /** While a hack is running (player in range), enemies spawn this much faster (interval x this). */
   spawnIntervalMultiplier: 0.8,
+  /** Game speed while a prompt is being typed (1 = normal, 0.3 = 30%). Everything but the hack itself slows. */
+  typingTimeScale: 0.3,
   /** Prompts per hack. They are spread evenly along the bar. */
   promptCount: { min: 2, max: 3 },
   smackHits: { min: 8, max: 15 },
