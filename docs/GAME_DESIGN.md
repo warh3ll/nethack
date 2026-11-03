@@ -61,19 +61,19 @@ Rules to check every feature against. Edit these first.
 
 ### Skill list
 
-| Skill       | Kind    | Idea                                                                 | Status  |
-| ----------- | ------- | -------------------------------------------------------------------- | ------- |
-| Auto-Pistol | weapon  | Fires at the nearest enemy; gains pierce and double shot with levels | in game |
-| TBD         | weapon  |                                                                      |         |
-| TBD         | weapon  |                                                                      |         |
-| TBD         | weapon  |                                                                      |         |
-| TBD         | weapon  |                                                                      |         |
-| TBD         | weapon  |                                                                      |         |
-| Health Regen | passive | Increases the player's passive health regeneration                  |         |
-| TBD         | passive |                                                                      |         |
-| TBD         | passive |                                                                      |         |
-| TBD         | passive |                                                                      |         |
-| TBD         | passive |                                                                      |         |
+| Skill        | Kind    | Idea                                                                 | Status  |
+| ------------ | ------- | -------------------------------------------------------------------- | ------- |
+| Auto-Pistol  | weapon  | Fires at the nearest enemy; gains pierce and double shot with levels | in game |
+| TBD          | weapon  |                                                                      |         |
+| TBD          | weapon  |                                                                      |         |
+| TBD          | weapon  |                                                                      |         |
+| TBD          | weapon  |                                                                      |         |
+| TBD          | weapon  |                                                                      |         |
+| Health Regen | passive | Increases the player's passive health regeneration                   |         |
+| TBD          | passive |                                                                      |         |
+| TBD          | passive |                                                                      |         |
+| TBD          | passive |                                                                      |         |
+| TBD          | passive |                                                                      |         |
 
 TBD: level cap per skill, evolutions/combinations, what happens when all slots are full and maxed.
 
@@ -110,7 +110,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - Hacking draws enemies near slightly faster, any damage to the player will halt progress by 0.2 seconds
 - **Interaction prompts:** during a server hack the player is forced to interact 2-3 times: typing an IP address, a password, injecting a very short code snippet or similar, and possibly physically smacking the server (see Hack server in section 7). TBD: exact prompt list, and what failure costs (progress loss, damage, reset).
   - **IP address** - the player needs to type an IP address that appears over the objective, hacking progression is halted until it is complete - format is xxx.xxx.xxx.xxx (but with numbers)
-  - **Password** A 6-12 character password appears that the player has to type, can contain A-Z, a-z, 0-9, and special characters (!?-$#@&1, though never more than two special characters)
+  - **Password** The player is prompted to type a password using the following structure [adjective-noun] (including the dash)
   - **Smack** The players is prompted to spam space to physically hit the machine, it wriggles with each hit and requires 8-15 hits
   - **Inject** The player is prompted to type a short code snippet (2-4 words)
     - **Inject words** else, for, while, void, null, nil, int, char, bool, true, false, var, let, const, func, def, async, await, yield, try, catch, throw, break, eval, exec, main, self, this, new, enum, byte, bit, hex, json, yaml, regex, loop, array, hash, map, sort, stack, queue, heap, node, tree, hack, root, pwn, pwned, leet, 1337, vuln, xss, sqli, ddos, proxy, vpn, tor, port, shell, spoof, sniff, crack, brute, salt, token, admin, login, pass, key, rsa, aes, md5, sha, cron, worm, virus, bomb, patch, ghost, nmap, ACK, SYN, NAT, DNS, ICMP, TCP, UDP, HTTP, GET, POST, 404, 403, git, bash, zsh, sudo, chmod, grep, sed, awk, curl, wget, ssh, ping, kill, top, cat, echo, pipe, touch, mkdir, pwd, tar, diff, push, pull, fetch, merge, clone, stash, blame, fork, HEAD, init, tag, sync, mount
@@ -152,12 +152,14 @@ Some objectives require hacking the ICE protecting a server or objective.
 ### Added by Claude (please answer inline or strike out)
 
 **Progression and skills**
+
 - Section 5 says "Kinds: weapons, passives, and skills", but the skill table only has weapon and passive. What separates a "skill" from a weapon? Are nethacking skills active abilities (cooldown, button press) or auto-firing like weapons?
 - Level-ups and caches share the same slot rules. Do caches draw from a rarer/stronger pool, or the same one?
 - What happens when a level-up offers nothing useful (all slots full and maxed)? Heal, credits, reroll?
 - Can the player pick "nothing" or reroll the 3 choices? (Relates to pillar 3.)
 
 **Map and objectives**
+
 - How is the player guided to the objective: marker, compass arrow, vague hint (distance only), or nothing? Does guidance differ per objective type?
 - Map edge: plain invisible wall, or something diegetic (firewall, grid edge)? Is 10000x10000 px right? Walk time at current player speed will tell us; a target of roughly 60-90 s edge to edge is my suggestion.
 - Are objective locations visible from the start, revealed one at a time, or only when the previous is done?
@@ -167,12 +169,14 @@ Some objectives require hacking the ICE protecting a server or objective.
 - Brute-force outposts: are they destructible structures with HP, or enemy spawners that go down when something is cleared? What do they shoot/spawn?
 
 **Hacking**
+
 - Arrow keys still move the player during a prompt, but WASD letters go to the prompt. What about the Smack prompt, which uses Space? (Space is not a movement key, so it should be fine, but worth confirming.)
 - Is the prompt sequence random per hack, a fixed order, or chosen by server difficulty? Can the same prompt appear twice?
 - Is typing case-sensitive and are typos forgiven (backspace, restart on mistake)? Non-US keyboard layouts (e.g. Swedish) make `!?-$#@&` awkward; do we keep those characters?
 - What does "damage halts progress 0.2 s" do during a prompt: nothing, or does it interrupt the prompt?
 
 **Economy and meta**
+
 - Credits: auto-picked up (magnet radius) or walked over? Do they persist on death 100%, or is there a bonus for extracting?
 - Does extraction have its own gameplay (timed typing under fire, a safe zone) or is it a final prompt? What does a successful run give beyond a death run?
 - "Very rare permanent upgrades" from caches: are they permanent for the whole save, or just for the character? Where is that stored (browser localStorage is the only option on itch.io, so clearing site data would wipe it)?
@@ -180,5 +184,6 @@ Some objectives require hacking the ICE protecting a server or objective.
 - Dash: which key, cooldown, and does it grant invulnerability?
 
 **Scope and consistency**
+
 - Meta progression is now in scope. Is the main-menu shop part of the prototype or a later milestone?
 - Win/lose screens: what stats do we show (kills, credits, time, level)?
