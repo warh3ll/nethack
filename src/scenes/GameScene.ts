@@ -37,6 +37,9 @@ export class GameScene extends Phaser.Scene {
 
   private elapsedMs = 0;
   private nextSpawnAt = 0;
+  /** Scaled game clock (ms): runs slower than real time during hack typing. */
+  private gameTime = 0;
+  private appliedScale = 1;
   private kills = 0;
   private gameOver = false;
   private paused = false;
@@ -52,6 +55,8 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.elapsedMs = 0;
     this.nextSpawnAt = 0;
+    this.gameTime = 0;
+    this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
     this.gameOver = false;
     this.levelingUp = false;
@@ -81,7 +86,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
-      if (this.player.takeDamage((e as Enemy).stats.contactDamage, this.time.now)) this.objectives.onPlayerHit();
+      if (this.player.takeDamage((e as Enemy).stats.contactDamage, this.gameTime)) this.objectives.onPlayerHit();
     });
 
     // Keep the swarm from collapsing into a single blob.
@@ -120,15 +125,21 @@ export class GameScene extends Phaser.Scene {
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
   }
 
-  update(time: number, delta: number) {
+  update(_time: number, delta: number) {
     this.background.setTilePosition(this.cameras.main.scrollX, this.cameras.main.scrollY);
     if (this.gameOver || this.paused || this.levelingUp) return;
 
-    this.elapsedMs += delta;
+    // Slow motion while typing a hack prompt: the world runs on scaled time, the hack on real time.
+    const scale = this.objectives.typing ? HACK.typingTimeScale : 1;
+    this.applyTimeScale(scale);
+    const gameDelta = delta * scale;
+    this.gameTime += gameDelta;
+
+    this.elapsedMs += gameDelta;
     this.player.update(this.joystick.vector);
-    for (const w of this.weapons) w.update(time);
+    for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
-    this.spawnEnemies(time);
+    this.spawnEnemies(this.gameTime);
 
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
@@ -137,6 +148,16 @@ export class GameScene extends Phaser.Scene {
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.endRun();
+  }
+
+  /** Slows physics and tweens to `scale` (1 = normal). Arcade's fixed step is retuned so motion stays smooth. */
+  private applyTimeScale(scale: number) {
+    if (scale === this.appliedScale) return;
+    this.appliedScale = scale;
+    // One physics step per rendered frame, each covering only `scale` of a frame's time.
+    this.physics.world.setFPS(60 / scale);
+    this.physics.world.timeScale = 1 / scale;
+    this.tweens.timeScale = scale;
   }
 
   private gainXp(amount: number) {
