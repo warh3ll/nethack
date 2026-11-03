@@ -34,17 +34,29 @@ export const HACK = {
   /** Prompts per hack. They are spread evenly along the bar. */
   promptCount: { min: 2, max: 3 },
   smackHits: { min: 8, max: 15 },
-  passwordLength: { min: 6, max: 12 },
-  passwordMaxSpecials: 2,
   injectWordCount: { min: 2, max: 4 },
 }
 
 /**
- * Password characters. Lookalikes (0/O, 1/l/I) are left out so a prompt is never ambiguous to read.
- * The password never has more than HACK.passwordMaxSpecials of the special characters.
+ * Password prompts are "adjective-noun" (GAME_DESIGN section 8), e.g. "neon-falcon".
+ * All lowercase, plain a-z only (no å/ä/ö, no lookalikes), so any keyboard layout can type them.
+ * Add or remove words freely; keep them short and unambiguous to read.
  */
-export const PASSWORD_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
-export const PASSWORD_SPECIALS = '!?-$#@&'
+export const PASSWORD_ADJECTIVES = [
+  'neon', 'chrome', 'rusty', 'silent', 'toxic', 'rapid', 'hollow', 'brittle', 'savage', 'glitchy',
+  'frozen', 'burning', 'cold', 'dark', 'electric', 'feral', 'ghostly', 'hidden', 'iron', 'lazy',
+  'lethal', 'lucky', 'mad', 'narrow', 'noisy', 'pale', 'quiet', 'rogue', 'sharp', 'shady',
+  'slick', 'smoky', 'solar', 'static', 'stolen', 'sunken', 'swift', 'tidal', 'twisted', 'vivid',
+  'wired', 'wild', 'bitter', 'broken', 'crimson', 'digital', 'dusty', 'faded', 'grim', 'hungry',
+]
+
+export const PASSWORD_NOUNS = [
+  'falcon', 'wolf', 'cobra', 'raven', 'tiger', 'viper', 'hornet', 'badger', 'jackal', 'mantis',
+  'dragon', 'ghost', 'comet', 'anvil', 'blade', 'bridge', 'cipher', 'circuit', 'dagger', 'engine',
+  'furnace', 'harbor', 'hammer', 'lantern', 'mirror', 'needle', 'orbit', 'pistol', 'plasma', 'portal',
+  'pulse', 'quartz', 'radar', 'reactor', 'signal', 'spark', 'storm', 'tunnel', 'turbine', 'vector',
+  'window', 'zebra', 'rocket', 'kernel', 'beacon', 'dynamo', 'magnet', 'prism', 'relay', 'thunder',
+]
 
 export const INJECT_WORDS = [
   'else', 'for', 'while', 'void', 'null', 'nil', 'int', 'char', 'bool', 'true', 'false', 'var', 'let', 'const',

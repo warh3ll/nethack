@@ -1,4 +1,4 @@
-import { HACK, INJECT_WORDS, PASSWORD_CHARS, PASSWORD_SPECIALS } from '../data/objectives';
+import { HACK, INJECT_WORDS, PASSWORD_ADJECTIVES, PASSWORD_NOUNS } from '../data/objectives';
 
 export type PromptKind = 'ip' | 'password' | 'smack' | 'inject';
 export type KeyResult = 'ignored' | 'ok' | 'wrong' | 'done';
@@ -33,13 +33,9 @@ function makePrompt(kind: PromptKind): Prompt {
     case 'ip':
       prompt.text = Array.from({ length: 4 }, () => randInt(0, 255)).join('.');
       break;
-    case 'password': {
-      const chars = Array.from({ length: randInt(HACK.passwordLength.min, HACK.passwordLength.max) }, () => pick(PASSWORD_CHARS));
-      const specials = randInt(0, HACK.passwordMaxSpecials);
-      for (const pos of shuffled(chars.map((_, i) => i)).slice(0, specials)) chars[pos] = pick(PASSWORD_SPECIALS);
-      prompt.text = chars.join('');
+    case 'password':
+      prompt.text = `${pick(PASSWORD_ADJECTIVES)}-${pick(PASSWORD_NOUNS)}`;
       break;
-    }
     case 'inject':
       prompt.text = shuffled(INJECT_WORDS)
         .slice(0, randInt(HACK.injectWordCount.min, HACK.injectWordCount.max))
