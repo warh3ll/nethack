@@ -8,16 +8,16 @@
 // ─────────────────────────────────────────────────────────────
 
 export interface WeaponStats {
-  damage: number;
-  cooldownMs: number;
-  projectileSpeed: number;
+  damage: number
+  cooldownMs: number
+  projectileSpeed: number
   /** How many enemies a bullet passes through before disappearing (0 = stops at the first). */
-  pierce: number;
+  pierce: number
   /** Bullets fired per shot, fanned out by spreadDeg. */
-  projectiles: number;
-  spreadDeg: number;
+  projectiles: number
+  spreadDeg: number
   /** Max targeting distance, and how far a bullet flies. */
-  range: number;
+  range: number
 }
 
 /**
@@ -26,32 +26,32 @@ export interface WeaponStats {
  */
 export interface PassiveStats {
   /** Flat extra max HP. */
-  maxHp?: number;
+  maxHp?: number
   /** Percent extra move speed (10 = +10%). */
-  moveSpeedPct?: number;
+  moveSpeedPct?: number
   /** Percent extra damage for everything the player's weapons fire. */
-  damagePct?: number;
+  damagePct?: number
 }
 
 interface SkillBase {
-  name: string;
-  description: string;
-  color: number;
+  name: string
+  description: string
+  color: number
   /** Stand-in until the real skill list is designed. */
-  placeholder?: boolean;
+  placeholder?: boolean
 }
 
 export interface WeaponSkill extends SkillBase {
-  kind: 'weapon';
-  levels: WeaponStats[];
+  kind: 'weapon'
+  levels: WeaponStats[]
 }
 
 export interface PassiveSkill extends SkillBase {
-  kind: 'passive';
-  levels: PassiveStats[];
+  kind: 'passive'
+  levels: PassiveStats[]
 }
 
-export type SkillData = WeaponSkill | PassiveSkill;
+export type SkillData = WeaponSkill | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
   autoPistol: {
@@ -60,11 +60,51 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Fires at the nearest enemy.',
     color: 0xfff35c,
     levels: [
-      { damage: 5, cooldownMs: 600, projectileSpeed: 520, pierce: 0, projectiles: 1, spreadDeg: 0, range: 420 },
-      { damage: 6, cooldownMs: 540, projectileSpeed: 540, pierce: 0, projectiles: 1, spreadDeg: 0, range: 440 },
-      { damage: 7, cooldownMs: 480, projectileSpeed: 560, pierce: 1, projectiles: 1, spreadDeg: 0, range: 460 },
-      { damage: 8, cooldownMs: 440, projectileSpeed: 580, pierce: 1, projectiles: 2, spreadDeg: 8, range: 480 },
-      { damage: 10, cooldownMs: 400, projectileSpeed: 600, pierce: 2, projectiles: 2, spreadDeg: 8, range: 500 },
+      {
+        damage: 7,
+        cooldownMs: 600,
+        projectileSpeed: 520,
+        pierce: 0,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 500,
+      },
+      {
+        damage: 8,
+        cooldownMs: 540,
+        projectileSpeed: 540,
+        pierce: 0,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 525,
+      },
+      {
+        damage: 9,
+        cooldownMs: 480,
+        projectileSpeed: 560,
+        pierce: 1,
+        projectiles: 2,
+        spreadDeg: 0,
+        range: 550,
+      },
+      {
+        damage: 10,
+        cooldownMs: 440,
+        projectileSpeed: 580,
+        pierce: 2,
+        projectiles: 2,
+        spreadDeg: 8,
+        range: 600,
+      },
+      {
+        damage: 12,
+        cooldownMs: 400,
+        projectileSpeed: 600,
+        pierce: 3,
+        projectiles: 3,
+        spreadDeg: 8,
+        range: 650,
+      },
     ],
   },
 
@@ -76,9 +116,33 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Placeholder weapon. Short-range spread at the nearest enemy.',
     color: 0xc77dff,
     levels: [
-      { damage: 4, cooldownMs: 1100, projectileSpeed: 480, pierce: 0, projectiles: 3, spreadDeg: 15, range: 280 },
-      { damage: 5, cooldownMs: 1000, projectileSpeed: 480, pierce: 0, projectiles: 4, spreadDeg: 14, range: 300 },
-      { damage: 6, cooldownMs: 900, projectileSpeed: 500, pierce: 1, projectiles: 5, spreadDeg: 13, range: 320 },
+      {
+        damage: 4,
+        cooldownMs: 1100,
+        projectileSpeed: 480,
+        pierce: 0,
+        projectiles: 3,
+        spreadDeg: 15,
+        range: 280,
+      },
+      {
+        damage: 5,
+        cooldownMs: 1000,
+        projectileSpeed: 480,
+        pierce: 0,
+        projectiles: 4,
+        spreadDeg: 14,
+        range: 300,
+      },
+      {
+        damage: 6,
+        cooldownMs: 900,
+        projectileSpeed: 500,
+        pierce: 1,
+        projectiles: 5,
+        spreadDeg: 13,
+        range: 320,
+      },
     ],
   },
   phPlating: {
@@ -105,32 +169,37 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xff9d2e,
     levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
   },
-};
+}
 
 /** Offered when every owned skill is maxed and no slot is free (or no skill is left to offer). */
 export const FALLBACK_UPGRADE = {
   name: 'Patch Up',
   description: 'Restore HP.',
   heal: 30,
-};
+}
 
-export function getSkillStats(id: string, level: number): WeaponStats | PassiveStats {
-  const skill = SKILLS[id];
-  if (!skill) throw new Error(`Unknown skill "${id}"`);
-  const i = Math.min(Math.max(level, 1), skill.levels.length) - 1;
-  return skill.levels[i];
+export function getSkillStats(
+  id: string,
+  level: number,
+): WeaponStats | PassiveStats {
+  const skill = SKILLS[id]
+  if (!skill) throw new Error(`Unknown skill "${id}"`)
+  const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
+  return skill.levels[i]
 }
 
 export function getWeaponStats(id: string, level: number): WeaponStats {
-  if (SKILLS[id]?.kind !== 'weapon') throw new Error(`"${id}" is not a weapon skill`);
-  return getSkillStats(id, level) as WeaponStats;
+  if (SKILLS[id]?.kind !== 'weapon')
+    throw new Error(`"${id}" is not a weapon skill`)
+  return getSkillStats(id, level) as WeaponStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {
-  if (SKILLS[id]?.kind !== 'passive') throw new Error(`"${id}" is not a passive skill`);
-  return getSkillStats(id, level) as PassiveStats;
+  if (SKILLS[id]?.kind !== 'passive')
+    throw new Error(`"${id}" is not a passive skill`)
+  return getSkillStats(id, level) as PassiveStats
 }
 
 export function maxSkillLevel(id: string): number {
-  return SKILLS[id].levels.length;
+  return SKILLS[id].levels.length
 }
