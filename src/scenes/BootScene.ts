@@ -33,6 +33,15 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture(`bullet-${key}`, 10, 4).clear();
     }
 
+    // Hackable server: dark tower with status lights.
+    g.fillStyle(0x0a0e1e).fillRect(0, 0, 40, 56);
+    g.lineStyle(2, 0x2ef2ff).strokeRect(1, 1, 38, 54);
+    for (let i = 0; i < 4; i++) {
+      g.fillStyle(0x1a2140).fillRect(6, 6 + i * 12, 28, 8);
+      g.fillStyle(i % 2 ? 0xff2e88 : 0x5fe08a).fillRect(8, 8 + i * 12, 4, 4);
+    }
+    g.generateTexture('server', 40, 56).clear();
+
     // Background grid tile.
     const t = 64;
     g.fillStyle(0x05060a).fillRect(0, 0, t, t);
