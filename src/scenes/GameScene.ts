@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SPAWNING, STARTING_SKILL, XP_PICKUPS } from '../data/balance';
+import { SPAWNING, STARTING_SKILL } from '../data/balance';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
@@ -8,7 +8,6 @@ import { Player } from '../entities/Player';
 import { PrimaryGun } from '../entities/PrimaryGun';
 import { PRIMARY_GUN } from '../data/guns';
 import { Weapon } from '../entities/Weapon';
-import { XpShard } from '../entities/XpShard';
 import { Progression, type Upgrade } from '../systems/Progression';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
 
@@ -16,7 +15,6 @@ export class GameScene extends Phaser.Scene {
   private player!: Player;
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
-  private shards!: Phaser.Physics.Arcade.Group;
   private progression!: Progression;
   private weapons: Weapon[] = [];
   private primaryGun!: PrimaryGun;
@@ -53,7 +51,6 @@ export class GameScene extends Phaser.Scene {
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
     this.bullets = this.physics.add.group({ classType: Bullet, maxSize: 300, runChildUpdate: true });
-    this.shards = this.physics.add.group({ classType: XpShard, maxSize: XP_PICKUPS.maxOnMap });
 
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);
@@ -68,7 +65,7 @@ export class GameScene extends Phaser.Scene {
       if (!bullet.active || !enemy.active) return;
       if (bullet.tryHit(enemy) && enemy.takeDamage(bullet.damage)) {
         this.kills++;
-        this.dropXp(enemy.x, enemy.y, enemy.stats.xp);
+        this.gainXp(enemy.stats.xp);
       }
     });
 
@@ -100,8 +97,6 @@ export class GameScene extends Phaser.Scene {
 
     this.elapsedMs += delta;
     this.player.update();
-    this.collectXp();
-    if (this.levelingUp) return; // frozen for the level-up burst and picker
     for (const w of this.weapons) w.update(time);
     this.primaryGun.update(time);
     this.spawnEnemies(time);
@@ -113,21 +108,6 @@ export class GameScene extends Phaser.Scene {
 
     this.drawHud();
     if (this.player.isDead) this.endRun();
-  }
-
-  private dropXp(x: number, y: number, value: number) {
-    const shard = this.shards.get() as XpShard | null;
-    if (shard) shard.drop(x, y, value);
-    else this.gainXp(value); // too many shards on the map: grant it directly
-  }
-
-  private collectXp() {
-    const { x, y } = this.player;
-    const radius = this.progression.stats.magnetRadius;
-    for (const obj of this.shards.getChildren()) {
-      const s = obj as XpShard;
-      if (s.active && s.follow(x, y, radius)) this.gainXp(s.value);
-    }
   }
 
   private gainXp(amount: number) {

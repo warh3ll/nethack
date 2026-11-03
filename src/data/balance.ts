@@ -17,7 +17,7 @@ export interface EnemyType {
   speed: number;
   /** Damage dealt per touch (once per player invulnerability window). */
   contactDamage: number;
-  /** XP dropped on death (as a pickup the player collects). */
+  /** XP the player gets for killing one. */
   xp: number;
   radius: number;
   color: number;
@@ -49,24 +49,15 @@ export const SKILL_SLOTS = 5;
 export const LEVELING = {
   /** Highest player level. Reaching it stops XP gain and level-ups. */
   maxLevel: 20,
-  /** XP needed to go from level 1 to level 2. */
-  xpForLevel2: 5,
+  /** XP needed to go from level 1 to level 2. A drone gives 1 XP, so this is roughly "kills per level". */
+  xpForLevel2: 20,
   /**
    * Each level after that needs this much more XP than the previous one.
-   * With 5 and 2: 5, 7, 9, ... 41 XP for level 19 to 20 (437 XP in total to reach 20).
+   * With 20 and 12: 20, 32, 44, ... 236 XP for level 19 to 20 (2432 XP in total to reach 20).
+   * Formula: XP for level n -> n+1 = xpForLevel2 + xpIncreasePerLevel * (n - 1).
    */
-  xpIncreasePerLevel: 2,
+  xpIncreasePerLevel: 12,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
 };
 
-export const XP_PICKUPS = {
-  /** XP shards within this distance fly to the player. */
-  magnetRadius: 100,
-  flySpeed: 450,
-  /** Distance at which a shard counts as collected. */
-  collectRadius: 18,
-  /** Hard cap on shards lying on the map; past it, kills give XP directly. */
-  maxOnMap: 500,
-  color: 0x5cff9d,
-};

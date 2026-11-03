@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { LEVELING, PLAYER, SKILL_SLOTS, XP_PICKUPS } from '../data/balance';
+import { LEVELING, PLAYER, SKILL_SLOTS } from '../data/balance';
 import { FALLBACK_UPGRADE, SKILLS, getPassiveStats, maxSkillLevel } from '../data/skills';
 
 /** The player's live stats: base values from balance.ts plus all passive bonuses. */
@@ -8,7 +8,6 @@ export interface PlayerStats {
   moveSpeed: number;
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number;
-  magnetRadius: number;
 }
 
 export type Upgrade =
@@ -29,7 +28,7 @@ export class Progression {
   /** Owned skills (weapons and passives) and their levels, in the order they were picked up. */
   readonly skills = new Map<string, number>();
   /** Shared by reference with the player and weapons; rewritten in place by recomputeStats(). */
-  readonly stats: PlayerStats = { maxHp: 0, moveSpeed: 0, damageMult: 1, magnetRadius: 0 };
+  readonly stats: PlayerStats = { maxHp: 0, moveSpeed: 0, damageMult: 1 };
 
   constructor(startingSkill: string) {
     this.skills.set(startingSkill, 1);
@@ -85,18 +84,15 @@ export class Progression {
     let maxHp = 0;
     let moveSpeedPct = 0;
     let damagePct = 0;
-    let magnetPct = 0;
     for (const [id, lvl] of this.skills) {
       if (SKILLS[id].kind !== 'passive') continue;
       const p = getPassiveStats(id, lvl);
       maxHp += p.maxHp ?? 0;
       moveSpeedPct += p.moveSpeedPct ?? 0;
       damagePct += p.damagePct ?? 0;
-      magnetPct += p.magnetPct ?? 0;
     }
     this.stats.maxHp = PLAYER.maxHp + maxHp;
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100);
     this.stats.damageMult = 1 + damagePct / 100;
-    this.stats.magnetRadius = XP_PICKUPS.magnetRadius * (1 + magnetPct / 100);
   }
 }
