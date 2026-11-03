@@ -17,7 +17,7 @@ export interface EnemyType {
   speed: number;
   /** Damage dealt per touch (once per player invulnerability window). */
   contactDamage: number;
-  /** XP dropped on death (as a pickup the player collects). */
+  /** XP the player gets for killing one. */
   xp: number;
   radius: number;
   color: number;
@@ -60,13 +60,3 @@ export const LEVELING = {
   choices: 3,
 };
 
-export const XP_PICKUPS = {
-  /** XP shards within this distance fly to the player. */
-  magnetRadius: 100,
-  flySpeed: 450,
-  /** Distance at which a shard counts as collected. */
-  collectRadius: 18,
-  /** Hard cap on shards lying on the map; past it, kills give XP directly. */
-  maxOnMap: 500,
-  color: 0x5cff9d,
-};

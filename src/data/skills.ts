@@ -31,8 +31,6 @@ export interface PassiveStats {
   moveSpeedPct?: number;
   /** Percent extra damage for everything the player fires (weapons and primary gun). */
   damagePct?: number;
-  /** Percent extra XP pickup (magnet) radius. */
-  magnetPct?: number;
 }
 
 interface SkillBase {
@@ -106,14 +104,6 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Placeholder passive. More damage from everything you fire.',
     color: 0xff9d2e,
     levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
-  },
-  phSiphon: {
-    name: '[PH] Data Siphon',
-    kind: 'passive',
-    placeholder: true,
-    description: 'Placeholder passive. Pulls XP from further away.',
-    color: 0x5cff9d,
-    levels: [{ magnetPct: 30 }, { magnetPct: 60 }, { magnetPct: 90 }],
   },
 };
 

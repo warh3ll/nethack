@@ -13,7 +13,6 @@ const LABELS: Record<string, string> = {
   maxHp: 'max HP',
   moveSpeedPct: 'move speed %',
   damagePct: 'damage %',
-  magnetPct: 'pickup radius %',
 };
 
 /** Stats shown on a new weapon's card (the rest are noise at a glance). */
