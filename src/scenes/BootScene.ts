@@ -38,6 +38,11 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillCircle(5, 5, 2);
     g.generateTexture('bullet-enemy', 10, 10).clear();
 
+    // Credit chip: small gold microchip.
+    g.fillStyle(0xffd23e).fillRect(1, 1, 10, 10);
+    g.fillStyle(0x05060a).fillRect(4, 4, 4, 4);
+    g.generateTexture('credit-chip', 12, 12).clear();
+
     // Hackable server: dark tower with status lights.
     g.fillStyle(0x0a0e1e).fillRect(0, 0, 40, 56);
     g.lineStyle(2, 0x2ef2ff).strokeRect(1, 1, 38, 54);
