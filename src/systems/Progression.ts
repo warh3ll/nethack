@@ -116,9 +116,22 @@ export class Progression {
         (p) =>
           p.type === 'skill' && u.type === 'skill' && p.skillId === u.skillId,
       )
-    const fresh = Phaser.Utils.Array.Shuffle(options.filter((u) => !seen(u)))
-    const repeats = Phaser.Utils.Array.Shuffle(options.filter(seen))
-    return [...fresh, ...repeats].slice(0, count)
+    // Shuffled, with anything shown on the previous roll last.
+    const ordered = (list: Upgrade[]) => [
+      ...Phaser.Utils.Array.Shuffle(list.filter((u) => !seen(u))),
+      ...Phaser.Utils.Array.Shuffle(list.filter(seen)),
+    ]
+    const isNew = (u: Upgrade) => u.type === 'skill' && u.toLevel === 1
+    const newSkills = ordered(options.filter(isNew))
+    const upgrades = ordered(options.filter((u) => !isNew(u)))
+
+    // Aim for (count - newSkillChoices) upgrades and newSkillChoices new skills.
+    // When one group runs short, the other fills the gap.
+    const wantNew = Math.min(LEVELING.newSkillChoices, count)
+    let takeNew = Math.min(wantNew, newSkills.length)
+    const takeUpgrades = Math.min(count - takeNew, upgrades.length)
+    takeNew = Math.min(count - takeUpgrades, newSkills.length)
+    return [...upgrades.slice(0, takeUpgrades), ...newSkills.slice(0, takeNew)]
   }
 
   /**
