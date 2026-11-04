@@ -64,7 +64,7 @@ Rules to check every feature against. Edit these first.
 | Skill        | Kind    | Idea                                                                 | Status  |
 | ------------ | ------- | -------------------------------------------------------------------- | ------- |
 | Auto-Pistol  | weapon  | Fires at the nearest enemy; gains pierce and double shot with levels | in game |
-| TBD          | weapon  |                                                                      |         |
+| Virus        | weapon  | Hacking weapon. Infects an enemy within 400 range for slow damage over time; when an infected enemy dies it spreads to another enemy within 200 range. Strong against dense swarms. Levels raise the damage over time and slightly raise infection range; levels 4-5 spread to up to two enemies | in game |
 | TBD          | weapon  |                                                                      |         |
 | TBD          | weapon  |                                                                      |         |
 | TBD          | weapon  |                                                                      |         |

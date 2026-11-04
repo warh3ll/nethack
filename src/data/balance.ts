@@ -38,11 +38,11 @@ export const SPAWNING = {
   /** Spawn interval at the start of a run. */
   startIntervalMs: 900,
   /** The interval shrinks toward this over time. */
-  minIntervalMs: 180,
+  minIntervalMs: 400,
   /** How much the interval shrinks every second of the run. */
   intervalDecayPerSecond: 4,
   /** Enemies appear on a ring this far outside the screen edge. */
-  spawnMargin: 60,
+  spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   enemyType: 'drone',
