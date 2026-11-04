@@ -5,7 +5,7 @@
 
 export interface ObjectiveDef {
   id: string
-  type: 'hackServer' | 'encryptionKey' | 'connectServers'
+  type: 'hackServer' | 'encryptionKey' | 'connectServers' | 'bruteForce'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
   /** World position, relative to the player's start (0, 0). */
@@ -13,15 +13,45 @@ export interface ObjectiveDef {
   y: number
 }
 
-/** The objectives of one run, completable in any order. Placeholder positions until the map exists. */
-export const RUN_OBJECTIVES: ObjectiveDef[] = [
-  { id: 'hack1', type: 'hackServer', name: 'Hack server 1', x: 700, y: -450 },
-  { id: 'hack2', type: 'hackServer', name: 'Hack server 2', x: -1100, y: -900 },
-  { id: 'hack3', type: 'hackServer', name: 'Hack server 3', x: 1500, y: 900 },
-  { id: 'key1', type: 'encryptionKey', name: 'Encryption key', x: -900, y: 800 },
-  // x, y is the first server (where the cable is grabbed); the second one is placed randomly nearby.
-  { id: 'connect1', type: 'connectServers', name: 'Connect servers', x: 400, y: 1500 },
-]
+/**
+ * Which objectives a run gets: 3-5 drawn at random, completable in any order.
+ * (For connectServers, x, y is the first server and the second is placed nearby. For bruteForce,
+ * x, y is the middle of the compound.)
+ */
+export const RUN_GENERATION = {
+  count: { min: 3, max: 5 },
+  /** The same objective type can occur at most this many times in one run. */
+  maxPerType: 2,
+  /** Name in the objective list; a " 1" / " 2" is added when a type occurs twice. */
+  names: {
+    hackServer: 'Hack server',
+    encryptionKey: 'Encryption key',
+    connectServers: 'Connect servers',
+    bruteForce: 'Brute-force',
+  } as Record<ObjectiveDef['type'], string>,
+  /** Objectives are placed in a square this far (half-width) around the player's start. Placeholder until the map exists. */
+  areaHalfSize: 3000,
+  /** No objective this close to the start (which is also the extraction point). */
+  minDistFromStart: 900,
+  /** No two objectives closer than this. */
+  minSpacing: 1300,
+}
+
+/** Brute-force objective: destroy every outpost (they spawn drones while the player is near), then pick up the secrets. */
+export const BRUTE_FORCE = {
+  /** Outposts per objective, picked at random. */
+  outposts: { min: 2, max: 5 },
+  /** Outposts stand on a circle of this radius around the objective position. */
+  ringRadius: 170,
+  /** Each outpost beyond the minimum count takes this much hp off every outpost (see ENEMIES.outpost.hp). */
+  hpLossPerExtra: 10,
+  /** An outpost spawns drones only while the player is within this distance of it. */
+  spawnTriggerRadius: 650,
+  /** Time between drones from one outpost. */
+  spawnIntervalMs: 2500,
+  /** The player picks up the secrets within this distance. */
+  pickupRadius: 36,
+}
 
 /** Connect servers objective: grab a cable (E) at the first server, hold E at the second to attach it. */
 export const CONNECT_SERVERS = {

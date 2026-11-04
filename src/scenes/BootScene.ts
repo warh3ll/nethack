@@ -58,6 +58,12 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x05060a).fillRect(5, 13, 18, 2).fillRect(5, 19, 18, 2).fillRect(5, 25, 12, 2);
     g.generateTexture('dossier', 28, 34).clear();
 
+    // Company secrets: purple data disk.
+    g.fillStyle(0x9b5cff).fillRect(0, 0, 30, 30);
+    g.fillStyle(0x05060a).fillRect(6, 0, 18, 10).fillRect(10, 18, 10, 12);
+    g.fillStyle(0xffffff).fillRect(17, 2, 4, 6);
+    g.generateTexture('secrets', 30, 30).clear();
+
     // Background grid tile.
     const t = 64;
     g.fillStyle(0x05060a).fillRect(0, 0, t, t);

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, RUN_OBJECTIVES, type ObjectiveDef } from '../data/objectives';
+import { ENEMIES } from '../data/balance';
+import { BRUTE_FORCE, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
 import { CableServers } from '../entities/CableServers';
 import { Dossier } from '../entities/Dossier';
 import type { Enemy } from '../entities/Enemy';
@@ -8,6 +9,7 @@ import { HackServer } from '../entities/HackServer';
 import type { Player } from '../entities/Player';
 import { Connect } from './Connect';
 import { Hack } from './Hack';
+import { generateRunObjectives } from './RunObjectives';
 
 export interface ObjectiveEntry {
   def: ObjectiveDef;
@@ -21,8 +23,19 @@ export interface ObjectiveEntry {
   /** Only for 'connectServers' objectives: the state and the look of the two servers and the cable. */
   connect: Connect | null;
   cable: CableServers | null;
+  /** Only for 'bruteForce' objectives: the outposts (kept after they die, to count them) and their drone timers. */
+  outposts: Outpost[] | null;
   done: boolean;
 }
+
+interface Outpost {
+  enemy: Enemy;
+  /** ms until this outpost may spawn its next drone. */
+  spawnTimerMs: number;
+}
+
+/** Spawns an enemy of the given type (the scene owns the enemy pool). `hp` overrides the type's hp. */
+export type EnemySpawner = (x: number, y: number, type: string, hp?: number) => Enemy | null;
 
 /**
  * Runs the objectives of a run. All of them are in the world from the start and can be done in
@@ -31,7 +44,7 @@ export interface ObjectiveEntry {
  * and "connect servers" (carry a cable from one server to another, hold E to attach).
  */
 export class Objectives {
-  readonly entries: ObjectiveEntry[] = RUN_OBJECTIVES.map((def) => ({
+  readonly entries: ObjectiveEntry[] = generateRunObjectives().map((def) => ({
     def,
     hack: def.type === 'hackServer' ? new Hack() : null,
     server: null,
@@ -39,6 +52,7 @@ export class Objectives {
     goon: null,
     connect: def.type === 'connectServers' ? new Connect() : null,
     cable: null,
+    outposts: null,
     done: false,
   }));
   /** E key for the cable. Not captured, so the browser keeps its shortcuts. */
@@ -60,8 +74,7 @@ export class Objectives {
     /** Keys are ignored while this returns false (paused, level-up picker, game over). */
     private acceptingInput: () => boolean,
     private onExtracted: () => void,
-    /** Puts a Goon at a guard post (the scene owns the enemy pool). */
-    spawnGoon: (x: number, y: number) => Enemy | null,
+    private spawnEnemy: EnemySpawner,
   ) {
     this.scene = scene;
     this.eKey = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
@@ -73,9 +86,11 @@ export class Objectives {
         const gap = Phaser.Math.FloatBetween(CONNECT_SERVERS.gap.min, CONNECT_SERVERS.gap.max);
         const angle = Math.random() * Math.PI * 2;
         e.cable = new CableServers(scene, { x, y }, { x: x + Math.cos(angle) * gap, y: y + Math.sin(angle) * gap });
+      } else if (e.def.type === 'bruteForce') {
+        e.outposts = this.spawnOutposts(x, y);
       } else {
         e.dossier = new Dossier(scene, x, y);
-        e.goon = spawnGoon(x +ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y);
+        e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
       }
     }
     scene.input.keyboard!.on('keydown', this.onKey, this);
@@ -83,6 +98,53 @@ export class Objectives {
       scene.input.keyboard?.off('keydown', this.onKey, this);
       scene.input.keyboard?.removeKey(this.eKey);
     });
+  }
+
+  /** A random number of outposts on a ring around the centre; more outposts means a bit less hp each. */
+  private spawnOutposts(cx: number, cy: number): Outpost[] {
+    const count = Phaser.Math.Between(BRUTE_FORCE.outposts.min, BRUTE_FORCE.outposts.max);
+    const hp = ENEMIES.outpost.hp - BRUTE_FORCE.hpLossPerExtra * (count - BRUTE_FORCE.outposts.min);
+    const start = Math.random() * Math.PI * 2;
+    const outposts: Outpost[] = [];
+    for (let i = 0; i < count; i++) {
+      const a = start + (i / count) * Math.PI * 2;
+      const enemy = this.spawnEnemy(cx + Math.cos(a) * BRUTE_FORCE.ringRadius, cy + Math.sin(a) * BRUTE_FORCE.ringRadius, 'outpost', hp);
+      if (enemy) outposts.push({ enemy, spawnTimerMs: 0 });
+    }
+    return outposts;
+  }
+
+  /** Outposts still standing. A dead one's pooled enemy may be reused as a drone, so check the type too. */
+  private static standing(o: Outpost) {
+    return o.enemy.active && !!o.enemy.stats.stationary;
+  }
+
+  /** Outposts destroyed and total, for the objective panel; null for other objective types. */
+  outpostCount(e: ObjectiveEntry) {
+    if (!e.outposts) return null;
+    return { down: e.outposts.filter((o) => !Objectives.standing(o)).length, total: e.outposts.length };
+  }
+
+  /** Brute-force: outposts spawn drones while the player is near; once all are down the secrets appear. */
+  private updateBruteForce(e: ObjectiveEntry, deltaMs: number) {
+    const outposts = e.outposts!;
+    if (e.dossier) {
+      if (this.playerWithin(e.dossier, BRUTE_FORCE.pickupRadius)) this.finish(e);
+      return;
+    }
+    let alive = 0;
+    for (const o of outposts) {
+      if (!Objectives.standing(o)) continue;
+      alive++;
+      if (!this.playerWithin(o.enemy, BRUTE_FORCE.spawnTriggerRadius)) continue;
+      o.spawnTimerMs -= deltaMs;
+      if (o.spawnTimerMs > 0) continue;
+      o.spawnTimerMs = BRUTE_FORCE.spawnIntervalMs;
+      const a = Math.random() * Math.PI * 2;
+      const r = o.enemy.stats.radius + ENEMIES.drone.radius + 6;
+      this.spawnEnemy(o.enemy.x + Math.cos(a) * r, o.enemy.y + Math.sin(a) * r, 'drone');
+    }
+    if (alive === 0) e.dossier = new Dossier(this.scene, e.def.x, e.def.y, 'secrets', 'SECRETS STOLEN', BRUTE_FORCE.pickupRadius);
   }
 
   get isComplete() {
@@ -157,6 +219,10 @@ export class Objectives {
         e.connect.update(deltaMs, ePressed, eHeld, nearA, nearB, this.player.x, this.player.y);
         e.cable.render(e.connect, this.player.x, this.player.y, nearA, nearB);
         if (e.connect.complete) this.finish(e);
+        continue;
+      }
+      if (e.outposts) {
+        this.updateBruteForce(e, deltaMs);
         continue;
       }
       if (e.dossier) {
