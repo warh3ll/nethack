@@ -64,7 +64,7 @@ export class HackServer {
     this.ring.lineStyle(2, CYAN, inRange ? 0.6 : 0.25).strokeCircle(x, y, HACK.range);
 
     const barX = x - BAR_W / 2;
-    const barY = y - 58;
+    const barY = y - SERVER.frameSize * SERVER.spriteScale / 2 - 30;
     this.bar.clear();
     this.bar.fillStyle(0x1a2140).fillRect(barX, barY, BAR_W, BAR_H);
     // Pink while damage has the hack halted, dimmer while out of range.
@@ -98,7 +98,7 @@ export class HackServer {
   /** Floating "HACKED" and then the server is gone. */
   playHacked() {
     const label = this.scene.add
-      .text(this.x, this.y - 30, 'HACKED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+      .text(this.x, this.y - SERVER.frameSize * SERVER.spriteScale / 4, 'HACKED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
       .setOrigin(0.5)
       .setDepth(21);
     this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });

@@ -99,7 +99,9 @@ export const EXTRACTION = {
 
 /** The server sprite (public/assets/server/server.png: 2 frames of 32x32), shared by Hack server and Connect servers. */
 export const SERVER = {
-  spriteScale: 2,
+  spriteScale: 4,
+  /** Frame size in pixels, before scaling. */
+  frameSize: 32,
   /** Animation speed in frames per second. */
   animFps: 2,
 }
