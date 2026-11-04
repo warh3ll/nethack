@@ -57,15 +57,62 @@ function describe(u: Upgrade) {
 
 /** Modal "pick 1 of N upgrades" screen. Click or tap a card, or press its number key. */
 export class LevelUpPicker {
-  private root: Phaser.GameObjects.Container;
+  private root!: Phaser.GameObjects.Container;
   private onKey: (e: KeyboardEvent) => void;
+  private rerollsLeft: number;
+  private upgrades: Upgrade[];
+  private done = false;
+  private armedAt = 0;
 
+  /**
+   * @param reroll returns a fresh set of choices (given the current ones), or null when a reroll would show nothing new
+   * @param onPick called with the chosen upgrade, or null when the player skips (no reward)
+   */
   constructor(
     private scene: Phaser.Scene,
-    level: number,
+    private level: number,
     upgrades: Upgrade[],
-    onPick: (u: Upgrade) => void,
+    rerolls: number,
+    private reroll: (current: Upgrade[]) => Upgrade[] | null,
+    private onPick: (u: Upgrade | null) => void,
   ) {
+    this.upgrades = upgrades;
+    this.rerollsLeft = rerolls;
+    this.onKey = (e: KeyboardEvent) => {
+      if (this.done) return;
+      const i = Number(e.key) - 1;
+      if (Number.isInteger(i) && i >= 0 && i < this.upgrades.length) this.pick(this.upgrades[i]);
+      else if (e.key === 'r' || e.key === 'R') this.doReroll();
+      else if (e.key === 's' || e.key === 'S') this.pick(null);
+    };
+    scene.input.keyboard!.on('keydown', this.onKey);
+    this.render();
+  }
+
+  private pick(u: Upgrade | null) {
+    if (this.done || this.scene.time.now < this.armedAt) return;
+    this.done = true;
+    this.destroy();
+    this.onPick(u);
+  }
+
+  private doReroll() {
+    if (this.done || this.rerollsLeft <= 0 || this.scene.time.now < this.armedAt) return;
+    const next = this.reroll(this.upgrades);
+    if (!next) return;
+    this.rerollsLeft--;
+    this.upgrades = next;
+    this.root.destroy();
+    this.render();
+  }
+
+  /** True when the reroll button is shown: one is left and it would show something new. */
+  private get canReroll() {
+    return this.rerollsLeft > 0 && this.upgrades.some((u) => u.type === 'skill') && this.reroll(this.upgrades) !== null;
+  }
+
+  private render() {
+    const { scene, level, upgrades } = this;
     const cam = scene.cameras.main;
     const W = cam.width;
     const H = cam.height;
@@ -90,16 +137,9 @@ export class LevelUpPicker {
     const stacked = W < 3 * 220 + 4 * gap;
     const cw = stacked ? Math.min(360, W - 2 * gap) : 220;
 
-    let picked = false;
     /** Card index the current press started on. A card is picked on release over the same card, like a button. */
     let pressed = -1;
-    const armedAt = scene.time.now + ARM_DELAY_MS;
-    const pick = (u: Upgrade) => {
-      if (picked || scene.time.now < armedAt) return;
-      picked = true;
-      this.destroy();
-      onPick(u);
-    };
+    this.armedAt = scene.time.now + ARM_DELAY_MS;
 
     // Build the card texts first so each card can be sized to fit its text.
     const cards = upgrades.map((u, i) => {
@@ -129,7 +169,8 @@ export class LevelUpPicker {
     const totalW = stacked ? cw : n * cw + (n - 1) * gap;
     const cardsH = stacked ? heights.reduce((a, b) => a + b, 0) + (n - 1) * gap : rowH;
     const titleH = title.height + 16;
-    const top = Math.max(12, (H - titleH - cardsH) / 2);
+    const buttonsH = 52;
+    const top = Math.max(12, (H - titleH - cardsH - buttonsH) / 2);
     title.setY(top);
 
     let y = top + titleH;
@@ -160,19 +201,33 @@ export class LevelUpPicker {
           bg.setFillStyle(0x1a2140);
         })
         .on('pointerup', () => {
-          if (pressed === i) pick(u);
+          if (pressed === i) this.pick(u);
           pressed = -1;
         });
     });
 
-    this.onKey = (e: KeyboardEvent) => {
-      const i = Number(e.key) - 1;
-      if (Number.isInteger(i) && i >= 0 && i < n) pick(upgrades[i]);
-    };
-    scene.input.keyboard!.on('keydown', this.onKey);
+    // Reroll and skip buttons under the cards.
+    const btnY = y + (stacked ? 0 : rowH) + 16;
+    const labels: { text: string; color: string; run: () => void }[] = [];
+    if (this.canReroll) labels.push({ text: `[R] reroll (${this.rerollsLeft})`, color: '#2ef2ff', run: () => this.doReroll() });
+    labels.push({ text: '[S] skip (no reward)', color: '#8a96c0', run: () => this.pick(null) });
+    const bw = Math.min(190, (W - gap * (labels.length + 1)) / labels.length);
+    const bh = 36;
+    const bx0 = W / 2 - (labels.length * bw + (labels.length - 1) * gap) / 2;
+    labels.forEach((l, i) => {
+      const x = bx0 + i * (bw + gap);
+      const bg = scene.add.rectangle(x, btnY, bw, bh, 0x0d1226).setOrigin(0).setStrokeStyle(2, 0x5a6a99, 0.8).setScrollFactor(0);
+      const t = scene.add.text(x + bw / 2, btnY + bh / 2, l.text, { fontFamily: 'monospace', fontSize: '14px', color: l.color }).setOrigin(0.5);
+      this.root.add([bg, t]);
+      bg.setInteractive({ useHandCursor: true })
+        .on('pointerover', () => bg.setFillStyle(0x1a2140))
+        .on('pointerout', () => bg.setFillStyle(0x0d1226))
+        .on('pointerup', l.run);
+    });
   }
 
   destroy() {
+    this.done = true;
     this.scene.input.keyboard?.off('keydown', this.onKey);
     this.root.destroy();
   }

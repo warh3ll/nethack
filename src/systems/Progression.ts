@@ -67,8 +67,8 @@ export class Progression {
     return this.ownedOfKind(kind).length < slots;
   }
 
-  /** Random distinct upgrade choices: level-ups for owned skills, plus new skills while a slot is free. */
-  rollUpgrades(count = LEVELING.choices): Upgrade[] {
+  /** Every upgrade that could be offered right now: level-ups for owned skills, plus new skills while a slot is free. */
+  private offerPool(): Upgrade[] {
     const options: Upgrade[] = [];
     for (const [id, lvl] of this.skills) {
       if (lvl < maxSkillLevel(id)) options.push({ type: 'skill', skillId: id, toLevel: lvl + 1 });
@@ -77,8 +77,22 @@ export class Progression {
       if (this.skills.has(id) || !this.hasFreeSlot(SKILLS[id].kind)) continue;
       options.push({ type: 'skill', skillId: id, toLevel: 1 });
     }
+    return options;
+  }
+
+  /** Random distinct upgrade choices. On a reroll, pass the previous choices: those are only repeated if the pool is too small. */
+  rollUpgrades(count = LEVELING.choices, previous: Upgrade[] = []): Upgrade[] {
+    const options = this.offerPool();
     if (options.length === 0) return [{ type: 'heal', amount: FALLBACK_UPGRADE.heal }];
-    return Phaser.Utils.Array.Shuffle(options).slice(0, count);
+    const seen = (u: Upgrade) => previous.some((p) => p.type === 'skill' && u.type === 'skill' && p.skillId === u.skillId);
+    const fresh = Phaser.Utils.Array.Shuffle(options.filter((u) => !seen(u)));
+    const repeats = Phaser.Utils.Array.Shuffle(options.filter(seen));
+    return [...fresh, ...repeats].slice(0, count);
+  }
+
+  /** True when a reroll could show something different (more options than fit on one screen). */
+  canReroll(count = LEVELING.choices): boolean {
+    return this.offerPool().length > count;
   }
 
   /** Records a skill upgrade. Healing is applied by the scene, which owns the player. */

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, ENEMIES, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
+import { CREDITS, ENEMIES, LEVELING, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -237,8 +237,11 @@ export class GameScene extends Phaser.Scene {
 
   private showUpgradePicker() {
     const level = this.progression.level - this.pendingLevelUps + 1;
-    new LevelUpPicker(this, level, this.progression.rollUpgrades(), (u) => {
-      this.applyUpgrade(u);
+    const choices = this.progression.rollUpgrades();
+    // A heal fallback has nothing to reroll; a reroll with nothing new to show is hidden too.
+    const rerolls = this.progression.canReroll() ? LEVELING.rerolls : 0;
+    new LevelUpPicker(this, level, choices, rerolls, (current) => (this.progression.canReroll() ? this.progression.rollUpgrades(LEVELING.choices, current) : null), (u) => {
+      if (u) this.applyUpgrade(u); // null = skipped: no reward
       this.pendingLevelUps--;
       if (this.pendingLevelUps > 0) {
         this.showUpgradePicker();

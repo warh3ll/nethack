@@ -37,7 +37,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
 - [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
-- [ ] One reroll per level-up, and skip (s5)
+- [x] One reroll per level-up, and skip (s5)
 - [ ] Fallback choice gets the second option: credits instead of heal (amount TBD) (s5)
 - [ ] Replace the `[PH]` passives with the real 5, including Health Regen and a base slow player regen (s4, s5)
 - [ ] Remaining damage skills: 6 are planned, 3 exist (Auto-Pistol, Virus, Railgun) plus the `[PH] Scatter Gun`. Designs TBD with Henrik, so this is a design session first (s5)

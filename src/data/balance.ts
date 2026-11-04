@@ -160,6 +160,8 @@ export const LEVELING = {
   xpIncreasePerLevel: 12,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
+  /** Rerolls of the choices per level-up. Skipping is always allowed but gives no reward. */
+  rerolls: 1,
 }
 
 /** On-screen joystick for touch play. Appears wherever the thumb lands. */
