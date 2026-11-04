@@ -34,28 +34,34 @@ export class CableServers {
 
   render(state: Connect, playerX: number, playerY: number, nearA: boolean, nearB: boolean) {
     this.rings.clear();
-    this.ring(this.a, CONNECT_SERVERS.grabRadius, !state.grabbed && nearA);
-    this.ring(this.b, CONNECT_SERVERS.attachRadius, state.grabbed && nearB);
+    this.ring(this.a, CONNECT_SERVERS.grabRadius, state.grabbed ? state.from === 'b' && nearA : nearA);
+    this.ring(this.b, CONNECT_SERVERS.attachRadius, state.grabbed ? state.from === 'a' && nearB : nearB);
+    const src = state.grabbed ? (state.from === 'a' ? this.a : this.b) : state.unwind?.from === 'b' ? this.b : this.a;
 
     this.cable.clear();
     if (state.grabbed) {
-      this.drawCable(this.a.x, this.a.y, playerX, playerY, state.attachMs > 0 ? GREEN : CYAN);
+      this.drawCable(src.x, src.y, playerX, playerY, state.attachMs > 0 ? GREEN : CYAN);
     } else if (state.unwind) {
-      // The loose end slides back along the ground to server A and the cable vanishes.
+      // The loose end slides back along the ground to the server it came from and the cable vanishes.
       const t = Math.min(1, state.unwind.ms / CONNECT_SERVERS.unwindMs);
-      this.drawCable(this.a.x, this.a.y, Phaser.Math.Linear(state.unwind.x, this.a.x, t), Phaser.Math.Linear(state.unwind.y, this.a.y, t), CYAN);
+      this.drawCable(src.x, src.y, Phaser.Math.Linear(state.unwind.x, src.x, t), Phaser.Math.Linear(state.unwind.y, src.y, t), CYAN);
     }
 
     this.bar.clear();
-    const at = state.grabbed ? this.b : this.a;
+    const target = state.from === 'a' ? this.b : this.a;
+    const nearTarget = state.from === 'a' ? nearB : nearA;
+    const at = state.grabbed ? target : this.a;
     if (!state.grabbed) {
-      this.label.setText(nearA ? '[E] GRAB CABLE' : 'GRAB CABLE HERE');
+      this.label.setText(nearA || nearB ? '[E] GRAB CABLE' : 'GRAB CABLE AT EITHER SERVER');
+      const nearest = nearB && !nearA ? this.b : this.a;
+      this.label.setPosition(nearest.x, nearest.y - 70);
+      return;
     } else if (state.attachMs > 0) {
       this.label.setText('ATTACHING...');
       this.bar.fillStyle(0x1a2140).fillRect(at.x - BAR_W / 2, at.y - 56, BAR_W, BAR_H);
       this.bar.fillStyle(GREEN).fillRect(at.x - BAR_W / 2, at.y - 56, BAR_W * state.progress, BAR_H);
     } else {
-      this.label.setText(nearB ? 'HOLD [E] TO ATTACH' : 'BRING THE CABLE HERE  ([E] DROP)');
+      this.label.setText(nearTarget ? 'HOLD [E] TO ATTACH' : 'BRING THE CABLE HERE  ([E] DROP)');
     }
     this.label.setPosition(at.x, at.y - 70);
   }
