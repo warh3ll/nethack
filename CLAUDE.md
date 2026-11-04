@@ -22,6 +22,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 ## Working style
 - Always work on a new branch, never directly on main. Do not merge to main until Henrik says so (he does that once he's happy with the result).
 - Small, runnable milestones: every change should leave the game playable.
+- Playtest features that come from `docs/PLAN.md` (they are usually larger) before calling them done: run the dev server and drive the game in a real browser, and check that the feature actually shows up and works, not just that it typechecks. Say plainly what was and wasn't exercised.
 - Placeholder art is generated in `src/scenes/BootScene.ts`; real assets load there under the same texture keys.
 
 ## Commands

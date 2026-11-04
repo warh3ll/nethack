@@ -24,7 +24,7 @@ export class Weapon {
   update(time: number) {
     if (time < this.nextFireAt) return;
     const s = this.stats;
-    const target = this.findNearest(s.range);
+    const target = this.findTarget(s.range, s.minRange ?? 0, s.targeting ?? 'nearest');
     if (!target) return; // hold fire (and stay ready) until something is in range
     this.nextFireAt = time + s.cooldownMs;
 
@@ -38,15 +38,19 @@ export class Weapon {
     }
   }
 
-  private findNearest(range: number): Enemy | null {
+  private findTarget(range: number, minRange: number, mode: 'nearest' | 'highestHp'): Enemy | null {
     let best: Enemy | null = null;
     let bestD = range * range;
+    let bestHp = -1;
+    const minD = minRange * minRange;
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active) continue;
       const d = Phaser.Math.Distance.Squared(this.owner.x, this.owner.y, e.x, e.y);
-      if (d < bestD) {
+      if (d > range * range || d < minD) continue;
+      if (mode === 'highestHp' ? e.hp > bestHp : d < bestD) {
         bestD = d;
+        bestHp = e.hp;
         best = e;
       }
     }

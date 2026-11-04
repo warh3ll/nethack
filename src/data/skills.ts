@@ -18,6 +18,10 @@ export interface WeaponStats {
   spreadDeg: number
   /** Max targeting distance, and how far a bullet flies. */
   range: number
+  /** Cannot target enemies closer than this (default 0). */
+  minRange?: number
+  /** Which enemy to aim at: the nearest (default) or the one with the most hp. */
+  targeting?: 'nearest' | 'highestHp'
 }
 
 /** Stats for the Virus: infects enemies, deals damage over time, spreads on death. */
@@ -144,6 +148,20 @@ export const SKILLS: Record<string, SkillData> = {
       { dps: 4, cooldownMs: 1500, infectRange: 440, spreadRange: 200, spreadCount: 1, tickMs: 250 },
       { dps: 5.5, cooldownMs: 1500, infectRange: 460, spreadRange: 200, spreadCount: 2, tickMs: 250 },
       { dps: 7, cooldownMs: 1500, infectRange: 480, spreadRange: 200, spreadCount: 2, tickMs: 250 },
+    ],
+  },
+
+  railgun: {
+    name: 'Railgun',
+    kind: 'weapon',
+    description: 'Slow, superfast piercing shot at the toughest enemy in long range. Cannot hit close targets.',
+    color: 0xff4fd8,
+    levels: [
+      { damage: 40, cooldownMs: 3000, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 700, minRange: 75, targeting: 'highestHp' },
+      { damage: 52, cooldownMs: 2800, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 750, minRange: 75, targeting: 'highestHp' },
+      { damage: 66, cooldownMs: 2600, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 800, minRange: 75, targeting: 'highestHp' },
+      { damage: 82, cooldownMs: 2400, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 850, minRange: 75, targeting: 'highestHp' },
+      { damage: 100, cooldownMs: 2200, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 900, minRange: 75, targeting: 'highestHp' },
     ],
   },
 
