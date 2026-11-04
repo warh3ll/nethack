@@ -41,7 +41,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
 - [ ] Finalise the 5 passives, including Health Regen (s4, s5). Base regen (0.1 HP/s) and Nanite Repair are in
-- [x] Remaining damage skills: all 6 planned damage skills exist (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock) (s5)
+- [x] Remaining damage skills: all 7 damage skills exist (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock, Rootkit; the roster was raised from 6 to 7) (s5)
 - [ ] Per-skill level cap and upgrade rows for every skill (s5)
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 

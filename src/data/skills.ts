@@ -63,6 +63,24 @@ export interface EmpStats {
   cooldownMs: number
 }
 
+/** Stats for Rootkit: hijack an enemy, it fights for the player for a while, then explodes. */
+export interface RootkitStats {
+  /** Time (ms) between hijacks (counted from when the previous batch has exploded). */
+  cooldownMs: number
+  /** How long (ms) a hijacked enemy fights before it explodes. */
+  durationMs: number
+  /** Max distance from the player to hijack an enemy. */
+  hijackRange: number
+  /** How many enemies are hijacked at once. */
+  count: number
+  /** Damage a hijacked enemy deals to every other enemy it touches, once per `tickMs`. */
+  contactDamage: number
+  tickMs: number
+  /** Damage to every other enemy within `explosionRadius` when the hijacked enemy explodes. */
+  explosionDamage: number
+  explosionRadius: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -113,6 +131,13 @@ export interface EmpSkill extends SkillBase {
   levels: EmpStats[]
 }
 
+/** Hacking-type weapon: no projectiles, see entities/Rootkit.ts. */
+export interface RootkitSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'rootkit'
+  levels: RootkitStats[]
+}
+
 export interface PassiveSkill extends SkillBase {
   kind: 'passive'
   levels: PassiveStats[]
@@ -123,6 +148,7 @@ export type SkillData =
   | VirusSkill
   | SynapticSkill
   | EmpSkill
+  | RootkitSkill
   | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
@@ -396,6 +422,66 @@ export const SKILLS: Record<string, SkillData> = {
       { damage: 20, radius: 250, stunMs: 2000, cooldownMs: 3200 },
     ],
   },
+  rootkit: {
+    name: 'Rootkit',
+    kind: 'weapon',
+    behavior: 'rootkit',
+    description:
+      'Turns an enemy against themselves. It fights for you for a few seconds, then explodes.',
+    color: 0xff5a7a,
+    levels: [
+      {
+        cooldownMs: 6000,
+        durationMs: 3000,
+        hijackRange: 400,
+        count: 1,
+        contactDamage: 6,
+        tickMs: 300,
+        explosionDamage: 25,
+        explosionRadius: 95,
+      },
+      {
+        cooldownMs: 5600,
+        durationMs: 3300,
+        hijackRange: 420,
+        count: 1,
+        contactDamage: 8,
+        tickMs: 300,
+        explosionDamage: 32,
+        explosionRadius: 110,
+      },
+      {
+        cooldownMs: 5200,
+        durationMs: 3600,
+        hijackRange: 440,
+        count: 1,
+        contactDamage: 10,
+        tickMs: 300,
+        explosionDamage: 40,
+        explosionRadius: 125,
+      },
+      {
+        cooldownMs: 4800,
+        durationMs: 4000,
+        hijackRange: 460,
+        count: 2,
+        contactDamage: 12,
+        tickMs: 300,
+        explosionDamage: 50,
+        explosionRadius: 140,
+      },
+      {
+        cooldownMs: 4400,
+        durationMs: 4500,
+        hijackRange: 480,
+        count: 2,
+        contactDamage: 15,
+        tickMs: 300,
+        explosionDamage: 62,
+        explosionRadius: 155,
+      },
+    ],
+  },
   firewall: {
     name: 'Firewall',
     kind: 'passive',
@@ -459,7 +545,13 @@ export const FALLBACK_UPGRADES = {
 export function getSkillStats(
   id: string,
   level: number,
-): WeaponStats | VirusStats | SynapticStats | EmpStats | PassiveStats {
+):
+  | WeaponStats
+  | VirusStats
+  | SynapticStats
+  | EmpStats
+  | RootkitStats
+  | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
@@ -472,7 +564,8 @@ export function getWeaponStats(id: string, level: number): WeaponStats {
     skill?.kind !== 'weapon' ||
     skill.behavior === 'virus' ||
     skill.behavior === 'synaptic' ||
-    skill.behavior === 'emp'
+    skill.behavior === 'emp' ||
+    skill.behavior === 'rootkit'
   )
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
@@ -509,6 +602,17 @@ export function getEmpStats(id: string, level: number): EmpStats {
   )
     throw new Error(`"${id}" is not an EMP skill`)
   return getSkillStats(id, level) as EmpStats
+}
+
+export function getRootkitStats(id: string, level: number): RootkitStats {
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as RootkitSkill).behavior === 'rootkit'
+    )
+  )
+    throw new Error(`"${id}" is not a rootkit skill`)
+  return getSkillStats(id, level) as RootkitStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {

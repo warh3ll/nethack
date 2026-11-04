@@ -17,7 +17,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Passive stat bonuses are re-summed from scratch on every change, never adjusted incrementally.
 - Object pooling from day one: enemies and bullets come from Phaser groups (`group.get()`), and are disabled, not destroyed.
 - Enemies move straight at the player; no pathfinding by design.
-- Prototype scope: one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills total (6 damage skills, 5 passives).
+- Prototype scope: one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills total (7 damage skills, 5 passives).
 
 ## Working style
 - Always work on a new branch, never directly on main. Do not merge to main until Henrik says so (he does that once he's happy with the result). When he does say so, merge and also push main to origin.

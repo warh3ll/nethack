@@ -58,13 +58,13 @@ Rules to check every feature against. Edit these first.
 - **Slots:** 10 total: 5 active skill slots (damage and nethacking skills) and 5 passive slots (these should be visualized in the UI). The two groups are separate: once all 5 active slots are filled, level-ups only offer new passives or upgrades to skills the player already has (and vice versa). Data caches follow the same rules, except the player gets no choice. Level-ups and caches draw from the same pool.
 - **Kinds (decided):** there are only **skills**: damage skills (e.g. Auto-Pistol, Virus), nethacking skills, and passive skills (which increase stats). "Weapon" is no longer a separate kind.
 - **Where they come from:** data caches found randomly on the map. Caches should be rare, can also drop from enemies in rare cases.
-- **Prototype roster:** 11 skills, 6 damage skills and 5 passives. In game so far: all 6 damage skills (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock) and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE).
+- **Prototype roster:** 12 skills, 7 damage skills and 5 passives (raised from 11/6 when Rootkit was added). In game so far: all 7 damage skills (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock, Rootkit) and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE).
 - Each skill has per-level stat rows, defined in data (`src/data/skills.ts`).
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
 - **Nothing useful to offer (decided):** when a level-up has nothing useful (all slots full and skills maxed), the player chooses between a heal (30% of max HP) or credits (amount TBD until the economy is set).
 - **XP curve (decided):** steady pace, with the XP needed per level increasing slightly each level. No level cap. Numbers in `balance.ts`.
-- **Nethacking skills:** not in the prototype roster. The 11 skills are damage skills and passives only.
+- **Nethacking skills:** not in the prototype roster. The 12 skills are damage skills and passives only.
 - **Reroll and skip (decided):** one reroll of the 3 choices per level-up. The player may also skip, but then gets no reward for that level-up.
 
 ### Skill list
@@ -77,6 +77,7 @@ Rules to check every feature against. Edit these first.
 | Scatter Gun | damage | Short-range spread of pellets at the nearest enemy; more pellets and pierce with levels | in game |
 | Synaptic Overload | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           | in game |
 | EMP Shock | damage | "Lights out, chrome." Every few seconds a ring pulses out from the player, damaging and briefly stunning every enemy it reaches. Levels give a bigger radius and a longer stun (and a little more damage and a faster pulse) | in game |
+| Rootkit | damage | "Turns an enemy against themselves." Every so often it hijacks a nearby enemy, which fights for the player for a few seconds and then explodes. A flash marks the hijack and a smoke plume rises from the enemy until it explodes. Levels give a longer hijack, harder hits and a bigger explosion, a faster cooldown, and at levels 4-5 two enemies are hijacked at once | in game |
 | Firewall | passive | Flat damage reduction on every hit you take | in game |
 | Healing Nanites | passive | Increases the player's passive health regeneration | in game |
 | Exoskeleton | passive | Servo assisted legs, +5/10/15% move speed | in game |
@@ -90,6 +91,8 @@ Rules to check every feature against. Edit these first.
 - **Synaptic Overload (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
 
 - **EMP Shock (decided):** a single ring that expands from the player to its radius; every enemy it reaches takes damage and is stunned (stops moving and shooting, shown with a cyan tint). The pulse waits until at least one enemy is in range, so it is never wasted on an empty screen. A stunned ranged enemy also holds its fire until the stun ends. A new stun never shortens a longer one already running. The pulse never hurts the player. Damage is boosted by OverClock. Outposts are immune to the stun (they still take the damage). Boss-type enemies such as the Goon are stunned for half as long (`stunMultiplier` per enemy in `balance.ts`). The ring has no targeting: anything within its radius is hit. _(numbers are placeholders for Henrik's balancing)_
+
+- **Rootkit (decided):** a hijack picks a random enemy within range (never the Goon or outposts, anything with a health bar). The hijacked enemy turns reddish and stops hurting the player or being hit by the player's bullets. It chases the nearest other enemy and damages every enemy it touches (a tick every 0.3 s), then after its time runs out it dies and explodes, hurting everything around it. The next hijack starts one cooldown after the last hijacked enemy is gone, so at most one batch is active at a time. It never hurts the player. Damage is boosted by OverClock. A hijacked enemy is immune to stun. XP and kills from its hits and explosion go to the player. _(my call, change if you disagree; numbers are placeholders for Henrik's balancing)_
 
 TBD: level cap per skill (the player's own level is uncapped), evolutions/combinations.
 
@@ -160,7 +163,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills (6 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two items per slot** to test equip/unequip/swap.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two items per slot** to test equip/unequip/swap.
 
 **Out of scope for now:** TBD (e.g. multiple characters, multiplayer, mobile). Meta progression is in scope.
 
