@@ -26,6 +26,11 @@ export class BootScene extends Phaser.Scene {
     const g = this.add.graphics();
     createPlayerAnims(this);
 
+    // Pixel art sprites are scaled up, so sample them without smoothing (the default blurs them). Parallax and generated textures stay smooth.
+    for (const key of this.textures.getTextureKeys()) {
+      if (key === 'server' || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
+
     for (const [key, e] of Object.entries(ENEMIES)) {
       g.fillStyle(e.color).fillRect(0, 0, e.radius * 2, e.radius * 2);
       g.fillStyle(0x05060a).fillRect(e.radius * 0.5, e.radius * 0.7, e.radius, e.radius * 0.35);
