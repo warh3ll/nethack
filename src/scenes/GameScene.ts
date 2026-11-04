@@ -36,6 +36,7 @@ export class GameScene extends Phaser.Scene {
   private clockText!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
   private hpBar!: Phaser.GameObjects.Graphics;
+  private hpText!: Phaser.GameObjects.Text;
   private xpBar!: Phaser.GameObjects.Graphics;
   private skillBar!: SkillBar;
   private objectives!: Objectives;
@@ -128,6 +129,10 @@ export class GameScene extends Phaser.Scene {
 
     this.enemyBars = this.add.graphics().setDepth(6);
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
+    this.hpText = this.add
+      .text(16 + 220 + 8, 12, '', { fontFamily: 'monospace', fontSize: '14px', color: '#c8f7ff', stroke: '#05060a', strokeThickness: 3 })
+      .setScrollFactor(0)
+      .setDepth(100);
     this.xpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hud = this.add
       // Wraps on narrow (phone) screens instead of running under the pause button.
@@ -340,6 +345,7 @@ export class GameScene extends Phaser.Scene {
     this.hpBar.clear();
     this.hpBar.fillStyle(0x1a2140).fillRect(16, 14, w, 12);
     this.hpBar.fillStyle(frac > 0.3 ? 0x2ef2ff : 0xff2e88).fillRect(16, 14, w * frac, 12);
+    this.hpText.setText(`${Math.ceil(this.player.hp)}/${this.player.maxHp}`);
 
     const p = this.progression;
     const xpFrac = p.isMaxLevel ? 1 : p.xp / p.xpNeeded;
