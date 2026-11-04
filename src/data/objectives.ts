@@ -97,11 +97,11 @@ export const EXTRACTION = {
   countdownSeconds: 3,
 }
 
-/** The server sprite (public/assets/server/server.png: 2 frames of 32x32), shared by Hack server and Connect servers. */
+/** The server sprite (public/assets/server/server.png: 2 frames of 64x64), shared by Hack server and Connect servers. */
 export const SERVER = {
-  spriteScale: 2,
+  spriteScale: 1,
   /** Frame size in pixels, before scaling. */
-  frameSize: 32,
+  frameSize: 64,
   /** Animation speed in frames per second. */
   animFps: 2,
 }

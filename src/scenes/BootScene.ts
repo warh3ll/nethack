@@ -19,7 +19,7 @@ export class BootScene extends Phaser.Scene {
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
     loadPlayerSheets(this);
     this.load.setPath('assets/server/');
-    this.load.spritesheet('server', 'server.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('server', 'server.png', { frameWidth: 64, frameHeight: 64 });
   }
 
   create() {
