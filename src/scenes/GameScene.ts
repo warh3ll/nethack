@@ -112,6 +112,8 @@ export class GameScene extends Phaser.Scene {
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
+    this.cameras.main.roundPixels = true;
 
     this.weapons = [new Weapon(STARTING_SKILL, this.player, this.enemies, this.bullets, stats)];
 
