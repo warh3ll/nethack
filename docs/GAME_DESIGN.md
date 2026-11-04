@@ -97,7 +97,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 
 ## 7. Run structure and objectives
 
-- A run is one attempt made of **3-5 objectives**, drawn at random per run; the same objective type can occur at most twice. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another.
+- A run is one attempt made of **3-5 objectives**, drawn at random per run; the same objective type can occur at most twice. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another. There has to be at least one hacking objective, since it's kind of the point of the game.
 - The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
