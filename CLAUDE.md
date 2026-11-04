@@ -20,6 +20,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Prototype scope: one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills total (6 damage skills, 5 passives).
 
 ## Working style
+- Always work on a new branch, never directly on main. Do not merge to main until Henrik says so (he does that once he's happy with the result).
 - Small, runnable milestones: every change should leave the game playable.
 - Placeholder art is generated in `src/scenes/BootScene.ts`; real assets load there under the same texture keys.
 
