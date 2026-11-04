@@ -19,6 +19,24 @@ export const MAP = {
   wallThickness: 96,
 }
 
+/**
+ * City backdrop seen past the map wall. Layers are listed back to front.
+ * depth: 0 = never moves, 1 = slides the full spare margin as you cross the map (nearer layers use more).
+ */
+export const PARALLAX = {
+  layers: [
+    { key: 'parallax-1', depth: 0 }, // sky gradient
+    { key: 'parallax-2', depth: 0.25 },
+    { key: 'parallax-3', depth: 0.5 },
+    { key: 'parallax-4', depth: 0.75 },
+    { key: 'parallax-5', depth: 1 },
+  ],
+  /** How much bigger than the screen the layers are drawn; the extra is the room they slide in. */
+  overscan: 1.2,
+  /** Vertical movement as a share of the horizontal one. */
+  verticalShare: 0.4,
+}
+
 export interface EnemyType {
   hp: number
   speed: number

@@ -8,6 +8,7 @@ import { CreditChip } from '../entities/CreditChip';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
+import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
@@ -74,6 +75,7 @@ export class GameScene extends Phaser.Scene {
     this.pendingLevelUps = 0;
     this.progression = new Progression(STARTING_SKILL);
 
+    createParallax(this);
     createMap(this);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.

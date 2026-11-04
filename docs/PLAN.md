@@ -14,6 +14,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Objective panel and objective marker (s7)
 - [x] Skill bar, split into 5 active + 5 passive slots (s5)
 - [x] Large bounded map (10000x10000) with visible wall, camera follow and background grid (s7)
+- [x] Parallax city backdrop behind the map, visible past the wall (s7)
 - [x] Compass to the closest unfinished objective; objectives in any order (s7)
 - [x] Random per-run objectives, 3-5, max two of a type, at least one hack, one near the start (s7)
 - [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7)

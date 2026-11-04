@@ -12,6 +12,11 @@ export class BootScene extends Phaser.Scene {
     super('boot');
   }
 
+  preload() {
+    this.load.setPath('assets/parallax/');
+    for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
+  }
+
   create() {
     const g = this.add.graphics();
 
