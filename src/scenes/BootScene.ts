@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ENEMIES } from '../data/balance';
 import { SKILLS } from '../data/skills';
+import { SERVER } from '../data/objectives';
 import { loadPlayerSheets, createPlayerAnims } from '../data/playerAnims';
 
 /**
@@ -17,6 +18,8 @@ export class BootScene extends Phaser.Scene {
     this.load.setPath('assets/parallax/');
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
     loadPlayerSheets(this);
+    this.load.setPath('assets/server/');
+    this.load.spritesheet('server', 'server.png', { frameWidth: 32, frameHeight: 32 });
   }
 
   create() {
@@ -47,14 +50,7 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x05060a).fillRect(4, 4, 4, 4);
     g.generateTexture('credit-chip', 12, 12).clear();
 
-    // Hackable server: dark tower with status lights.
-    g.fillStyle(0x0a0e1e).fillRect(0, 0, 40, 56);
-    g.lineStyle(2, 0x2ef2ff).strokeRect(1, 1, 38, 54);
-    for (let i = 0; i < 4; i++) {
-      g.fillStyle(0x1a2140).fillRect(6, 6 + i * 12, 28, 8);
-      g.fillStyle(i % 2 ? 0xff2e88 : 0x5fe08a).fillRect(8, 8 + i * 12, 4, 4);
-    }
-    g.generateTexture('server', 40, 56).clear();
+    this.anims.create({ key: 'server', frames: this.anims.generateFrameNumbers('server', { start: 0, end: 1 }), frameRate: SERVER.animFps, repeat: -1 });
 
     // Dossier: gold folder with text lines.
     g.fillStyle(0xffd23e).fillRect(0, 4, 28, 30);

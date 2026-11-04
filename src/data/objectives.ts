@@ -97,6 +97,13 @@ export const EXTRACTION = {
   countdownSeconds: 3,
 }
 
+/** The server sprite (public/assets/server/server.png: 2 frames of 32x32), shared by Hack server and Connect servers. */
+export const SERVER = {
+  spriteScale: 2,
+  /** Animation speed in frames per second. */
+  animFps: 2,
+}
+
 export const HACK = {
   /** The player must stay within this distance of the server for the hack to progress. */
   range: 220,

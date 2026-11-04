@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { HACK } from '../data/objectives';
+import { HACK, SERVER } from '../data/objectives';
 import type { Hack, PromptKind } from '../systems/Hack';
 
 const BAR_W = 120;
@@ -20,7 +20,7 @@ const TITLES: Record<PromptKind, string> = {
  * the progress bar and the current prompt floating above it. Pure view, all state lives in Hack.
  */
 export class HackServer {
-  private sprite: Phaser.GameObjects.Image;
+  private sprite: Phaser.GameObjects.Sprite;
   private ring: Phaser.GameObjects.Graphics;
   private bar: Phaser.GameObjects.Graphics;
   private percent: Phaser.GameObjects.Text;
@@ -36,7 +36,7 @@ export class HackServer {
     readonly y: number,
   ) {
     this.ring = scene.add.graphics().setDepth(1);
-    this.sprite = scene.add.image(x, y, 'server').setDepth(4);
+    this.sprite = scene.add.sprite(x, y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server');
     this.bar = scene.add.graphics().setDepth(20);
     const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color }).setDepth(21);
     this.percent = text('14px', '#c8f7ff').setOrigin(0.5);

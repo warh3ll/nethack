@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONNECT_SERVERS } from '../data/objectives';
+import { CONNECT_SERVERS, SERVER } from '../data/objectives';
 import type { Connect } from '../systems/Connect';
 
 const BAR_W = 100;
@@ -27,7 +27,7 @@ export class CableServers {
   ) {
     this.rings = scene.add.graphics().setDepth(1);
     this.cable = scene.add.graphics().setDepth(3);
-    for (const p of [a, b]) scene.add.image(p.x, p.y, 'server').setDepth(4);
+    for (const p of [a, b]) scene.add.sprite(p.x, p.y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server');
     this.bar = scene.add.graphics().setDepth(20);
     this.label = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '13px', color: '#ffd23e' }).setOrigin(0.5).setDepth(21);
   }
