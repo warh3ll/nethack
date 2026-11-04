@@ -430,11 +430,56 @@ export const SKILLS: Record<string, SkillData> = {
       'Turns an enemy against themselves. It fights for you for a few seconds, then explodes.',
     color: 0xff5a7a,
     levels: [
-      { cooldownMs: 6000, durationMs: 3000, hijackRange: 400, count: 1, contactDamage: 6, tickMs: 300, explosionDamage: 25, explosionRadius: 80 },
-      { cooldownMs: 5600, durationMs: 3300, hijackRange: 420, count: 1, contactDamage: 8, tickMs: 300, explosionDamage: 32, explosionRadius: 90 },
-      { cooldownMs: 5200, durationMs: 3600, hijackRange: 440, count: 1, contactDamage: 10, tickMs: 300, explosionDamage: 40, explosionRadius: 100 },
-      { cooldownMs: 4800, durationMs: 4000, hijackRange: 460, count: 2, contactDamage: 12, tickMs: 300, explosionDamage: 50, explosionRadius: 115 },
-      { cooldownMs: 4400, durationMs: 4500, hijackRange: 480, count: 2, contactDamage: 15, tickMs: 300, explosionDamage: 62, explosionRadius: 130 },
+      {
+        cooldownMs: 6000,
+        durationMs: 3000,
+        hijackRange: 400,
+        count: 1,
+        contactDamage: 6,
+        tickMs: 300,
+        explosionDamage: 25,
+        explosionRadius: 95,
+      },
+      {
+        cooldownMs: 5600,
+        durationMs: 3300,
+        hijackRange: 420,
+        count: 1,
+        contactDamage: 8,
+        tickMs: 300,
+        explosionDamage: 32,
+        explosionRadius: 110,
+      },
+      {
+        cooldownMs: 5200,
+        durationMs: 3600,
+        hijackRange: 440,
+        count: 1,
+        contactDamage: 10,
+        tickMs: 300,
+        explosionDamage: 40,
+        explosionRadius: 125,
+      },
+      {
+        cooldownMs: 4800,
+        durationMs: 4000,
+        hijackRange: 460,
+        count: 2,
+        contactDamage: 12,
+        tickMs: 300,
+        explosionDamage: 50,
+        explosionRadius: 140,
+      },
+      {
+        cooldownMs: 4400,
+        durationMs: 4500,
+        hijackRange: 480,
+        count: 2,
+        contactDamage: 15,
+        tickMs: 300,
+        explosionDamage: 62,
+        explosionRadius: 155,
+      },
     ],
   },
   firewall: {
@@ -500,7 +545,13 @@ export const FALLBACK_UPGRADES = {
 export function getSkillStats(
   id: string,
   level: number,
-): WeaponStats | VirusStats | SynapticStats | EmpStats | RootkitStats | PassiveStats {
+):
+  | WeaponStats
+  | VirusStats
+  | SynapticStats
+  | EmpStats
+  | RootkitStats
+  | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
