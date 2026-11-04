@@ -5,6 +5,9 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 ## Game design
 `docs/GAME_DESIGN.md` is the source of truth for what the game is meant to be. Read it before building or changing a feature. If a request conflicts with it (or touches something marked TBD), say so and ask rather than silently deciding. Henrik edits it; Claude only suggests changes.
 
+## Build plan
+`docs/PLAN.md` is the checklist of main features. Read it before starting a feature. If a request overlaps an unticked item, mention it and suggest doing them together (Henrik decides). Tick items off in the same change that completes them, and add new items when scope grows. If a request drifts from the plan's suggested order, that's fine, just note it.
+
 ## Roles
 - Henrik: game design, assets, balancing. Claude writes most of the code.
 - Keep tuning numbers in `src/data/` (`balance.ts`, `skills.ts`) so Henrik can balance without touching logic. Never hard-code a balance value in game code.

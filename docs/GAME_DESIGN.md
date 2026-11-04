@@ -57,11 +57,13 @@ Rules to check every feature against. Edit these first.
 - **Slots:** 10 total: 5 active skill slots (damage and nethacking skills) and 5 passive slots (these should be visualized in the UI). The two groups are separate: once all 5 active slots are filled, level-ups only offer new passives or upgrades to skills the player already has (and vice versa). Data caches follow the same rules, except the player gets no choice. Level-ups and caches draw from the same pool.
 - **Kinds (decided):** there are only **skills**: damage skills (e.g. Auto-Pistol, Virus), nethacking skills, and passive skills (which increase stats). "Weapon" is no longer a separate kind.
 - **Where they come from:** data caches found randomly on the map. Caches should be rare, can also drop from enemies in rare cases.
-- **Prototype roster:** 11 skills, 6 damage skills and 5 passives (Auto-Pistol and Virus exist so far). The fifth passive is Health Regen.
+- **Prototype roster:** 11 skills, 6 damage skills and 5 passives (Auto-Pistol and Virus exist so far). One of the passives is Health Regen.
 - Each skill has per-level stat rows, defined in data (`src/data/skills.ts`).
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
-- **Nothing useful to offer (decided):** when a level-up has nothing useful (all slots full and skills maxed), the player chooses between a heal or credits.
+- **Nothing useful to offer (decided):** when a level-up has nothing useful (all slots full and skills maxed), the player chooses between a heal (30% of max HP) or credits (amount TBD until the economy is set).
+- **XP curve (decided):** steady pace, with the XP needed per level increasing slightly each level. No level cap. Numbers in `balance.ts`.
+- **Nethacking skills:** not in the prototype roster. The 11 skills are damage skills and passives only.
 - **Reroll and skip (decided):** one reroll of the 3 choices per level-up. The player may also skip, but then gets no reward for that level-up.
 
 ### Skill list
@@ -94,15 +96,16 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 
 ## 7. Run structure and objectives
 
-- A run is one attempt made of **3-5 objectives**. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another.
-- The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. After the last objective it points to the extraction point.
+- A run is one attempt made of **3-5 objectives**, drawn at random per run; the same objective type can occur at most twice. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another.
+- The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
-- A **run clock is always visible in the UI**.
+- A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
+- **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
 - **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
   2. **Encryption Key:** A Goon guards a dossier containing an encryption key (see Goon in section 6).
-  3. **Brute-force:** the player attacks a location with **2-5 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn enemies when the player is close. Once all of them are down, the player can steal company secrets from within (an object the player picks up).
+  3. **Brute-force:** the player attacks a location with **2-5 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
 - **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
@@ -118,7 +121,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - The player will keep auto-shooting while hacking, so hacking happens under pressure from enemy hordes.
 - **Input priority (decided):** the player can still move during a hack, but while a typing prompt is active, typing takes priority over movement keys. WASD letters go to the prompt, while the arrow keys keep moving the player. Space (Smack) is fine as-is.
 - Hacking draws enemies near slightly faster. Any damage to the player will halt progress by 0.2 seconds. This does not interrupt an active prompt and does not add prompts; it only makes the hack take longer.
-- **Interaction prompts:** during a server hack the player is forced to interact 2-3 times. **Each prompt type appears at most once per server.** When each appears is random over the duration of the hack, within a min/max spacing (values in `balance.ts`). TBD: what failure costs (progress loss, damage, reset).
+- **Interaction prompts:** during a server hack the player is forced to interact 2-3 times. **Each prompt type appears at most once per server.** When each appears is random over the duration of the hack, within a min/max spacing (values in `balance.ts`). **Mistyping (decided):** no penalty, the player just retypes. Typing is case-sensitive for Inject words.
   - **IP address** - the player needs to type an IP address that appears over the objective, hacking progression is halted until it is complete - format is xxx.xxx.xxx.xxx (but with numbers)
   - **Password** The player is prompted to type a password using the following structure [adjective-noun] (including the dash). Chosen over symbol-heavy passwords so it works on non-US keyboards.
   - **Smack** The players is prompted to spam space to physically hit the machine, it wriggles with each hit and requires 8-15 hits
@@ -129,7 +132,9 @@ Some objectives require hacking the ICE protecting a server or objective.
 ## 9. Meta progression
 
 - Credits are picked up in a run (magnet radius) and spent in the main-menu store.
+- **Credits on death (decided):** credits collected are kept in full even if the player dies. A successful extraction only adds an end-of-run credit bonus on top.
 - **Extraction bonus (decided):** a successful extraction gives an end-of-run credit bonus.
+- **Save code (decided):** the menu offers export/import of a save code, as a backup against wiped localStorage.
 - Items can be bought from a store in the main menu and equipped there (section 4b).
 - Permanent upgrades are account-wide. Storage is browser localStorage (the only option on itch.io), so clearing site data wipes progress.
 - More progression TBD
@@ -143,7 +148,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills (6 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills (6 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two placeholder items per slot** to test equip/unequip/swap.
 
 **Out of scope for now:** TBD (e.g. multiple characters, multiplayer, mobile). Meta progression is in scope.
 
@@ -160,29 +165,14 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 Answer inline or strike out. Answered questions get folded into the sections above.
 
-**Contradictions to resolve**
+**Objectives and run**
 
-- Credits on death: section 9 used to say credits are kept even when dead, but your last answer says "death is a full reset so shouldn't persist". Which is it: (a) all credits lost on death, (b) a fraction kept, (c) kept in full, with extraction only adding a bonus? Until you answer I am assuming (c), as the old text said. Yes, sorry, C is correct.
-- Run clock: with timed objectives gone, what is the clock for? Options: pure stat shown on the results screen, driver of enemy difficulty (already decided), or a soft par time for a bonus. The run clock is only to indicate time, no real functionality right now.
-
-**Map and objectives**
-
-- Are the 3-5 objectives drawn at random from the types (so the same type can repeat), or is there a fixed pool per run? They should be random per run, but the same type shouldn't be able to occur more than twice.
-- Is the extraction point visible/active from the start, or only revealed once all objectives are done? Reveal the extraction once the final objective is done.
-- Does extraction ("log out") need a hold-out period under fire, or is typing the phrase enough? After the player finishes typing "log out", countdown from 3, 2, 1 then complete the run.
-- Brute-force: what do outposts spawn (which enemies, how often), and do they shoot? Normal drones for now.
-
-**Skills and progression**
-
-- With the max level gone for the player, what does the XP curve look like (steady, or soft-capped)? Numbers go in `balance.ts`; I just need the intent. Steady pace, should increase slightly per level
-- Heal-or-credits fallback: fixed amounts, or scaling with player level? Heal could be 30% of max, credits I'm not sure as the whole economy is TBD.
-- Do nethacking skills (non-damage hacking utilities) exist in the 11-skill prototype roster, or only damage skills and passives for now? Only damage and passives for now.
-
-**Hacking**
-
-- What should failure cost on a mistyped prompt: nothing (just retype), progress loss, or damage? Are typos forgiven with backspace, and is typing case-sensitive (the Inject list mixes cases, e.g. HEAD, ACK)? Just retype, I like it as it is. It's case senstive for the injection type yes.
+- Objective types: with the "max two of a type" rule, 3-5 objectives need at least 3 types (5 needs 3 types). Three exist today, so that works, but should we add a fourth type soon for variety (candidates: defend a point, retrieve an item, eliminate a target)?
+- Does the compass show distance as well as direction?
+- Does extraction ("log out") need the player to stay at the extraction point, or can they leave mid-typing and the countdown cancel if they take damage?
 
 **Economy and meta**
 
-- Since localStorage can be wiped, do you want an export/import save code in the menu? Sure.
-- Should the first shop version include a handful of placeholder items (one per slot) just to test equipping? Make it two per slot, so that we can play around with equip/unequip.
+- Rough credit values: how many credits per Drone, per Goon, and the extraction bonus? Fine to leave until the shop prices exist; I will use placeholders in `balance.ts` and you tune them.
+- Are credits and items shown to the player mid-run (HUD counter), or only on the results screen?
+- Cache drops of "very rare" permanent items: from which pool (the same shop items, or a separate find-only list)?
