@@ -29,6 +29,7 @@ const RESTART_ARM_DELAY_MS = 800;
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
+  private dying = false;
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
@@ -76,6 +77,7 @@ export class GameScene extends Phaser.Scene {
     this.kills = 0;
     this.credits = 0;
     this.gameOver = false;
+    this.dying = false;
     this.levelingUp = false;
     this.pendingLevelUps = 0;
     this.progression = new Progression(STARTING_SKILL);
@@ -190,7 +192,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number) {
-    if (this.gameOver || this.paused || this.levelingUp) return;
+    if (this.gameOver || this.paused || this.levelingUp || this.dying) return;
 
     // Slow motion while typing a hack prompt: the world runs on scaled time, the hack on real time.
     const scale = this.objectives.typing ? HACK.typingTimeScale : 1;
@@ -219,7 +221,17 @@ export class GameScene extends Phaser.Scene {
     this.updateCachePrompts();
 
     this.drawHud();
-    if (this.player.isDead && !this.gameOver) this.endRun();
+    if (this.player.isDead && !this.gameOver) this.onPlayerDeath();
+  }
+
+  /** Freezes the world, lets the death animation play out, then shows the results. */
+  private onPlayerDeath() {
+    if (this.dying) return;
+    this.dying = true;
+    this.player.update(undefined, 0); // starts the death animation
+    this.joystick.release();
+    this.physics.pause();
+    this.time.delayedCall(this.player.deathDurationMs, () => this.endRun());
   }
 
   /** The cache within reach, if any. Not while typing a hack prompt (the E would be text) or during a modal. */
