@@ -71,7 +71,14 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x05060a).fillRect(0, 0, t, t);
     g.lineStyle(1, 0x1a2140).strokeRect(0, 0, t, t);
     g.fillStyle(0x2a3a70).fillRect(0, 0, 2, 2);
-    g.generateTexture('grid', t, t);
+    g.generateTexture('grid', t, t).clear();
+
+    // Boundary wall: hazard stripes that tile in every direction.
+    g.fillStyle(0x1a0a18).fillRect(0, 0, t, t);
+    g.lineStyle(14, 0xff2e88, 0.8);
+    // Lines overshoot the tile so their square ends don't leave notches at the seams.
+    for (let x = -t; x <= t; x += t / 2) g.lineBetween(x - t / 2, t + t / 2, x + t + t / 2, -t / 2);
+    g.generateTexture('wall', t, t);
 
     g.destroy();
     this.scene.start('game');

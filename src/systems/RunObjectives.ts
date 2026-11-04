@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MAP } from '../data/balance';
 import { RUN_GENERATION, type ObjectiveDef } from '../data/objectives';
 
 const TYPES = Object.keys(RUN_GENERATION.names) as ObjectiveDef['type'][];
@@ -20,7 +21,7 @@ export function generateRunObjectives(): ObjectiveDef[] {
   const placed: { x: number; y: number }[] = [];
   const seen: Partial<Record<ObjectiveDef['type'], number>> = {};
   return types.map((type) => {
-    const { x, y } = pickPosition(placed);
+    const { x, y } = placed.length === 0 ? pickNearStart() : pickPosition(placed);
     placed.push({ x, y });
     const total = types.filter((t) => t === type).length;
     const n = (seen[type] = (seen[type] ?? 0) + 1);
@@ -28,17 +29,25 @@ export function generateRunObjectives(): ObjectiveDef[] {
   });
 }
 
+/** Random point close to the start, for the first objective of a run. */
+function pickNearStart() {
+  const g = RUN_GENERATION;
+  const angle = Math.random() * Math.PI * 2;
+  const dist = Phaser.Math.Between(g.minDistFromStart, g.firstObjectiveMaxDist);
+  return { x: Math.round(Math.cos(angle) * dist), y: Math.round(Math.sin(angle) * dist) };
+}
+
 /** Random point away from the start and from the others. Gives up on the spacing rule if the area is too crowded. */
 function pickPosition(placed: { x: number; y: number }[]) {
   const g = RUN_GENERATION;
+  const half = MAP.size / 2 - g.edgeMargin;
   let best = { x: 0, y: 0 };
   let bestGap = -1;
   for (let i = 0; i < 200; i++) {
-    const x = Phaser.Math.Between(-g.areaHalfSize, g.areaHalfSize);
-    const y = Phaser.Math.Between(-g.areaHalfSize, g.areaHalfSize);
-    const fromStart = Math.hypot(x, y);
-    if (fromStart < g.minDistFromStart) continue;
-    const gap = Math.min(fromStart, ...placed.map((p) => Math.hypot(x - p.x, y - p.y)));
+    const x = Phaser.Math.Between(-half, half);
+    const y = Phaser.Math.Between(-half, half);
+    if (Math.hypot(x, y) < g.minDistFromStart) continue;
+    const gap = Math.min(...placed.map((p) => Math.hypot(x - p.x, y - p.y)));
     if (gap >= g.minSpacing) return { x, y };
     if (gap > bestGap) {
       best = { x, y };

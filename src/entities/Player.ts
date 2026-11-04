@@ -16,6 +16,7 @@ export class Player extends Phaser.Physics.Arcade.Image {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.body!.setCircle(PLAYER.radius);
+    this.setCollideWorldBounds(true);
     this.setDepth(10);
     this.keys = scene.input.keyboard!.addKeys('up,down,left,right,w,a,s,d') as Player['keys'];
   }

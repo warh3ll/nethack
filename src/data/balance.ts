@@ -12,6 +12,13 @@ export const PLAYER = {
   invulnerableMs: 500,
 }
 
+/** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (65 s). */
+export const MAP = {
+  size: 13000,
+  /** How thick the boundary wall is drawn. */
+  wallThickness: 96,
+}
+
 export interface EnemyType {
   hp: number
   speed: number

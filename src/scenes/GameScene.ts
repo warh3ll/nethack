@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SPAWNING, STARTING_SKILL } from '../data/balance';
+import { ENEMIES, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -7,6 +7,7 @@ import { Bullet } from '../entities/Bullet';
 import { CreditChip } from '../entities/CreditChip';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
+import { createMap } from '../entities/MapWall';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
@@ -30,7 +31,6 @@ export class GameScene extends Phaser.Scene {
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
   private weapons: (Weapon | Virus)[] = [];
-  private background!: Phaser.GameObjects.TileSprite;
   private hud!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
   private hpBar!: Phaser.GameObjects.Graphics;
@@ -73,7 +73,7 @@ export class GameScene extends Phaser.Scene {
     this.pendingLevelUps = 0;
     this.progression = new Progression(STARTING_SKILL);
 
-    this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'grid').setOrigin(0).setScrollFactor(0);
+    createMap(this);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
@@ -163,7 +163,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number) {
-    this.background.setTilePosition(this.cameras.main.scrollX, this.cameras.main.scrollY);
     if (this.gameOver || this.paused || this.levelingUp) return;
 
     // Slow motion while typing a hack prompt: the world runs on scaled time, the hack on real time.
@@ -282,7 +281,14 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const radius = Math.hypot(cam.width, cam.height) / 2 + SPAWNING.spawnMargin;
     const angle = Math.random() * Math.PI * 2;
-    enemy.spawn(this.player.x + Math.cos(angle) * radius, this.player.y + Math.sin(angle) * radius, this.rollEnemyType(seconds));
+    let dx = Math.cos(angle) * radius;
+    let dy = Math.sin(angle) * radius;
+    const type = this.rollEnemyType(seconds);
+    // A point past the wall is mirrored across the player: same distance, so still off screen, but on the map.
+    const limit = MAP.size / 2 - ENEMIES[type].radius;
+    if (Math.abs(this.player.x + dx) > limit) dx = -dx;
+    if (Math.abs(this.player.y + dy) > limit) dy = -dy;
+    enemy.spawn(this.player.x + dx, this.player.y + dy, type);
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */
@@ -408,7 +414,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onResize(size: Phaser.Structs.Size) {
-    this.background.setSize(size.width, size.height);
     this.pauseButton.setPosition(size.width - 52, 12);
     this.hud.setWordWrapWidth(size.width - 80);
   }

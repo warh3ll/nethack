@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { insideMap } from './MapWall';
 
 /** Pooled projectile fired by an enemy (the Goon). Hurts the player, passes through other enemies. */
 export class EnemyBullet extends Phaser.Physics.Arcade.Image {
@@ -20,9 +21,9 @@ export class EnemyBullet extends Phaser.Physics.Arcade.Image {
 
   /** Called every frame by its group (runChildUpdate). */
   update() {
-    if (this.active && Phaser.Math.Distance.Between(this.startX, this.startY, this.x, this.y) > this.maxDistance) {
-      this.kill();
-    }
+    if (!this.active) return;
+    const spent = Phaser.Math.Distance.Between(this.startX, this.startY, this.x, this.y) > this.maxDistance;
+    if (spent || !insideMap(this.x, this.y)) this.kill();
   }
 
   kill() {

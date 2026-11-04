@@ -16,12 +16,12 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 
 ## 1. Run foundation
 
-- [ ] Large bounded map (~10000x10000) with a visible boundary wall; tune walk time to 60-90 s edge to edge (s7)
+- [x] Large bounded map (13000x13000, `MAP` in `balance.ts`) with a visible boundary wall; 65 s edge to edge at normal speed (s7)
 - [ ] Camera and background so movement across the map is readable
 - [ ] Run clock in the HUD (elapsed time only) (s7)
 - [ ] HUD: remove the enemies counter; add credits and items-found counters once those exist (s10)
 - [x] Compass pointing at the closest unfinished objective (s7)
-- [x] Random objective placement per run, 3-5 objectives, max two of one type (s7). Positions are random in a 6000x6000 square around the start until the real map exists (then re-place them on it)
+- [x] Random objective placement per run, 3-5 objectives, max two of one type (s7). Positions are random on the whole map, `edgeMargin` away from the wall; one objective is always within `firstObjectiveMaxDist` of the start
 - [x] Objectives completable in any order (s7)
 
 ## 2. Run end

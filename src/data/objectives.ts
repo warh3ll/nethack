@@ -31,10 +31,15 @@ export const RUN_GENERATION = {
     connectServers: 'Connect servers',
     stealSecrets: 'Steal secrets',
   } as Record<ObjectiveDef['type'], string>,
-  /** Objectives are placed in a square this far (half-width) around the player's start. Placeholder until the map exists. */
-  areaHalfSize: 3000,
+  /**
+   * Objectives stay at least this far from the map edge. Has to fit everything built around the
+   * objective position, the largest being the second server of Connect servers (CONNECT_SERVERS.gap).
+   */
+  edgeMargin: 700,
   /** No objective this close to the start (which is also the extraction point). */
   minDistFromStart: 900,
+  /** One objective per run is placed within this distance of the start, so the first walk stays short. */
+  firstObjectiveMaxDist: 2500,
   /** No two objectives closer than this. */
   minSpacing: 1300,
 }
