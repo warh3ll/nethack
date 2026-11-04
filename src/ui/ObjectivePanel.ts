@@ -6,7 +6,9 @@ const MARGIN = 16;
 const PAD = 10;
 const ROW_H = 22;
 const HEADER_H = 26;
-const COLORS = { done: '#5fe08a', active: '#2ef2ff', pending: '#6a7ba8' };
+/** Opacity of the Extract row until every objective is done. */
+const LOCKED_ALPHA = 0.6;
+const COLORS ={ done: '#5fe08a', active: '#2ef2ff', pending: '#6a7ba8' };
 
 /**
  * Objective list in the top right: every objective of the run, with the finished ones ticked,
@@ -25,7 +27,8 @@ export class ObjectivePanel {
     this.bg = scene.add.graphics().setScrollFactor(0).setDepth(100);
     const style = { fontFamily: 'monospace', fontSize: '15px' };
     this.header = scene.add.text(0, 0, 'OBJECTIVES', { ...style, fontStyle: 'bold', color: '#ffd23e' }).setScrollFactor(0).setDepth(101);
-    for (let i = 0; i < objectives.entries.length; i++) {
+    // One row per objective plus the extraction row at the bottom (not one of the 3-5).
+    for (let i = 0; i < objectives.entries.length + 1; i++) {
       this.rows.push(scene.add.text(0, 0, '', { ...style, color: COLORS.pending }).setScrollFactor(0).setDepth(101));
     }
     this.layout();
@@ -49,7 +52,8 @@ export class ObjectivePanel {
   /** Call every frame; only touches the text objects when something changed. */
   update() {
     const states = this.objectives.entries.map((e) => (e.done ? 'done' : e === this.objectives.current ? 'active' : 'pending'));
-    const key = states.join();
+    const locked = !this.objectives.isComplete;
+    const key = states.join() + locked;
     const recolor = key !== this.lastKey;
     this.lastKey = key;
 
@@ -68,5 +72,13 @@ export class ObjectivePanel {
       this.rows[i].setText(`${mark} ${entry.def.name.padEnd(19)}${pct.padStart(4)}`);
       if (recolor) this.rows[i].setColor(COLORS[state as keyof typeof COLORS]);
     });
+
+    // Extraction row: faded until every objective is done, then it becomes the active goal.
+    const row = this.rows[this.rows.length - 1];
+    row.setText(`${locked ? '[ ]' : '[>]'} ${'Extract'.padEnd(19)}${''.padStart(4)}`);
+    if (recolor) {
+      row.setColor(locked ? COLORS.pending : COLORS.active);
+      row.setAlpha(locked ? LOCKED_ALPHA : 1);
+    }
   }
 }
