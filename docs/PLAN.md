@@ -22,8 +22,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Objectives completable in any order (replace the fixed order in `RUN_OBJECTIVES`) (s7)
 
 ## 2. Run end
-- [ ] Extraction point revealed after the last objective; compass switches to it (s7)
-- [ ] "log out" typing prompt, then 3-2-1 countdown, then win (s7)
+- [x] Extraction point revealed after the last objective; compass switches to it (s7). - [x] "log out" typing prompt, then 3-2-1 countdown, then win (s7). Leaving the point cancels both (open question in the design doc)
 - [ ] Game-over on HP 0
 - [ ] Results screen: credits gained, items found, objectives completed, level reached (s7)
 

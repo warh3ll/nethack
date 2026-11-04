@@ -260,7 +260,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.pause();
     this.drawHud();
     const cam = this.cameras.main;
-    const title = won ? 'ALL OBJECTIVES COMPLETE' : 'SYSTEM FAILURE';
+    const title = won ? 'EXTRACTION COMPLETE' : 'SYSTEM FAILURE';
     this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.75).setOrigin(0).setScrollFactor(0).setDepth(199);
     this.add
       .text(cam.width / 2, cam.height / 2, `${title}\n\nlevel ${this.progression.level}   kills ${this.kills}\n\npress R or tap\nto reboot`, {

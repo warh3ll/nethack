@@ -20,6 +20,19 @@ export const RUN_OBJECTIVES: ObjectiveDef[] = [
   { id: 'hack3', type: 'hackServer', name: 'Hack server 3', x: 1500, y: 900 },
 ]
 
+/** The extraction point (the player's own 127.0.0.1). Appears once the last objective is done. */
+export const EXTRACTION = {
+  /** World position, relative to the player's start (0, 0). */
+  x: 0,
+  y: 0,
+  /** The player must stay inside this radius to log out; leaving cancels the typing and the countdown. */
+  radius: 140,
+  /** What to type at the extraction point (case-sensitive, mistypes just get retyped). */
+  logoutText: 'log out',
+  /** Seconds of countdown after the text is typed, then the run is won. */
+  countdownSeconds: 3,
+}
+
 export const HACK = {
   /** The player must stay within this distance of the server for the hack to progress. */
   range: 220,
