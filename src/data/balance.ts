@@ -198,7 +198,7 @@ export const CACHES = {
   openRadius: 80,
 }
 
-export const STARTING_SKILL = 'autoPistol'
+export const STARTING_SKILL = 'synapticOverload' // TEMP for testing, change back to 'autoPistol' before merging
 
 /** Skill slots: weapons (and other active skills) and passives each have their own group. */
 export const WEAPON_SLOTS = 5

@@ -116,7 +116,7 @@ export class GameScene extends Phaser.Scene {
     // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
     this.cameras.main.roundPixels = true;
 
-    this.weapons = [new Weapon(STARTING_SKILL, this.player, this.enemies, this.bullets, stats)];
+    this.weapons = [this.createWeapon(STARTING_SKILL)];
 
     this.physics.add.overlap(this.bullets, this.enemies, (a, b) => {
       const bullet = (a instanceof Bullet ? a : b) as Bullet;
@@ -345,13 +345,16 @@ export class GameScene extends Phaser.Scene {
     if (skill.kind !== 'weapon') return;
     const existing = this.weapons.find((w) => w.skillId === u.skillId);
     if (existing) existing.level = u.toLevel;
-    else if (skill.behavior === 'virus') {
-      this.weapons.push(new Virus(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onSkillKill(e)));
-    } else if (skill.behavior === 'synaptic') {
-      this.weapons.push(new SynapticOverload(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onSkillKill(e)));
-    } else {
-      this.weapons.push(new Weapon(u.skillId, this.player, this.enemies, this.bullets, this.progression.stats));
-    }
+    else this.weapons.push(this.createWeapon(u.skillId));
+  }
+
+  /** The runtime object for a damage skill, by its behavior. */
+  private createWeapon(skillId: string): Weapon | Virus | SynapticOverload {
+    const behavior = (SKILLS[skillId] as { behavior?: string }).behavior;
+    const stats = this.progression.stats;
+    if (behavior === 'virus') return new Virus(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
+    if (behavior === 'synaptic') return new SynapticOverload(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
+    return new Weapon(skillId, this.player, this.enemies, this.bullets, stats);
   }
 
   /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Overload). */
