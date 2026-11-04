@@ -120,9 +120,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     return Phaser.Math.Angle.Between(this.x, this.y, playerX, playerY);
   }
 
-  /** Stuns until the given game time. A shorter stun never cuts a longer one short. */
-  stun(until: number) {
-    this.stunnedUntil = Math.max(this.stunnedUntil, until);
+  /** Stuns for `ms` from game time `now`, scaled by the enemy's stunMultiplier. A shorter stun never cuts a longer one short. */
+  stun(now: number, ms: number) {
+    const duration = ms * (this.stats.stunMultiplier ?? 1);
+    if (duration <= 0) return;
+    this.stunnedUntil = Math.max(this.stunnedUntil, now + duration);
     this.applyStunTint();
   }
 

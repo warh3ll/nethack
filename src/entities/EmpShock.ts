@@ -44,7 +44,7 @@ export class EmpShock {
 
     const damage = s.damage * this.playerStats.damageMult;
     for (const e of hit) {
-      e.stun(time + s.stunMs);
+      e.stun(time, s.stunMs);
       if (e.takeDamage(damage)) this.onKill(e);
     }
     this.playRing(s.radius);
