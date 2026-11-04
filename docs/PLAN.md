@@ -40,6 +40,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] One reroll per level-up, and skip (s5)
 - [ ] Fallback choice when nothing is useful: heal 30% or credits (s5)
 - [ ] Level cap and upgrade rows for every skill (s5)
+- [ ] Build the railgun damage skill
 
 ## 4. Data caches
 
