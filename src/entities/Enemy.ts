@@ -5,6 +5,8 @@ import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
 /** Scene event fired when an enemy dies, with the enemy as argument. */
 export const ENEMY_KILLED = 'enemy-killed';
 
+const HIJACK_TINT = 0xff5a7a;
+
 /** Set on an enemy infected by the Virus. Spread copies these numbers onto the next victims. */
 export interface Infection {
   dps: number;
@@ -22,6 +24,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /** Game time until which the enemy is stunned (no moving, no shooting). */
   private stunnedUntil = 0;
   private stunTinted = false;
+  /** Hijacked by Rootkit: fights for the player (driven by the Rootkit, not by act()). */
+  hijacked = false;
   /** Guard post (guards only): where the enemy stands and returns to. */
   private homeX = 0;
   private homeY = 0;
@@ -37,6 +41,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.infection = null;
     this.stunnedUntil = 0;
     this.stunTinted = false;
+    this.hijacked = false;
     this.homeX = x;
     this.homeY = y;
     this.chasing = false;
@@ -66,6 +71,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   /** Per-frame behaviour: swarm enemies head straight for the player, guards follow their aggro rules. */
   act(playerX: number, playerY: number, time: number) {
+    if (this.hijacked) return; // Rootkit steers it
     if (time < this.stunnedUntil) {
       if (!this.stunTinted) this.applyStunTint();
       return this.setVelocity(0, 0);
@@ -103,7 +109,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    */
   shotAngle(time: number, playerX: number, playerY: number): number | null {
     const ranged = this.stats.ranged;
-    if (!ranged) return null;
+    if (!ranged || this.hijacked) return null;
     if (time < this.stunnedUntil) {
       // Stunned: no shots, and the cooldown is held so it doesn't fire the instant the stun ends.
       if (this.nextShotAt >= 0) this.nextShotAt = Math.max(this.nextShotAt, this.stunnedUntil);
@@ -122,10 +128,22 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   /** Stuns for `ms` from game time `now`, scaled by the enemy's stunMultiplier. A shorter stun never cuts a longer one short. */
   stun(now: number, ms: number) {
+    if (this.hijacked) return;
     const duration = ms * (this.stats.stunMultiplier ?? 1);
     if (duration <= 0) return;
     this.stunnedUntil = Math.max(this.stunnedUntil, now + duration);
     this.applyStunTint();
+  }
+
+  /** Rootkit: switch sides (reddish tint while hijacked). */
+  setHijacked(on: boolean) {
+    this.hijacked = on;
+    if (on) {
+      this.stunTinted = false;
+      this.setTint(HIJACK_TINT).setTintMode(Phaser.TintModes.MULTIPLY);
+    } else {
+      this.clearTint();
+    }
   }
 
   private applyStunTint() {
@@ -155,7 +173,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.scene.time.delayedCall(60, () => {
         if (!this.active) return;
         this.clearTint();
-        if (this.stunTinted) this.applyStunTint(); // still stunned: back to the stun colour
+        if (this.hijacked) this.setTint(HIJACK_TINT).setTintMode(Phaser.TintModes.MULTIPLY);
+        else if (this.stunTinted) this.applyStunTint(); // still stunned: back to the stun colour
       });
     }
     return false;
@@ -165,6 +184,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Emitted while the enemy still has its position, so listeners (Virus) can spread from it.
     this.scene.events.emit(ENEMY_KILLED, this);
     this.infection = null;
+    this.hijacked = false;
     this.disableBody(true, true);
   }
 }

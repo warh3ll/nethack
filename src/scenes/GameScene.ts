@@ -15,6 +15,7 @@ import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { SynapticOverload } from '../entities/SynapticOverload';
 import { EmpShock } from '../entities/EmpShock';
+import { Rootkit } from '../entities/Rootkit';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
@@ -38,7 +39,7 @@ export class GameScene extends Phaser.Scene {
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
   private caches: DataCache[] = [];
-  private weapons: (Weapon | Virus | SynapticOverload | EmpShock)[] = [];
+  private weapons: (Weapon | Virus | SynapticOverload | EmpShock | Rootkit)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
@@ -122,7 +123,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.bullets, this.enemies, (a, b) => {
       const bullet = (a instanceof Bullet ? a : b) as Bullet;
       const enemy = (a instanceof Enemy ? a : b) as Enemy;
-      if (!bullet.active || !enemy.active) return;
+      if (!bullet.active || !enemy.active || enemy.hijacked) return; // hijacked enemies are allies
       if (bullet.tryHit(enemy) && enemy.takeDamage(bullet.damage)) {
         this.kills++;
         this.gainXp(enemy.stats.xp);
@@ -131,7 +132,7 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
       const enemy = e as Enemy;
-      if (enemy.stats.contactDamage <= 0) return; // outposts don't hurt on touch
+      if (enemy.stats.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
       if (!this.player.takeDamage(enemy.stats.contactDamage, this.gameTime)) return;
       this.objectives.onPlayerHit();
       // Black ICE: the enemy whose touch landed takes damage back.
@@ -350,12 +351,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** The runtime object for a damage skill, by its behavior. */
-  private createWeapon(skillId: string): Weapon | Virus | SynapticOverload | EmpShock {
+  private createWeapon(skillId: string): Weapon | Virus | SynapticOverload | EmpShock | Rootkit {
     const behavior = (SKILLS[skillId] as { behavior?: string }).behavior;
     const stats = this.progression.stats;
     if (behavior === 'virus') return new Virus(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'synaptic') return new SynapticOverload(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'emp') return new EmpShock(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
+    if (behavior === 'rootkit') return new Rootkit(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     return new Weapon(skillId, this.player, this.enemies, this.bullets, stats);
   }
 
