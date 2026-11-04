@@ -39,7 +39,9 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
     this.setTexture(`enemy-${typeKey}`);
     this.enableBody(true, x, y, true, true);
     this.body!.setCircle(this.stats.radius);
+    // Stationary: frozen in place (no integration, can't be pushed). Pooled bodies must be reset for other types.
     this.setImmovable(!!this.stats.stationary);
+    (this.body as Phaser.Physics.Arcade.Body).moves = !this.stats.stationary;
     this.clearTint();
   }
 
