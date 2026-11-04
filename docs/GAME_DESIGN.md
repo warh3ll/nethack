@@ -107,7 +107,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
   2. **Encryption Key:** A Goon guards a dossier containing an encryption key (see Goon in section 6) _(in game)_. **Decided:** the player takes the key by walking onto the dossier; killing the Goon is not required, so luring him away works. If he is still alive when the dossier is taken, he hunts the player regardless of distance until he is dead.
   3. **Brute-force:** the player attacks a location with **2-5 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
-  4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **75-125 px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
+  4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **300-400px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
 - **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
@@ -169,8 +169,8 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 **Objectives and run**
 
-- Does the compass show distance as well as direction? The answer reads "No, just distance", which is ambiguous: should it show only the distance (no arrow), or only the arrow (no distance)? Today it shows both.
+- Does the compass show distance as well as direction? The answer reads "No, just distance", which is ambiguous: should it show only the distance (no arrow), or only the arrow (no distance)? Today it shows both. Keep as today.
 
 **Economy and meta**
 
-- Extraction bonus: how many credits? Fine to leave until the shop prices exist; I will use a placeholder in `balance.ts` and you tune it.
+- Extraction bonus: how many credits? Fine to leave until the shop prices exist; I will use a placeholder in `balance.ts` and you tune it. 15 credits for successful extraction for now.
