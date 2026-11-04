@@ -26,7 +26,7 @@ Rules to check every feature against. Edit these first.
 1. Move around the map while skills fire automatically at enemies _(in game: arena only)_.
 2. Enemies spawn outside the screen and walk straight at the player; the spawn rate ramps up over the run _(in game)_.
 3. Explore the map to find the objectives. A compass always points to the closest unfinished objective (section 7).
-4. Along the way, find data caches scattered randomly on the map and open them for passive upgrades, damage skills or nethacking skills (section 5). Even permanent upgrades (very rare) or items.
+4. Along the way, find data caches scattered randomly on the map and open them for passive upgrades or damage skills (player can choose to not take the skill). Even permanent upgrades (very rare) or items.
 5. Players gain XP by killing enemies, leveling up provides upgrade choices (3 to begin, could possibly be raised by some upgrade). Player level has no cap.
 6. Complete the objectives (often by hacking, section 8). They can be done in any order.
 7. Finish all objectives to unlock extraction. The run clock is always visible.
