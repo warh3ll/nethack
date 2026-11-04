@@ -238,7 +238,7 @@ export class GameScene extends Phaser.Scene {
   private showUpgradePicker() {
     const level = this.progression.level - this.pendingLevelUps + 1;
     const choices = this.progression.rollUpgrades();
-    // A heal fallback has nothing to reroll; a reroll with nothing new to show is hidden too.
+    // The heal/credits fallback has nothing to reroll; a reroll with nothing new to show is hidden too.
     const rerolls = this.progression.canReroll() ? LEVELING.rerolls : 0;
     new LevelUpPicker(this, level, choices, rerolls, (current) => (this.progression.canReroll() ? this.progression.rollUpgrades(LEVELING.choices, current) : null), (u) => {
       if (u) this.applyUpgrade(u); // null = skipped: no reward
@@ -254,7 +254,11 @@ export class GameScene extends Phaser.Scene {
 
   private applyUpgrade(u: Upgrade) {
     if (u.type === 'heal') {
-      this.player.heal(u.amount);
+      this.player.heal(this.player.maxHp * u.fraction);
+      return;
+    }
+    if (u.type === 'credits') {
+      this.credits += u.amount;
       return;
     }
     const hpBefore = this.player.maxHp;

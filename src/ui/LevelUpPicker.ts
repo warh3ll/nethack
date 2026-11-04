@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { FALLBACK_UPGRADE, SKILLS, getSkillStats } from '../data/skills';
+import { FALLBACK_UPGRADES, SKILLS, getSkillStats } from '../data/skills';
 import type { Upgrade } from '../systems/Progression';
 
 const LABELS: Record<string, string> = {
@@ -47,7 +47,12 @@ function statLines(skillId: string, toLevel: number): string {
 
 function describe(u: Upgrade) {
   if (u.type === 'heal') {
-    return { tag: 'REPAIR', name: FALLBACK_UPGRADE.name, body: `${FALLBACK_UPGRADE.description}\n\n+${u.amount} HP`, color: 0xff2e88 };
+    const f = FALLBACK_UPGRADES.heal;
+    return { tag: 'REPAIR', name: f.name, body: `${f.description}\n\n+${Math.round(u.fraction * 100)}% max HP`, color: 0xff2e88 };
+  }
+  if (u.type === 'credits') {
+    const f = FALLBACK_UPGRADES.credits;
+    return { tag: 'PAYOUT', name: f.name, body: `${f.description}\n\n+${u.amount} credits`, color: 0xffd23e };
   }
   const s = SKILLS[u.skillId];
   const kind = s.kind === 'weapon' ? 'WEAPON' : 'PASSIVE';
