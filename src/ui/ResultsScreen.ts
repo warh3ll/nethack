@@ -10,6 +10,8 @@ export interface RunResult {
   objectivesTotal: number;
   /** Credits picked up this run. */
   credits: number;
+  /** Part of `credits` that came from the extraction bonus (shown on its own row). */
+  bonus: number;
   /** Items found this run. Stays 0 until caches and drops exist (PLAN section 4). */
   items: number;
 }
@@ -39,7 +41,8 @@ export class ResultsScreen {
       ['level reached', String(r.level)],
       ['kills', String(r.kills)],
       ['time', formatTime(r.timeMs)],
-      ['credits gained', String(r.credits)],
+      ['credits gained', String(r.credits - r.bonus)],
+      ...(r.bonus > 0 ? ([['extraction bonus', `+${r.bonus}`]] as [string, string][]) : []),
       ['items found', String(r.items)],
     ];
 

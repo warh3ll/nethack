@@ -137,6 +137,8 @@ export const CREDITS = {
   magnetSpeed: 420,
   /** A chip this close to the player is collected. */
   collectRadius: 20,
+  /** Credits added to the run's total on a successful extraction (placeholder, Henrik tunes). */
+  extractionBonus: 15,
 }
 
 export const STARTING_SKILL = 'autoPistol'
