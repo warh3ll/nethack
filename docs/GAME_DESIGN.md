@@ -91,7 +91,9 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - Deal contact damage.
 - **Drone:** basic swarm enemy _(in game)_.
 - **Goon:** miniboss-like brute with more health and damage than normal mobs; guards a dossier in the Encryption Key objective (section 7). Larger than other enemies, with a small health bar above him. Somewhat faster than a Drone, but clearly slower than the player. Once he is chasing he **shoots bullets towards the player** at intervals (the first shot comes one cooldown after the chase starts); his bullets hurt the player and are not blocked by other enemies. If the player takes the dossier while he is alive, he hunts the player regardless of distance until he is dead. Has an **aggro radius**: he stands guard until the player enters it, and returns to guarding if the player gets too far away. If the player shoots or damages him he chases regardless of distance.
-- **Difficulty over time (decided):** more dangerous enemy types join as the run clock advances. These are not defined yet.
+- **Marksman:** ranged swarm enemy _(in game)_. Walks toward the player only until it is within 250 px, then stops and shoots bullets that hurt the player. Has slightly less HP and damage than a Drone.
+- **Spawn pool (decided):** all swarm enemies share one spawn pool. Each spawn rolls once, so a Marksman spawning means no Drone spawns in its place. Harder enemies have a chance that grows with the run clock. Marksman: 5% at the start, +1% every 30 seconds. Numbers live in `balance.ts` (`SPAWNING.specialEnemies`).
+- **Difficulty over time (decided):** more dangerous enemy types join as the run clock advances, using the spawn pool above. Only the Marksman is defined so far.
 - TBD: further enemy types, elites.
 - Enemies can drop credit chips, tougher enemies will drop more credits. Credits are picked up automatically within a magnet radius. **Values (decided, placeholder):** Drone 1 credit, Goon 5 credits. To be refined later; they live in `balance.ts`.
 

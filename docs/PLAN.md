@@ -53,6 +53,8 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Goon miniboss: large, health bar, aggro radius, returns to guard, chases when damaged, shoots at the player, hunts forever once the dossier is taken (s6)
 - [ ] Enemy difficulty scaling with the run clock (s6)
 - [ ] New dangerous enemy types joining over time (designs TBD) (s6)
+  - [x] Marksman: ranged swarm enemy, holds at 250 px and shoots; joins the shared spawn pool at 5% chance, +1% every 30 s (`SPAWNING.specialEnemies`)
+  - [ ] Further types (TBD)
 
 ## 6. More objective types
 

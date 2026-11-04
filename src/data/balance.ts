@@ -43,6 +43,8 @@ export interface EnemyType {
     /** How far a bullet flies, and how close the player must be for the enemy to shoot. */
     range: number
     cooldownMs: number
+    /** Swarm enemies only: stop moving once within `range` of the player instead of closing in. */
+    holdAtRange?: boolean
   }
 }
 
@@ -56,6 +58,18 @@ export const ENEMIES: Record<string, EnemyType> = {
     creditChance: 0.1,
     radius: 11,
     color: 0xff2e88,
+  },
+  // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
+  marksman: {
+    hp: 8,
+    speed: 70,
+    contactDamage: 6,
+    xp: 2,
+    credits: 2,
+    creditChance: 0.1,
+    radius: 11,
+    color: 0xffd62e,
+    ranged: { damage: 6, speed: 260, range: 250, cooldownMs: 2000, holdAtRange: true },
   },
   // Miniboss that guards the dossier in the Encryption Key objective. Not part of the random swarm.
   goon: {
@@ -98,7 +112,14 @@ export const SPAWNING = {
   spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
+  /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
   enemyType: 'drone',
+  /**
+   * Harder enemies sharing the same spawn pool: each spawn rolls these in order, and if none hits it
+   * is a plain `enemyType`. The chance of each is `startChance` plus `chanceStep` for every
+   * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...).
+   */
+  specialEnemies: [{ type: 'marksman', startChance: 0.05, chanceStep: 0.01, stepSeconds: 30 }],
 }
 
 /** Credit chips dropped by enemies. How many credits each enemy type drops is `credits` in ENEMIES. */
