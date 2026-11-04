@@ -73,7 +73,7 @@ Rules to check every feature against. Edit these first.
 | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
 | Auto-Pistol  | damage  | Fires at the nearest enemy; gains pierce and double shot with levels                                                                                                                                                                                                                             | in game |
 | Virus        | damage  | Hacking weapon. Infects an enemy within 400 range for slow damage over time; when an infected enemy dies it spreads to another enemy within 200 range. Strong against dense swarms. Levels raise the damage over time and slightly raise infection range; levels 4-5 spread to up to two enemies | in game |
-| Railgun      | damage  | Fires superfast shots with a 3 second cooldown between each, pierces enemies along the way, targets the highest HP enemy within its long range, cannot shoot enemies within 75px | in game |
+| Railgun      | damage  | Fires superfast shots with a 3 second cooldown between each, pierces enemies along the way, targets the highest HP enemy within its long range, cannot shoot enemies within 75px                                                                                                                 | in game |
 | TBD          | damage  |                                                                                                                                                                                                                                                                                                  |         |
 | TBD          | damage  |                                                                                                                                                                                                                                                                                                  |         |
 | TBD          | damage  |                                                                                                                                                                                                                                                                                                  |         |
@@ -176,3 +176,8 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 **Economy and meta**
 
 - Extraction bonus: how many credits? Fine to leave until the shop prices exist; It lives in `balance.ts` and you tune it. 15 credits for successful extraction for now.
+
+## 14. Difficulty settings
+
+- Under a future Options menu we should have a few things where players can customize their experience
+  - One is a choice to freeze time completely while inputing hacks, for players who struggle to stay alive while typing
