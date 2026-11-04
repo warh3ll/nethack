@@ -12,6 +12,10 @@ export interface PlayerStats {
   maxHp: number
   /** HP regenerated per second. */
   hpRegenPerSec: number
+  /** Flat damage taken off every hit the player receives. */
+  damageReduction: number
+  /** Damage dealt back to an enemy whose touch hurts the player. */
+  retaliationDamage: number
   moveSpeed: number
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number
@@ -41,6 +45,8 @@ export class Progression {
   readonly stats: PlayerStats = {
     maxHp: 0,
     hpRegenPerSec: 0,
+    damageReduction: 0,
+    retaliationDamage: 0,
     moveSpeed: 0,
     damageMult: 1,
   }
@@ -140,19 +146,23 @@ export class Progression {
 
   /** Re-sums every passive bonus from scratch (never adjusted incrementally). */
   recomputeStats() {
-    let maxHp = 0
+    let damageReduction = 0
+    let retaliation = 0
     let hpRegen = 0
     let moveSpeedPct = 0
     let damagePct = 0
     for (const [id, lvl] of this.skills) {
       if (SKILLS[id].kind !== 'passive') continue
       const p = getPassiveStats(id, lvl)
-      maxHp += p.damageReduction ?? 0
+      damageReduction += p.damageReduction ?? 0
+      retaliation += p.retaliationDamage ?? 0
       hpRegen += p.hpRegenPerSec ?? 0
       moveSpeedPct += p.moveSpeedPct ?? 0
       damagePct += p.damagePct ?? 0
     }
-    this.stats.maxHp = PLAYER.maxHp + maxHp
+    this.stats.maxHp = PLAYER.maxHp
+    this.stats.damageReduction = damageReduction
+    this.stats.retaliationDamage = retaliation
     this.stats.hpRegenPerSec = PLAYER.hpRegenPerSec + hpRegen
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100)
     this.stats.damageMult = 1 + damagePct / 100

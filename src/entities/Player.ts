@@ -94,7 +94,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   /** Returns true if damage was applied (false while invulnerable). */
   takeDamage(amount: number, now: number): boolean {
     if (now < this.invulnerableUntil || this.isDead) return false;
-    this.hp = Math.max(0, this.hp - amount);
+    this.hp = Math.max(0, this.hp - Math.max(PLAYER.minDamageTaken, amount - this.stats.damageReduction));
     this.invulnerableUntil = now + PLAYER.invulnerableMs;
     this.scene.tweens.add({ targets: this, alpha: 0.3, duration: 80, yoyo: true, repeat: 2 });
     return true;

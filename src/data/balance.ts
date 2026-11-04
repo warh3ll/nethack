@@ -14,6 +14,8 @@ export const PLAYER = {
   spriteScale: 2,
   /** Time after taking a hit during which the player can't be hit again. */
   invulnerableMs: 500,
+  /** Damage reduction (Firewall) can never bring a hit below this. */
+  minDamageTaken: 1,
   /** How long after a shot the player keeps the shooting pose. */
   shootingPoseMs: 350,
   /** Animation speed (frames per second; every sheet has 8 frames). */

@@ -128,8 +128,16 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
-      if ((e as Enemy).stats.contactDamage <= 0) return; // outposts don't hurt on touch
-      if (this.player.takeDamage((e as Enemy).stats.contactDamage, this.gameTime)) this.objectives.onPlayerHit();
+      const enemy = e as Enemy;
+      if (enemy.stats.contactDamage <= 0) return; // outposts don't hurt on touch
+      if (!this.player.takeDamage(enemy.stats.contactDamage, this.gameTime)) return;
+      this.objectives.onPlayerHit();
+      // Black ICE: the enemy whose touch landed takes damage back.
+      const back = this.progression.stats.retaliationDamage;
+      if (back > 0 && enemy.takeDamage(back)) {
+        this.kills++;
+        this.gainXp(enemy.stats.xp);
+      }
     });
 
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => {

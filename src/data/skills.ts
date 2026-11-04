@@ -42,9 +42,9 @@ export interface VirusStats {
  * (not the step from the previous level). Bonuses from all passives are added together.
  */
 export interface PassiveStats {
-  /** Damage dealt to enemies that hit the player. */
-  damage?: number
-  /** Flat extra max HP. */
+  /** Damage dealt back to an enemy that damages the player by touching them (once per hit that lands). */
+  retaliationDamage?: number
+  /** Flat damage taken off every hit the player receives (a hit never does less than PLAYER.minDamageTaken). */
   damageReduction?: number
   /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
   hpRegenPerSec?: number
@@ -289,7 +289,7 @@ export const SKILLS: Record<string, SkillData> = {
   firewall: {
     name: 'Firewall',
     kind: 'passive',
-    description: 'Reduces incoming damage.',
+    description: 'Reduces the damage of every hit you take.',
     color: 0x9aa7c7,
     levels: [
       { damageReduction: 1 },
@@ -300,7 +300,7 @@ export const SKILLS: Record<string, SkillData> = {
   healingNanites: {
     name: 'Healing Nanites',
     kind: 'passive',
-    description: 'Faster health regeneration.',
+    description: 'Nanites repair you over time. Faster health regeneration.',
     color: 0x5fe08a,
     levels: [
       { hpRegenPerSec: 0.5 },
@@ -326,9 +326,13 @@ export const SKILLS: Record<string, SkillData> = {
     name: 'Black ICE',
     kind: 'passive',
     description:
-      'Your internal ICE is now upgraded to retaliate against enemies that hit you',
-    color: 0xff9d2e,
-    levels: [{ damage: 4 }, { damage: 8 }, { damage: 12 }],
+      'Your internal ICE retaliates against enemies that hurt you by touch.',
+    color: 0x7a5cff,
+    levels: [
+      { retaliationDamage: 4 },
+      { retaliationDamage: 8 },
+      { retaliationDamage: 12 },
+    ],
   },
 }
 
