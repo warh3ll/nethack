@@ -13,6 +13,7 @@ import { Progression, type Upgrade } from '../systems/Progression';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
 import { ObjectiveMarker } from '../ui/ObjectiveMarker';
 import { ObjectivePanel } from '../ui/ObjectivePanel';
+import { ResultsScreen } from '../ui/ResultsScreen';
 import { SkillBar } from '../ui/SkillBar';
 import { TouchJoystick } from '../ui/TouchJoystick';
 
@@ -259,19 +260,16 @@ export class GameScene extends Phaser.Scene {
     this.gameOver = true;
     this.physics.pause();
     this.drawHud();
-    const cam = this.cameras.main;
-    const title = won ? 'EXTRACTION COMPLETE' : 'SYSTEM FAILURE';
-    this.add.rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.75).setOrigin(0).setScrollFactor(0).setDepth(199);
-    this.add
-      .text(cam.width / 2, cam.height / 2, `${title}\n\nlevel ${this.progression.level}   kills ${this.kills}\n\npress R or tap\nto reboot`, {
-        fontFamily: 'monospace',
-        fontSize: cam.width < 420 ? '20px' : '24px',
-        color: won ? '#5fe08a' : '#ff2e88',
-        align: 'center',
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(200);
+    new ResultsScreen(this, {
+      won,
+      level: this.progression.level,
+      kills: this.kills,
+      timeMs: this.elapsedMs,
+      objectivesDone: this.objectives.entries.filter((e) => e.done).length,
+      objectivesTotal: this.objectives.entries.length,
+      credits: 0, // TODO: credit chips (PLAN section 7)
+      items: 0, // TODO: caches and drops (PLAN section 4)
+    });
     this.joystick.release();
     this.pauseButton.setVisible(false);
     const restart = () => this.scene.restart();

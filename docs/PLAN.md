@@ -24,7 +24,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 ## 2. Run end
 - [x] Extraction point revealed after the last objective; compass switches to it (s7). - [x] "log out" typing prompt, then 3-2-1 countdown, then win (s7). Leaving the point cancels both (open question in the design doc)
 - [ ] Game-over on HP 0
-- [ ] Results screen: credits gained, items found, objectives completed, level reached (s7)
+- [x] Results screen: credits gained, items found, objectives completed, level reached (s7). Credits and items show 0 until credit chips (section 7) and caches (section 4) exist
 
 ## 3. Skills and level-ups
 - [ ] Uncapped player level with a gently rising XP curve (s5)
