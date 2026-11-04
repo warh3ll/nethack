@@ -95,7 +95,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - **Spawn pool (decided):** all swarm enemies share one spawn pool. Each spawn rolls once, so a Marksman spawning means no Drone spawns in its place. Harder enemies have a chance that grows with the run clock. Marksman: 5% at the start, +1% every 30 seconds. Numbers live in `balance.ts` (`SPAWNING.specialEnemies`).
 - **Difficulty over time (decided):** more dangerous enemy types join as the run clock advances, using the spawn pool above. Only the Marksman is defined so far.
 - TBD: further enemy types, elites.
-- Enemies can drop credit chips, tougher enemies will drop more credits. Credits are picked up automatically within a magnet radius. **Values (decided, placeholder):** Drone 1 credit, Goon 5 credits. To be refined later; they live in `balance.ts`.
+- Enemies can drop credit chips, tougher enemies will drop more credits. Credits are picked up automatically within a magnet radius. **Values (decided):** Drone 1 credit, Goon 5 credits. To be refined later; they live in `balance.ts`.
 
 ## 7. Run structure and objectives
 
@@ -146,13 +146,13 @@ Some objectives require hacking the ICE protecting a server or objective.
 ## 10. Setting, art and audio
 
 - **Setting:** cyberpunk.
-- **Art direction:** TBD. Placeholder shapes are generated in `BootScene.ts`; real assets will replace them under the same texture keys.
+- **Art direction:** TBD. Textures are generated or loaded in `BootScene.ts`; new assets can replace them under the same texture keys.
 - **Audio:** TBD.
 - **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills (6 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two placeholder items per slot** to test equip/unequip/swap.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 11 skills (6 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two items per slot** to test equip/unequip/swap.
 
 **Out of scope for now:** TBD (e.g. multiple characters, multiplayer, mobile). Meta progression is in scope.
 
@@ -175,4 +175,4 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 **Economy and meta**
 
-- Extraction bonus: how many credits? Fine to leave until the shop prices exist; I will use a placeholder in `balance.ts` and you tune it. 15 credits for successful extraction for now.
+- Extraction bonus: how many credits? Fine to leave until the shop prices exist; It lives in `balance.ts` and you tune it. 15 credits for successful extraction for now.
