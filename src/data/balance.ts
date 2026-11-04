@@ -10,6 +10,8 @@ export const PLAYER = {
   hpRegenPerSec: 0.1,
   moveSpeed: 200,
   radius: 14,
+  /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
+  spriteScale: 2,
   /** Time after taking a hit during which the player can't be hit again. */
   invulnerableMs: 500,
   /** How long after a shot the player keeps the shooting pose. */

@@ -21,8 +21,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.hp = stats.maxHp;
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    // Hit circle centred on the 48x64 frame.
-    this.body!.setCircle(PLAYER.radius, FRAME.width / 2 - PLAYER.radius, FRAME.height / 2 - PLAYER.radius);
+    this.setScale(PLAYER.spriteScale);
+    // Hit circle (world pixels) centred on the frame; the offset is in unscaled frame pixels.
+    const k = PLAYER.radius / PLAYER.spriteScale;
+    this.body!.setCircle(PLAYER.radius, FRAME.width / 2 - k, FRAME.height / 2 - k);
     this.setCollideWorldBounds(true);
     this.setDepth(10);
     this.keys = scene.input.keyboard!.addKeys('up,down,left,right,w,a,s,d') as Player['keys'];
