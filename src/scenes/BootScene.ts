@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { ENEMIES, PLAYER } from '../data/balance';
+import { ENEMIES } from '../data/balance';
 import { SKILLS } from '../data/skills';
+import { loadPlayerSheets, createPlayerAnims } from '../data/playerAnims';
 
 /**
  * Creates placeholder textures from code so the game runs with zero art.
@@ -15,16 +16,12 @@ export class BootScene extends Phaser.Scene {
   preload() {
     this.load.setPath('assets/parallax/');
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
+    loadPlayerSheets(this);
   }
 
   create() {
     const g = this.add.graphics();
-
-    // Player: cyan circle with a "nose" so facing is readable.
-    const r = PLAYER.radius;
-    g.fillStyle(0x2ef2ff).fillCircle(r, r, r);
-    g.fillStyle(0xffffff).fillCircle(r * 1.6, r, r * 0.3);
-    g.generateTexture('player', r * 2, r * 2).clear();
+    createPlayerAnims(this);
 
     for (const [key, e] of Object.entries(ENEMIES)) {
       g.fillStyle(e.color).fillRect(0, 0, e.radius * 2, e.radius * 2);

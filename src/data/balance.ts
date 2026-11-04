@@ -10,8 +10,17 @@ export const PLAYER = {
   hpRegenPerSec: 0.1,
   moveSpeed: 200,
   radius: 14,
+  /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
+  spriteScale: 2,
   /** Time after taking a hit during which the player can't be hit again. */
   invulnerableMs: 500,
+  /** How long after a shot the player keeps the shooting pose. */
+  shootingPoseMs: 350,
+  /** Animation speed (frames per second; every sheet has 8 frames). */
+  animFps: 12,
+  /** Death animation speed, and how long the last frame is held before the results screen. */
+  deathFps: 8,
+  deathHoldMs: 700,
 }
 
 /** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */

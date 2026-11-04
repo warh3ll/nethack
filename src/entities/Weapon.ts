@@ -11,7 +11,7 @@ export class Weapon {
 
   constructor(
     readonly skillId: string,
-    private owner: Phaser.GameObjects.Components.Transform,
+    private owner: Phaser.GameObjects.Components.Transform & { noteShot?(angle: number): void },
     private enemies: Phaser.Physics.Arcade.Group,
     private bullets: Phaser.Physics.Arcade.Group,
     private playerStats: PlayerStats,
@@ -29,6 +29,7 @@ export class Weapon {
     this.nextFireAt = time + s.cooldownMs;
 
     const base = Phaser.Math.Angle.Between(this.owner.x, this.owner.y, target.x, target.y);
+    this.owner.noteShot?.(base);
     const spread = Phaser.Math.DegToRad(s.spreadDeg);
     for (let i = 0; i < s.projectiles; i++) {
       const offset = (i - (s.projectiles - 1) / 2) * spread;
