@@ -51,7 +51,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 ## 6. More objective types
 - [x] Encryption Key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
 - [ ] Brute-force: 2-5 destructible outposts that spawn drones, then a pick-up secrets object (s7)
-- [ ] Connect servers: grab a cable with E, attach it to a server 75-125 px away by holding E for 2.5 s (damage resets), with a cable line drawn (s7)
+- [x] Connect servers: grab a cable with E, attach it to a server 300-400 px away (cable max 600 px) by holding E for 2.5 s (damage resets), with a cable line drawn (s7). The second server is placed randomly around the first; the cable stays in hand once grabbed
 
 ## 7. Economy and meta
 - [x] Credit chip drops from enemies with magnet pickup: Drone 1, Goon 5 (placeholders in `balance.ts`) (s6, s9)

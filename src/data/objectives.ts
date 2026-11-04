@@ -5,7 +5,7 @@
 
 export interface ObjectiveDef {
   id: string
-  type: 'hackServer' | 'encryptionKey'
+  type: 'hackServer' | 'encryptionKey' | 'connectServers'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
   /** World position, relative to the player's start (0, 0). */
@@ -19,7 +19,25 @@ export const RUN_OBJECTIVES: ObjectiveDef[] = [
   { id: 'hack2', type: 'hackServer', name: 'Hack server 2', x: -1100, y: -900 },
   { id: 'hack3', type: 'hackServer', name: 'Hack server 3', x: 1500, y: 900 },
   { id: 'key1', type: 'encryptionKey', name: 'Encryption key', x: -900, y: 800 },
+  // x, y is the first server (where the cable is grabbed); the second one is placed randomly nearby.
+  { id: 'connect1', type: 'connectServers', name: 'Connect servers', x: 400, y: 1500 },
 ]
+
+/** Connect servers objective: grab a cable (E) at the first server, hold E at the second to attach it. */
+export const CONNECT_SERVERS = {
+  /** The second server is placed this far from the first, in a random direction. */
+  gap: { min: 300, max: 400 },
+  /** Press E within this distance of the first server to grab the cable. */
+  grabRadius: 60,
+  /** Hold E within this distance of the second server to attach it. */
+  attachRadius: 60,
+  /** How long E must be held. Taking damage resets it. */
+  attachMs: 2500,
+  /** With the cable in hand the player can't get farther than this from the first server (they can still circle it). */
+  maxCableLength: 600,
+  /** Pressing E away from the second server drops the cable; this is how long it takes to wind back. */
+  unwindMs: 600,
+}
 
 /** Encryption Key objective: a Goon stands guard next to a dossier; walking onto the dossier takes the key. */
 export const ENCRYPTION_KEY = {
