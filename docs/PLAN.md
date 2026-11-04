@@ -67,6 +67,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] Audio (s10)
 - [ ] Balance pass on `src/data/`
 - [ ] itch.io HTML5 build and upload (CLAUDE.md)
+- [x] GitHub Pages deploy on push to main, for playtesting (`.github/workflows/pages.yml`)
 
 ## Suggested order
 1 (map, clock, compass) -> 2 (finishing a run) -> 7 (credits, menu, shop) -> 3 (slots, passives) -> 4 (caches) -> 5/6 (Goon and objective types) -> 8.
