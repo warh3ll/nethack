@@ -217,6 +217,11 @@ export const LEVELING = {
   xpIncreasePerLevel: 12,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
+  /**
+   * How many of those choices should be new skills; the rest are upgrades to owned skills (3 choices, 1 new = 2 upgrades + 1 new).
+   * If one group runs out (early game: few owned skills; late game: slots full), the other fills the gap.
+   */
+  newSkillChoices: 1,
   /** Rerolls of the choices per level-up. Skipping is always allowed but gives no reward. */
   rerolls: 1,
 }
