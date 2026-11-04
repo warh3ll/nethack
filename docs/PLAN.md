@@ -16,7 +16,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 
 ## 1. Run foundation
 
-- [x] Large bounded map (13000x13000, `MAP` in `balance.ts`) with a visible boundary wall; 65 s edge to edge at normal speed (s7)
+- [x] Large bounded map (10000x10000, `MAP` in `balance.ts`) with a visible boundary wall; 50 s edge to edge at normal speed (s7)
 - [ ] Camera and background so movement across the map is readable
 - [ ] Run clock in the HUD (elapsed time only) (s7)
 - [ ] HUD: remove the enemies counter; add credits and items-found counters once those exist (s10)
