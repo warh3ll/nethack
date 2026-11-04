@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ENEMIES, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
+import { CREDITS, ENEMIES, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -32,6 +32,7 @@ export class GameScene extends Phaser.Scene {
   private progression!: Progression;
   private weapons: (Weapon | Virus)[] = [];
   private hud!: Phaser.GameObjects.Text;
+  private clockText!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
   private hpBar!: Phaser.GameObjects.Graphics;
   private xpBar!: Phaser.GameObjects.Graphics;
@@ -131,6 +132,14 @@ export class GameScene extends Phaser.Scene {
       .text(16, 40, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff', wordWrap: { width: this.scale.width - 80 } })
       .setScrollFactor(0)
       .setDepth(100);
+
+    // Run clock, always visible, top centre.
+    this.clockText = this.add
+      .text(this.scale.width / 2, 12, '0:00', { fontFamily: 'monospace', fontSize: '28px', color: '#ffffff', stroke: '#05060a', strokeThickness: 4 })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(100);
+    this.placeClock(this.scale.width);
 
     this.skillBar = new SkillBar(this, this.progression);
 
@@ -331,9 +340,9 @@ export class GameScene extends Phaser.Scene {
 
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
-    const live = this.enemies.countActive(true);
     const lv = this.progression.isMaxLevel ? 'MAX' : this.progression.level;
-    this.hud.setText(`lv ${lv}   ${time}   kills ${this.kills}   credits ${this.credits}   enemies ${live}`);
+    this.clockText.setText(time);
+    this.hud.setText(`lv ${lv}   kills ${this.kills}   credits ${this.credits}`);
     this.objectivePanel.update();
     this.objectiveMarker.update();
   }
@@ -341,6 +350,8 @@ export class GameScene extends Phaser.Scene {
   private endRun(won = false) {
     this.gameOver = true;
     this.physics.pause();
+    const bonus = won ? CREDITS.extractionBonus : 0;
+    this.credits += bonus;
     this.drawHud();
     new ResultsScreen(this, {
       won,
@@ -350,6 +361,7 @@ export class GameScene extends Phaser.Scene {
       objectivesDone: this.objectives.entries.filter((e) => e.done).length,
       objectivesTotal: this.objectives.entries.length,
       credits: this.credits,
+      bonus,
       items: 0, // TODO: caches and drops (PLAN section 4)
     });
     this.joystick.release();
@@ -413,8 +425,15 @@ export class GameScene extends Phaser.Scene {
     return button;
   }
 
+  /** Centred on wide screens; on phones it sits left of the pause button so it clears the HP bar. */
+  private placeClock(width: number) {
+    const narrow = width < 600;
+    this.clockText.setFontSize(narrow ? 22 : 28).setOrigin(narrow ? 1 : 0.5, 0).setX(narrow ? width - 64 : width / 2);
+  }
+
   private onResize(size: Phaser.Structs.Size) {
     this.pauseButton.setPosition(size.width - 52, 12);
     this.hud.setWordWrapWidth(size.width - 80);
+    this.placeClock(size.width);
   }
 }

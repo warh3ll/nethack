@@ -30,10 +30,10 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 Roughly in the order I'd do them. Each is a few sessions' worth at most and leaves the game playable.
 
 ### A. HUD and run polish (small, do first)
-- [ ] Run clock shown as its own HUD element (it's currently in the one-line text with `lv`, `kills`, `credits`, `enemies`) (s7, s10)
-- [ ] Remove the enemies counter; credits counter stays; items-found counter once caches exist (s10)
-- [ ] Extraction bonus credits on win (15, placeholder in `balance.ts`) added to the run's credits (s9)
-- [ ] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
+- [x] Run clock shown as its own HUD element (it's currently in the one-line text with `lv`, `kills`, `credits`, `enemies`) (s7, s10)
+- [x] Remove the enemies counter; credits counter stays; items-found counter once caches exist (s10)
+- [x] Extraction bonus credits on win (15, placeholder in `balance.ts`) added to the run's credits (s9)
+- [x] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
 - [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
