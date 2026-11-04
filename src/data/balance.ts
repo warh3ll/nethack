@@ -6,6 +6,8 @@
 
 export const PLAYER = {
   maxHp: 100,
+  /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
+  hpRegenPerSec: 0.1,
   moveSpeed: 200,
   radius: 14,
   /** Time after taking a hit during which the player can't be hit again. */

@@ -5,6 +5,8 @@ import { FALLBACK_UPGRADES, SKILLS, getPassiveStats, maxSkillLevel } from '../da
 /** The player's live stats: base values from balance.ts plus all passive bonuses. */
 export interface PlayerStats {
   maxHp: number;
+  /** HP regenerated per second. */
+  hpRegenPerSec: number;
   moveSpeed: number;
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number;
@@ -31,7 +33,7 @@ export class Progression {
   /** Owned skills (weapons and passives) and their levels, in the order they were picked up. */
   readonly skills = new Map<string, number>();
   /** Shared by reference with the player and weapons; rewritten in place by recomputeStats(). */
-  readonly stats: PlayerStats = { maxHp: 0, moveSpeed: 0, damageMult: 1 };
+  readonly stats: PlayerStats = { maxHp: 0, hpRegenPerSec: 0, moveSpeed: 0, damageMult: 1 };
 
   constructor(startingSkill: string) {
     this.skills.set(startingSkill, 1);
@@ -113,16 +115,19 @@ export class Progression {
   /** Re-sums every passive bonus from scratch (never adjusted incrementally). */
   recomputeStats() {
     let maxHp = 0;
+    let hpRegen = 0;
     let moveSpeedPct = 0;
     let damagePct = 0;
     for (const [id, lvl] of this.skills) {
       if (SKILLS[id].kind !== 'passive') continue;
       const p = getPassiveStats(id, lvl);
       maxHp += p.maxHp ?? 0;
+      hpRegen += p.hpRegenPerSec ?? 0;
       moveSpeedPct += p.moveSpeedPct ?? 0;
       damagePct += p.damagePct ?? 0;
     }
     this.stats.maxHp = PLAYER.maxHp + maxHp;
+    this.stats.hpRegenPerSec = PLAYER.hpRegenPerSec + hpRegen;
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100);
     this.stats.damageMult = 1 + damagePct / 100;
   }

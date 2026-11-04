@@ -40,7 +40,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
-- [ ] Replace the `[PH]` passives with the real 5, including Health Regen and a base slow player regen (s4, s5)
+- [ ] Replace the `[PH]` passives with the real 5, including Health Regen (s4, s5). Base regen (0.1 HP/s) and a `[PH] Nanite Repair` passive are in; the real Health Regen passive is still to do
 - [ ] Remaining damage skills: 6 are planned, 3 exist (Auto-Pistol, Virus, Railgun) plus the `[PH] Scatter Gun`. Designs TBD with Henrik, so this is a design session first (s5)
 - [ ] Per-skill level cap and upgrade rows for every skill (s5)
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)

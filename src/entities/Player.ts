@@ -30,7 +30,8 @@ export class Player extends Phaser.Physics.Arcade.Image {
   }
 
   /** `stick` is the touch joystick (length 0..1); it's used when no movement key is held. */
-  update(stick?: Phaser.Math.Vector2) {
+  update(stick?: Phaser.Math.Vector2, deltaMs = 0) {
+    if (!this.isDead) this.heal((this.stats.hpRegenPerSec * deltaMs) / 1000);
     const k = this.keys;
     const letters = !this.typingLock;
     const dir = new Phaser.Math.Vector2(
