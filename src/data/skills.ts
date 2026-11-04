@@ -20,6 +20,22 @@ export interface WeaponStats {
   range: number
 }
 
+/** Stats for the Virus: infects enemies, deals damage over time, spreads on death. */
+export interface VirusStats {
+  /** Damage per second to each infected enemy. */
+  dps: number
+  /** How often (ms) a new enemy is infected. */
+  cooldownMs: number
+  /** Max distance from the player to infect an enemy. */
+  infectRange: number
+  /** Max distance from a dying infected enemy to the enemies it spreads to. */
+  spreadRange: number
+  /** How many nearby enemies get infected when an infected enemy dies. */
+  spreadCount: number
+  /** How often (ms) the damage over time is applied. */
+  tickMs: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -43,7 +59,15 @@ interface SkillBase {
 
 export interface WeaponSkill extends SkillBase {
   kind: 'weapon'
+  behavior?: 'gun'
   levels: WeaponStats[]
+}
+
+/** Hacking-type weapon: no projectiles, see entities/Virus.ts. */
+export interface VirusSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'virus'
+  levels: VirusStats[]
 }
 
 export interface PassiveSkill extends SkillBase {
@@ -51,7 +75,7 @@ export interface PassiveSkill extends SkillBase {
   levels: PassiveStats[]
 }
 
-export type SkillData = WeaponSkill | PassiveSkill
+export type SkillData = WeaponSkill | VirusSkill | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
   autoPistol: {
@@ -105,6 +129,21 @@ export const SKILLS: Record<string, SkillData> = {
         spreadDeg: 8,
         range: 650,
       },
+    ],
+  },
+
+  virus: {
+    name: 'Virus',
+    kind: 'weapon',
+    behavior: 'virus',
+    description: 'Infects an enemy for slow damage over time. When it dies, the infection spreads.',
+    color: 0x5fe08a,
+    levels: [
+      { dps: 2, cooldownMs: 1500, infectRange: 400, spreadRange: 200, spreadCount: 1, tickMs: 250 },
+      { dps: 3, cooldownMs: 1500, infectRange: 420, spreadRange: 200, spreadCount: 1, tickMs: 250 },
+      { dps: 4, cooldownMs: 1500, infectRange: 440, spreadRange: 200, spreadCount: 1, tickMs: 250 },
+      { dps: 5.5, cooldownMs: 1500, infectRange: 460, spreadRange: 200, spreadCount: 2, tickMs: 250 },
+      { dps: 7, cooldownMs: 1500, infectRange: 480, spreadRange: 200, spreadCount: 2, tickMs: 250 },
     ],
   },
 
@@ -181,7 +220,7 @@ export const FALLBACK_UPGRADE = {
 export function getSkillStats(
   id: string,
   level: number,
-): WeaponStats | PassiveStats {
+): WeaponStats | VirusStats | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
@@ -189,9 +228,16 @@ export function getSkillStats(
 }
 
 export function getWeaponStats(id: string, level: number): WeaponStats {
-  if (SKILLS[id]?.kind !== 'weapon')
-    throw new Error(`"${id}" is not a weapon skill`)
+  const skill = SKILLS[id]
+  if (skill?.kind !== 'weapon' || skill.behavior === 'virus')
+    throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
+}
+
+export function getVirusStats(id: string, level: number): VirusStats {
+  if (!(SKILLS[id]?.kind === 'weapon' && (SKILLS[id] as VirusSkill).behavior === 'virus'))
+    throw new Error(`"${id}" is not a virus skill`)
+  return getSkillStats(id, level) as VirusStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {

@@ -6,6 +6,7 @@ import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
+import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
@@ -23,7 +24,7 @@ export class GameScene extends Phaser.Scene {
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
   private progression!: Progression;
-  private weapons: Weapon[] = [];
+  private weapons: (Weapon | Virus)[] = [];
   private background!: Phaser.GameObjects.TileSprite;
   private hud!: Phaser.GameObjects.Text;
   private hpBar!: Phaser.GameObjects.Graphics;
@@ -199,10 +200,20 @@ export class GameScene extends Phaser.Scene {
     // Extra max HP from a passive comes with that much HP, so it isn't an empty bar.
     if (this.player.maxHp > hpBefore) this.player.heal(this.player.maxHp - hpBefore);
 
-    if (SKILLS[u.skillId].kind !== 'weapon') return;
+    const skill = SKILLS[u.skillId];
+    if (skill.kind !== 'weapon') return;
     const existing = this.weapons.find((w) => w.skillId === u.skillId);
     if (existing) existing.level = u.toLevel;
-    else this.weapons.push(new Weapon(u.skillId, this.player, this.enemies, this.bullets, this.progression.stats));
+    else if (skill.behavior === 'virus') {
+      this.weapons.push(new Virus(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onInfectionKill(e)));
+    } else {
+      this.weapons.push(new Weapon(u.skillId, this.player, this.enemies, this.bullets, this.progression.stats));
+    }
+  }
+
+  private onInfectionKill(enemy: Enemy) {
+    this.kills++;
+    this.gainXp(enemy.stats.xp);
   }
 
   private spawnEnemies(time: number) {

@@ -28,7 +28,7 @@ export class BootScene extends Phaser.Scene {
     }
 
     for (const [key, s] of Object.entries(SKILLS)) {
-      if (s.kind !== 'weapon') continue;
+      if (s.kind !== 'weapon' || s.behavior === 'virus') continue;
       g.fillStyle(s.color).fillRect(0, 0, 10, 4);
       g.generateTexture(`bullet-${key}`, 10, 4).clear();
     }
