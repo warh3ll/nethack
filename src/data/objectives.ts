@@ -22,6 +22,8 @@ export const RUN_GENERATION = {
   count: { min: 3, max: 5 },
   /** The same objective type can occur at most this many times in one run. */
   maxPerType: 2,
+  /** Types every run must contain at least once (hacking is the core of the game). */
+  required: ['hackServer'] as ObjectiveDef['type'][],
   /** Name in the objective list; a " 1" / " 2" is added when a type occurs twice. */
   names: {
     hackServer: 'Hack server',

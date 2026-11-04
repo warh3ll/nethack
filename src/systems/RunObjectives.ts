@@ -10,6 +10,12 @@ export function generateRunObjectives(): ObjectiveDef[] {
   const pool = TYPES.flatMap((t) => Array<ObjectiveDef['type']>(g.maxPerType).fill(t));
   const count = Math.min(Phaser.Math.Between(g.count.min, g.count.max), pool.length);
   const types = Phaser.Utils.Array.Shuffle(pool).slice(0, count);
+  // Guarantee the required types: swap in a random slot not already holding a required type.
+  for (const req of g.required) {
+    if (types.includes(req)) continue;
+    const free = types.map((_, i) => i).filter((i) => !g.required.includes(types[i]));
+    types[Phaser.Utils.Array.GetRandom(free)] = req;
+  }
 
   const placed: { x: number; y: number }[] = [];
   const seen: Partial<Record<ObjectiveDef['type'], number>> = {};
