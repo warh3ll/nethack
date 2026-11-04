@@ -173,6 +173,8 @@ export const CACHES = {
   minSpacing: 1000,
   /** Radius of the pulsing ring drawn around a cache. */
   ringRadius: 40,
+  /** Press E (or tap the prompt) within this distance of a cache to open it. */
+  openRadius: 80,
 }
 
 export const STARTING_SKILL = 'autoPistol'

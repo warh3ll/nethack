@@ -100,6 +100,16 @@ export class Progression {
     return [...fresh, ...repeats].slice(0, count);
   }
 
+  /**
+   * What a data cache holds: one random entry from the same pool as level-ups, so the slot rules apply.
+   * With nothing useful in the pool it holds credits instead.
+   */
+  rollCacheContents(): Upgrade {
+    const options = this.offerPool();
+    if (options.length === 0) return { type: 'credits', amount: FALLBACK_UPGRADES.credits.amount };
+    return Phaser.Utils.Array.GetRandom(options);
+  }
+
   /** True when a reroll could show something different (more options than fit on one screen). */
   canReroll(count = LEVELING.choices): boolean {
     return this.offerPool().length > count;
