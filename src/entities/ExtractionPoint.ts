@@ -56,7 +56,7 @@ export class ExtractionPoint {
     this.countdown.setText('');
     this.title.setPosition(x, py + 22).setText('CONFIRM LOG OUT');
     this.base.setText(logoutText).setColor(this.scene.time.now < this.errorUntil ? '#ff2e88' : '#ffffff');
-    this.typed.setText(logoutText.slice(0, typedCount));
+    this.typed.setText(logoutText.slice(0, typedCount).replace(/ /g, '_'));
     const left = x - this.base.width / 2;
     this.base.setPosition(left, py);
     this.typed.setPosition(left, py);

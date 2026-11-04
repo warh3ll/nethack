@@ -86,7 +86,7 @@ export class HackServer {
       this.typed.setText('');
     } else {
       this.base.setText(p.text);
-      this.typed.setText(p.text.slice(0, p.typed));
+      this.typed.setText(p.text.slice(0, p.typed).replace(/ /g, '_'));
     }
     this.base.setColor(this.scene.time.now < this.errorUntil ? '#ff2e88' : '#ffffff');
     const left = x - this.base.width / 2;
