@@ -8,81 +8,76 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 
 - [x] Player movement, health, invulnerability window, pause (s4)
 - [x] Enemy swarm (Drone) with pooling and ramping spawn rate (s6)
-- [x] Auto-Pistol and Virus damage skills (s5)
+- [x] Auto-Pistol, Virus and Railgun damage skills (s5)
 - [x] XP from kills and level-up picker (s5)
 - [x] Hack server objective with prompts: IP, password, smack, inject, PIN (s7, s8)
 - [x] Objective panel and objective marker (s7)
-- [x] Skill bar (s5)
+- [x] Skill bar, split into 5 active + 5 passive slots (s5)
+- [x] Large bounded map (10000x10000) with visible wall, camera follow and background grid (s7)
+- [x] Compass to the closest unfinished objective; objectives in any order (s7)
+- [x] Random per-run objectives, 3-5, max two of a type, at least one hack, one near the start (s7)
+- [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7)
+- [x] Extraction point, "log out" prompt, countdown, win (s7)
+- [x] Game over on HP 0, results screen on win and death (s7)
+- [x] Goon miniboss and Marksman ranged enemy with a shared, time-scaled spawn pool (s6)
+- [x] Credit chip drops with magnet pickup (s6, s9)
+- [x] Passive stat system, re-summed from scratch, with four placeholder passives (`[PH]` in `skills.ts`) (s5)
+- [x] Fallback level-up choice (heal) when nothing is useful (s5)
+- [x] GitHub Pages playtest deploy (`.github/workflows/pages.yml`)
 
-## 1. Run foundation
+## Work packages (suggested next)
 
-- [x] Large bounded map (10000x10000, `MAP` in `balance.ts`) with a visible boundary wall; 50 s edge to edge at normal speed (s7)
-- [ ] Camera and background so movement across the map is readable
-- [ ] Run clock in the HUD (elapsed time only) (s7)
-- [ ] HUD: remove the enemies counter; add credits and items-found counters once those exist (s10)
-- [x] Compass pointing at the closest unfinished objective (s7)
-- [x] Random objective placement per run, 3-5 objectives, max two of one type (s7). Positions are random on the whole map, `edgeMargin` away from the wall; one objective is always within `firstObjectiveMaxDist` of the start
-- [x] Objectives completable in any order (s7)
+Roughly in the order I'd do them. Each is a few sessions' worth at most and leaves the game playable.
 
-## 2. Run end
+### A. HUD and run polish (small, do first)
+- [ ] Run clock shown as its own HUD element (it's currently in the one-line text with `lv`, `kills`, `credits`, `enemies`) (s7, s10)
+- [ ] Remove the enemies counter; credits counter stays; items-found counter once caches exist (s10)
+- [ ] Extraction bonus credits on win (15, placeholder in `balance.ts`) added to the run's credits (s9)
+- [ ] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
-- [x] Extraction point revealed after the last objective; compass switches to it (s7). - [x] "log out" typing prompt, then 3-2-1 countdown, then win (s7). Leaving the point cancels both (open question in the design doc)
-- [ ] Game-over on HP 0
-- [x] Results screen: credits gained, items found, objectives completed, level reached (s7). Items show 0 until caches (section 4) exist
-
-## 3. Skills and level-ups
-
-- [ ] Uncapped player level with a gently rising XP curve (s5)
-- [ ] 5 active + 5 passive slots with separate offer rules (s5)
-- [ ] Passive stat system, re-summed from scratch on every change (CLAUDE.md rules)
-- [ ] Health Regen passive plus the other 4 passives (s5)
-- [ ] Remaining 4 damage skills (designs TBD with Henrik) (s5)
+### B. Skills and level-up rules (the biggest gap in the core loop)
+- [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
 - [ ] One reroll per level-up, and skip (s5)
-- [ ] Fallback choice when nothing is useful: heal 30% or credits (s5)
-- [ ] Level cap and upgrade rows for every skill (s5)
-- [x] Build the railgun damage skill (design doc section 5)
+- [ ] Fallback choice gets the second option: credits instead of heal (amount TBD) (s5)
+- [ ] Replace the `[PH]` passives with the real 5, including Health Regen and a base slow player regen (s4, s5)
+- [ ] Remaining damage skills: 6 are planned, 3 exist (Auto-Pistol, Virus, Railgun) plus the `[PH] Scatter Gun`. Designs TBD with Henrik, so this is a design session first (s5)
+- [ ] Per-skill level cap and upgrade rows for every skill (s5)
+- [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
-## 4. Data caches
-
-- [ ] Caches scattered randomly on the map, rare (s3, s5)
+### C. Data caches
+- [ ] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5)
 - [ ] Opening a cache grants a skill/passive using the slot rules, no choice (s5)
-- [ ] Rare drops of permanent items from a separate find-only list; about 2.5% of caches (s4b)
-- [ ] Cache-opening UI (s10)
+- [ ] Cache-opening UI and the items-found counter (s10)
+- [ ] Rare find-only items, about 2.5% of caches. Needs the item system from D first, so a placeholder item list is fine (s4b)
+- [ ] Optional: rare cache drop from enemies (s5)
 
-## 5. Enemies
-
-- [x] Goon miniboss: large, health bar, aggro radius, returns to guard, chases when damaged, shoots at the player, hunts forever once the dossier is taken (s6)
-- [ ] Enemy difficulty scaling with the run clock (s6)
-- [ ] New dangerous enemy types joining over time (designs TBD) (s6)
-  - [x] Marksman: ranged swarm enemy, holds at 250 px and shoots; joins the shared spawn pool at 5% chance, +1% every 30 s (`SPAWNING.specialEnemies`)
-  - [ ] Further types (TBD)
-
-## 6. More objective types
-
-- [x] Grab encryption key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
-- [x] Steal secrets: 2-4 destructible outposts that spawn drones, then a pick-up secrets object (s7). More outposts means slightly less hp each; drones spawn only while the player is near
-- [x] Connect servers: grab a cable with E, attach it to a server 300-400 px away (cable max 600 px) by holding E for 2.5 s (damage resets), with a cable line drawn (s7). The second server is placed randomly around the first; the cable stays in hand once grabbed
-- [x] New hacking interaction - PIN code. The player needs to enter a pin code, four random digits from 0-9
-
-## 7. Economy and meta
-
-- [x] Credit chip drops from enemies with magnet pickup: Drone 1, Goon 5 (placeholders in `balance.ts`) (s6, s9)
-- [ ] Credits persist across runs, kept on death, extraction bonus (s9)
+### D. Meta loop: save, menu, shop, items (turns it into a game you return to)
+Best done together, in this order:
+- [ ] Credits persist across runs (kept on death) (s9)
 - [ ] Save to localStorage, plus export/import save code (s9)
-- [ ] Main menu scene (start run, shop, equipment) (s9)
-- [ ] Shop with two placeholder items per slot (Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small) (s4b)
-- [ ] Equip/unequip UI and item stats applied at run start (s4b)
-- [ ] Dash on Space from Feet items (s4)
+- [ ] Main menu scene: start run, shop, equipment (s9)
+- [ ] Item data file in `src/data/` (slots, stats, price) with two placeholder items per slot: Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small (s4b)
+- [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
+- [ ] Item stats applied at run start through the same re-sum as passives
+- [ ] Dash on Shift from Feet items (the design doc says Shift; the old plan said Space) (s4)
 
-## 8. Polish
+### E. Enemies and difficulty
+- [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6)
+- [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
+- [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
 
-- [ ] Real art and texture swap in `BootScene.ts` (s10)
+### F. More objective types (optional, after the above)
+Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
+
+### G. Polish and release
+- [ ] Balance pass on `src/data/` once B, C and D exist (Henrik)
+- [ ] Real art and texture swap in `BootScene.ts`, boundary wall textures (s10)
 - [ ] Audio (s10)
-- [ ] Balance pass on `src/data/`
+- [ ] Playtest build review with outside testers via GitHub Pages
 - [ ] itch.io HTML5 build and upload (CLAUDE.md)
-- [x] GitHub Pages deploy on push to main, for playtesting (`.github/workflows/pages.yml`)
 
 ## Suggested order
 
-1 (map, clock, compass) -> 2 (finishing a run) -> 7 (credits, menu, shop) -> 3 (slots, passives) -> 4 (caches) -> 5/6 (Goon and objective types) -> 8.
-That gives a complete start-to-finish loop early, then fills in depth.
+A (quick HUD cleanup) -> B (skill rules, so level-ups feel right) -> D (menu, shop and items, which gives the run a purpose) -> C (caches, which need B's slot rules and D's items) -> E (enemies, once there are builds to challenge) -> G, with F slotted in whenever more variety is wanted.
+
+Why this order: the run itself already works end to end, so the missing pieces are depth within a run (B, C, E) and a reason to start another one (D). B comes before C because caches reuse the slot rules, and D before the item part of C because find-only items need the item list.
