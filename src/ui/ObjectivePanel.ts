@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { RUN_OBJECTIVES } from '../data/objectives';
 import type { Objectives } from '../systems/Objectives';
 
 const WIDTH = 270;
@@ -17,7 +16,7 @@ export class ObjectivePanel {
   private bg: Phaser.GameObjects.Graphics;
   private header: Phaser.GameObjects.Text;
   private rows: Phaser.GameObjects.Text[] = [];
-  private lastIndex = -1;
+  private lastKey = '';
 
   constructor(
     private scene: Phaser.Scene,
@@ -26,7 +25,7 @@ export class ObjectivePanel {
     this.bg = scene.add.graphics().setScrollFactor(0).setDepth(100);
     const style = { fontFamily: 'monospace', fontSize: '15px' };
     this.header = scene.add.text(0, 0, 'OBJECTIVES', { ...style, fontStyle: 'bold', color: '#ffd23e' }).setScrollFactor(0).setDepth(101);
-    for (let i = 0; i < RUN_OBJECTIVES.length; i++) {
+    for (let i = 0; i < objectives.entries.length; i++) {
       this.rows.push(scene.add.text(0, 0, '', { ...style, color: COLORS.pending }).setScrollFactor(0).setDepth(101));
     }
     this.layout();
@@ -49,18 +48,20 @@ export class ObjectivePanel {
 
   /** Call every frame; only touches the text objects when something changed. */
   update() {
-    const index = this.objectives.index;
-    const recolor = index !== this.lastIndex;
-    this.lastIndex = index;
+    const states = this.objectives.entries.map((e) => (e.done ? 'done' : e === this.objectives.current ? 'active' : 'pending'));
+    const key = states.join();
+    const recolor = key !== this.lastKey;
+    this.lastKey = key;
 
-    this.rows.forEach((row, i) => {
-      const state = i < index ? 'done' : i === index ? 'active' : 'pending';
+    this.objectives.entries.forEach((entry, i) => {
+      const state = states[i];
       const mark = state === 'done' ? '[x]' : state === 'active' ? '[>]' : '[ ]';
-      const pct = state === 'active' ? `${Math.floor(this.objectives.progress * 100)}%` : '';
-      const name = RUN_OBJECTIVES[i].name;
+      // Show progress for anything started but unfinished (it decays when the player leaves).
+      const p = entry.hack.progress;
+      const pct = !entry.done && p > 0 ? `${Math.floor(p * 100)}%` : '';
       // Monospace: pad the name so the percentage lines up on the right.
-      row.setText(`${mark} ${name.padEnd(19)}${pct.padStart(4)}`);
-      if (recolor) row.setColor(COLORS[state]);
+      this.rows[i].setText(`${mark} ${entry.def.name.padEnd(19)}${pct.padStart(4)}`);
+      if (recolor) this.rows[i].setColor(COLORS[state as keyof typeof COLORS]);
     });
   }
 }

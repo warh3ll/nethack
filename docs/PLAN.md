@@ -17,9 +17,9 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] Large bounded map (~10000x10000) with a visible boundary wall; tune walk time to 60-90 s edge to edge (s7)
 - [ ] Camera and background so movement across the map is readable
 - [ ] Run clock in the HUD (elapsed time only) (s7)
-- [ ] Compass pointing at the closest unfinished objective (s7)
+- [x] Compass pointing at the closest unfinished objective (s7)
 - [ ] Random objective placement per run, 3-5 objectives, max two of one type (s7)
-- [ ] Objectives completable in any order (replace the fixed order in `RUN_OBJECTIVES`) (s7)
+- [x] Objectives completable in any order (replace the fixed order in `RUN_OBJECTIVES`) (s7)
 
 ## 2. Run end
 - [ ] Extraction point revealed after the last objective; compass switches to it (s7)
