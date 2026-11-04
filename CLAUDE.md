@@ -29,4 +29,4 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - `npm run typecheck`
 
 ## Release
-Repo stays private. Eventual release on itch.io. GitHub Pages (`.github/workflows/pages.yml`) is only for playtest builds.
+Repo is public for now (needed for free GitHub Pages); may go private later if Henrik upgrades GitHub, at which point Pages playtests would need a paid plan or itch.io. Eventual release on itch.io. GitHub Pages (`.github/workflows/pages.yml`) is only for playtest builds.
