@@ -60,18 +60,18 @@ export const STEAL_SECRETS = {
   pickupRadius: 36,
 }
 
-/** Connect servers objective: grab a cable (E) at the first server, hold E at the second to attach it. */
+/** Connect servers objective: grab a cable (E) at the first server, hold E at the other to attach it (start at either). */
 export const CONNECT_SERVERS = {
   /** The second server is placed this far from the first, in a random direction. */
-  gap: { min: 300, max: 400 },
-  /** Press E within this distance of the first server to grab the cable. */
+  gap: { min: 500, max: 600 },
+  /** Press E within this distance of either server to grab the cable. */
   grabRadius: 60,
-  /** Hold E within this distance of the second server to attach it. */
+  /** Hold E within this distance of the other server to attach it. */
   attachRadius: 60,
   /** How long E must be held. Taking damage resets it. */
   attachMs: 2500,
-  /** With the cable in hand the player can't get farther than this from the first server (they can still circle it). */
-  maxCableLength: 600,
+  /** With the cable in hand the player can't get farther than this from the server it is attached to (they can still circle it). */
+  maxCableLength: 800,
   /** Pressing E away from the second server drops the cable; this is how long it takes to wind back. */
   unwindMs: 600,
 }

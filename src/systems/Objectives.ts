@@ -166,7 +166,7 @@ export class Objectives {
     }
     if (!best) return null;
     // With the cable in hand the way leads to the second server.
-    if (best.connect?.grabbed && best.cable) return { x: best.cable.b.x, y: best.cable.b.y };
+    if (best.connect?.grabbed && best.cable) return best.connect.from === 'a' ? { x: best.cable.b.x, y: best.cable.b.y } : { x: best.cable.a.x, y: best.cable.a.y };
     return { x: best.def.x, y: best.def.y };
   }
 
@@ -213,7 +213,7 @@ export class Objectives {
     for (const e of this.entries) {
       if (e.done) continue;
       if (e.connect && e.cable) {
-        if (e.connect.grabbed) this.tetherPlayer(e.cable.a);
+        if (e.connect.grabbed) this.tetherPlayer(e.connect.from === 'a' ? e.cable.a : e.cable.b);
         const nearA = this.playerWithin(e.cable.a, CONNECT_SERVERS.grabRadius);
         const nearB = this.playerWithin(e.cable.b, CONNECT_SERVERS.attachRadius);
         e.connect.update(deltaMs, ePressed, eHeld, nearA, nearB, this.player.x, this.player.y);
