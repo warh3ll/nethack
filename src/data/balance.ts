@@ -19,6 +19,10 @@ export interface EnemyType {
   contactDamage: number
   /** XP the player gets for killing one. */
   xp: number
+  /** Credits in the chip dropped on death (placeholder values). */
+  credits: number
+  /** Chance (0 to 1) that a death drops a chip at all. */
+  creditChance: number
   radius: number
   color: number
   /** Show a small health bar above the enemy. */
@@ -46,6 +50,8 @@ export const ENEMIES: Record<string, EnemyType> = {
     speed: 70,
     contactDamage: 8,
     xp: 1,
+    credits: 1,
+    creditChance: 0.1,
     radius: 11,
     color: 0xff2e88,
   },
@@ -55,6 +61,8 @@ export const ENEMIES: Record<string, EnemyType> = {
     speed: 130,
     contactDamage: 20,
     xp: 15,
+    credits: 5,
+    creditChance: 1,
     radius: 28,
     color: 0xff8a2e,
     healthBar: true,
@@ -75,6 +83,16 @@ export const SPAWNING = {
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   enemyType: 'drone',
+}
+
+/** Credit chips dropped by enemies. How many credits each enemy type drops is `credits` in ENEMIES. */
+export const CREDITS = {
+  /** Chips within this distance of the player start flying toward them. */
+  magnetRadius: 120,
+  /** Speed (px/s) of a chip being pulled in. Faster than the player so it always catches up. */
+  magnetSpeed: 420,
+  /** A chip this close to the player is collected. */
+  collectRadius: 20,
 }
 
 export const STARTING_SKILL = 'autoPistol'

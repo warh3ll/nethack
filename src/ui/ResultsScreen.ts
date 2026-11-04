@@ -8,7 +8,7 @@ export interface RunResult {
   timeMs: number;
   objectivesDone: number;
   objectivesTotal: number;
-  /** Credits picked up this run. Stays 0 until credit chips exist (PLAN section 7). */
+  /** Credits picked up this run. */
   credits: number;
   /** Items found this run. Stays 0 until caches and drops exist (PLAN section 4). */
   items: number;

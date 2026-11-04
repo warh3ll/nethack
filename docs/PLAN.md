@@ -25,7 +25,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 ## 2. Run end
 - [x] Extraction point revealed after the last objective; compass switches to it (s7). - [x] "log out" typing prompt, then 3-2-1 countdown, then win (s7). Leaving the point cancels both (open question in the design doc)
 - [ ] Game-over on HP 0
-- [x] Results screen: credits gained, items found, objectives completed, level reached (s7). Credits and items show 0 until credit chips (section 7) and caches (section 4) exist
+- [x] Results screen: credits gained, items found, objectives completed, level reached (s7). Items show 0 until caches (section 4) exist
 
 ## 3. Skills and level-ups
 - [ ] Uncapped player level with a gently rising XP curve (s5)
@@ -54,7 +54,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] Connect servers: grab a cable with E, attach it to a server 75-125 px away by holding E for 2.5 s (damage resets), with a cable line drawn (s7)
 
 ## 7. Economy and meta
-- [ ] Credit chip drops from enemies with magnet pickup: Drone 1, Goon 5 (placeholders in `balance.ts`) (s6, s9)
+- [x] Credit chip drops from enemies with magnet pickup: Drone 1, Goon 5 (placeholders in `balance.ts`) (s6, s9)
 - [ ] Credits persist across runs, kept on death, extraction bonus (s9)
 - [ ] Save to localStorage, plus export/import save code (s9)
 - [ ] Main menu scene (start run, shop, equipment) (s9)

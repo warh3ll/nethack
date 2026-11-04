@@ -4,7 +4,8 @@ import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
-import { Enemy } from '../entities/Enemy';
+import { CreditChip } from '../entities/CreditChip';
+import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
@@ -26,6 +27,7 @@ export class GameScene extends Phaser.Scene {
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
+  private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
   private weapons: (Weapon | Virus)[] = [];
   private background!: Phaser.GameObjects.TileSprite;
@@ -46,6 +48,8 @@ export class GameScene extends Phaser.Scene {
   private gameTime = 0;
   private appliedScale = 1;
   private kills = 0;
+  /** Credits picked up this run. */
+  private credits = 0;
   private gameOver = false;
   private paused = false;
   private pauseOverlay?: Phaser.GameObjects.Container;
@@ -63,6 +67,7 @@ export class GameScene extends Phaser.Scene {
     this.gameTime = 0;
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
+    this.credits = 0;
     this.gameOver = false;
     this.levelingUp = false;
     this.pendingLevelUps = 0;
@@ -75,6 +80,17 @@ export class GameScene extends Phaser.Scene {
     this.bullets = this.physics.add.group({ classType: Bullet, maxSize: 300, runChildUpdate: true });
 
     this.enemyBullets = this.physics.add.group({ classType: EnemyBullet, maxSize: 60, runChildUpdate: true });
+
+    // Drops are rare, so the pool needs no cap.
+    this.chips = this.add.group({ classType: CreditChip });
+    // Every enemy death (bullets, Virus, anything) may drop a chip, wherever it died.
+    const dropChip = (e: Enemy) => {
+      if (Math.random() >= e.stats.creditChance) return;
+      const chip = this.chips.get(e.x, e.y) as CreditChip | null;
+      chip?.drop(e.x, e.y, e.stats.credits);
+    };
+    this.events.on(ENEMY_KILLED, dropChip);
+    this.events.once('shutdown', () => this.events.off(ENEMY_KILLED, dropChip));
 
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);
@@ -172,9 +188,18 @@ export class GameScene extends Phaser.Scene {
       }
     }
     this.drawEnemyBars();
+    this.updateChips(gameDelta / 1000);
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.endRun();
+  }
+
+  private updateChips(dtSeconds: number) {
+    if (this.player.isDead) return;
+    for (const obj of this.chips.getChildren()) {
+      const chip = obj as CreditChip;
+      if (chip.active) this.credits += chip.update(this.player.x, this.player.y, dtSeconds);
+    }
   }
 
   /** Slows physics and tweens to `scale` (1 = normal). Arcade's fixed step is retuned so motion stays smooth. */
@@ -290,7 +315,7 @@ export class GameScene extends Phaser.Scene {
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
     const live = this.enemies.countActive(true);
     const lv = this.progression.isMaxLevel ? 'MAX' : this.progression.level;
-    this.hud.setText(`lv ${lv}   ${time}   kills ${this.kills}   enemies ${live}`);
+    this.hud.setText(`lv ${lv}   ${time}   kills ${this.kills}   credits ${this.credits}   enemies ${live}`);
     this.objectivePanel.update();
     this.objectiveMarker.update();
   }
@@ -306,7 +331,7 @@ export class GameScene extends Phaser.Scene {
       timeMs: this.elapsedMs,
       objectivesDone: this.objectives.entries.filter((e) => e.done).length,
       objectivesTotal: this.objectives.entries.length,
-      credits: 0, // TODO: credit chips (PLAN section 7)
+      credits: this.credits,
       items: 0, // TODO: caches and drops (PLAN section 4)
     });
     this.joystick.release();
