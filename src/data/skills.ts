@@ -87,7 +87,7 @@ export interface VirusSkill extends SkillBase {
   levels: VirusStats[]
 }
 
-/** Hacking-type weapon: no projectiles, see entities/SynapticCollapse.ts. */
+/** Hacking-type weapon: no projectiles, see entities/SynapticOverload.ts. */
 export interface SynapticSkill extends SkillBase {
   kind: 'weapon'
   behavior: 'synaptic'

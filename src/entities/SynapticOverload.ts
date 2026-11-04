@@ -14,7 +14,7 @@ const FX = { durationMs: 300 };
  * The hack restarts on a new target if the enemy dies or leaves the range band while it uploads.
  * Enemies with a health bar (Goon, outposts) are never picked. Stats come from data/skills.ts.
  */
-export class SynapticCollapse {
+export class SynapticOverload {
   level = 1;
   private target: Enemy | null = null;
   private hackStartedAt = 0;
