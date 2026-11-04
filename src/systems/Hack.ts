@@ -13,7 +13,10 @@ export interface Prompt {
   hitsNeeded: number;
 }
 
-const KINDS: PromptKind[] = ['ip', 'password', 'smack', 'inject'];
+/** General interact key (lowercase KeyboardEvent.key). Used by smack now, cables later. */
+export const INTERACT_KEY = 'e';
+
+const KINDS: PromptKind[] =['ip', 'password', 'smack', 'inject'];
 
 const randInt = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
 const pick = <T>(arr: ArrayLike<T>) => arr[Math.floor(Math.random() * arr.length)];
@@ -75,7 +78,7 @@ export class Hack {
     return this.haltMs > 0;
   }
 
-  /** True while a prompt that needs typing is up (smack only needs the space bar). */
+  /** True while a prompt that needs typing is up (smack only needs the interact key). */
   get typing() {
     return this.prompt !== null && this.prompt.kind !== 'smack';
   }
@@ -112,7 +115,7 @@ export class Hack {
     if (!p) return 'ignored';
 
     if (p.kind === 'smack') {
-      if (key !== ' ') return 'ignored';
+      if (key.toLowerCase() !== INTERACT_KEY) return 'ignored';
       p.hits++;
       if (p.hits < p.hitsNeeded) return 'ok';
     } else {
