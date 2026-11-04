@@ -19,8 +19,8 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] Run clock in the HUD (elapsed time only) (s7)
 - [ ] HUD: remove the enemies counter; add credits and items-found counters once those exist (s10)
 - [x] Compass pointing at the closest unfinished objective (s7)
-- [ ] Random objective placement per run, 3-5 objectives, max two of one type (s7)
-- [x] Objectives completable in any order (replace the fixed order in `RUN_OBJECTIVES`) (s7)
+- [x] Random objective placement per run, 3-5 objectives, max two of one type (s7). Positions are random in a 6000x6000 square around the start until the real map exists (then re-place them on it)
+- [x] Objectives completable in any order (s7)
 
 ## 2. Run end
 - [x] Extraction point revealed after the last objective; compass switches to it (s7). - [x] "log out" typing prompt, then 3-2-1 countdown, then win (s7). Leaving the point cancels both (open question in the design doc)
@@ -50,7 +50,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 
 ## 6. More objective types
 - [x] Encryption Key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
-- [ ] Brute-force: 2-5 destructible outposts that spawn drones, then a pick-up secrets object (s7)
+- [x] Brute-force: 2-5 destructible outposts that spawn drones, then a pick-up secrets object (s7). More outposts means slightly less hp each; drones spawn only while the player is near
 - [x] Connect servers: grab a cable with E, attach it to a server 300-400 px away (cable max 600 px) by holding E for 2.5 s (damage resets), with a cable line drawn (s7). The second server is placed randomly around the first; the cable stays in hand once grabbed
 
 ## 7. Economy and meta

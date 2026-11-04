@@ -109,6 +109,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
+      if ((e as Enemy).stats.contactDamage <= 0) return; // outposts don't hurt on touch
       if (this.player.takeDamage((e as Enemy).stats.contactDamage, this.gameTime)) this.objectives.onPlayerHit();
     });
 
@@ -138,10 +139,10 @@ export class GameScene extends Phaser.Scene {
       this.player,
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
-      (x, y) => {
-        const goon = this.enemies.get() as Enemy | null;
-        goon?.spawn(x, y, 'goon');
-        return goon;
+      (x, y, type, hp) => {
+        const enemy = this.enemies.get() as Enemy | null;
+        enemy?.spawn(x, y, type, hp);
+        return enemy;
       },
     );
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
@@ -294,7 +295,7 @@ export class GameScene extends Phaser.Scene {
       const x = e.x - w / 2;
       const y = e.y - e.stats.radius - 12;
       this.enemyBars.fillStyle(0x1a2140).fillRect(x, y, w, 5);
-      this.enemyBars.fillStyle(0xff2e88).fillRect(x, y, w * Math.max(0, e.hp / e.stats.hp), 5);
+      this.enemyBars.fillStyle(0xff2e88).fillRect(x, y, w * Math.max(0, e.hp / e.maxHp), 5);
     }
   }
 

@@ -14,6 +14,8 @@ export interface Infection {
 /** Pooled enemy. Never destroyed during a run: spawn() reuses it, kill() returns it to the pool. */
 export class Enemy extends Phaser.Physics.Arcade.Image {
   hp = 0;
+  /** Starting hp of this spawn (may differ from stats.hp), for health bars. */
+  maxHp = 0;
   stats!: EnemyType;
   infection: Infection | null = null;
   /** Guard post (guards only): where the enemy stands and returns to. */
@@ -25,9 +27,9 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
   /** Game time of the next shot; -1 = not armed yet (starts when a chase starts). */
   private nextShotAt = -1;
 
-  spawn(x: number, y: number, typeKey: string) {
+  spawn(x: number, y: number, typeKey: string, hp?: number) {
     this.stats = ENEMIES[typeKey];
-    this.hp = this.stats.hp;
+    this.hp = this.maxHp = hp ?? this.stats.hp;
     this.infection = null;
     this.homeX = x;
     this.homeY = y;
@@ -37,11 +39,13 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
     this.setTexture(`enemy-${typeKey}`);
     this.enableBody(true, x, y, true, true);
     this.body!.setCircle(this.stats.radius);
+    this.setImmovable(!!this.stats.stationary);
     this.clearTint();
   }
 
   /** Per-frame behaviour: swarm enemies head straight for the player, guards follow their aggro rules. */
   act(playerX: number, playerY: number) {
+    if (this.stats.stationary) return this.setVelocity(0, 0);
     const guard = this.stats.guard;
     if (!guard) {
       this.chasing = true;

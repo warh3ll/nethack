@@ -27,6 +27,8 @@ export interface EnemyType {
   color: number
   /** Show a small health bar above the enemy. */
   healthBar?: boolean
+  /** Never moves and can't be pushed (outposts). */
+  stationary?: boolean
   /**
    * Guards its spawn point instead of swarming. Stands still until the player comes within
    * `aggroRadius`, chases while the player is within `leashRadius`, then walks back to its post.
@@ -68,6 +70,20 @@ export const ENEMIES: Record<string, EnemyType> = {
     healthBar: true,
     guard: { aggroRadius: 380, leashRadius: 700 },
     ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
+  },
+  // Destructible structure in the Brute-force objective. Its hp is the value for the fewest outposts;
+  // see BRUTE_FORCE in objectives.ts for how it shrinks with more of them.
+  outpost: {
+    hp: 120,
+    speed: 0,
+    contactDamage: 0,
+    xp: 5,
+    credits: 3,
+    creditChance: 1,
+    radius: 30,
+    color: 0x9b5cff,
+    healthBar: true,
+    stationary: true,
   },
 }
 
