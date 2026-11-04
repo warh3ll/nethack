@@ -2,9 +2,6 @@
 // SKILLS: each skill is data. `levels[0]` is level 1, `levels[1]` level 2, ...
 // The code reads stats via getSkillStats(id, level), so adding a level is just adding a row.
 // A skill's max level is simply how many rows it has.
-//
-// Skills marked `placeholder: true` (and "[PH]" in the name) are stand-ins so the
-// level-up picker has something to offer. Replace or delete them as real skills are designed.
 // ─────────────────────────────────────────────────────────────
 
 export interface WeaponStats {
@@ -59,8 +56,6 @@ interface SkillBase {
   name: string
   description: string
   color: number
-  /** Stand-in until the real skill list is designed. */
-  placeholder?: boolean
 }
 
 export interface WeaponSkill extends SkillBase {
@@ -167,12 +162,10 @@ export const SKILLS: Record<string, SkillData> = {
     ],
   },
 
-  // ── Placeholders ───────────────────────────────────────────
-  phScatter: {
-    name: '[PH] Scatter Gun',
+  scatterGun: {
+    name: 'Scatter Gun',
     kind: 'weapon',
-    placeholder: true,
-    description: 'Placeholder weapon. Short-range spread at the nearest enemy.',
+    description: 'Short-range spread at the nearest enemy.',
     color: 0xc77dff,
     levels: [
       {
@@ -204,35 +197,31 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
-  phPlating: {
-    name: '[PH] Armor Plating',
+  armorPlating: {
+    name: 'Armor Plating',
     kind: 'passive',
-    placeholder: true,
-    description: 'Placeholder passive. More max HP.',
+    description: 'More max HP.',
     color: 0x9aa7c7,
     levels: [{ maxHp: 20 }, { maxHp: 40 }, { maxHp: 60 }],
   },
-  phRegen: {
-    name: '[PH] Nanite Repair',
+  naniteRepair: {
+    name: 'Nanite Repair',
     kind: 'passive',
-    placeholder: true,
-    description: 'Placeholder passive. Faster health regeneration.',
+    description: 'Faster health regeneration.',
     color: 0x5fe08a,
     levels: [{ hpRegenPerSec: 0.1 }, { hpRegenPerSec: 0.25 }, { hpRegenPerSec: 0.5 }],
   },
-  phServos: {
-    name: '[PH] Leg Servos',
+  legServos: {
+    name: 'Leg Servos',
     kind: 'passive',
-    placeholder: true,
-    description: 'Placeholder passive. Faster movement.',
+    description: 'Faster movement.',
     color: 0x2ef2ff,
     levels: [{ moveSpeedPct: 8 }, { moveSpeedPct: 16 }, { moveSpeedPct: 24 }],
   },
-  phOverclock: {
-    name: '[PH] Overclock',
+  overclock: {
+    name: 'Overclock',
     kind: 'passive',
-    placeholder: true,
-    description: 'Placeholder passive. More damage from everything you fire.',
+    description: 'More damage from everything you fire.',
     color: 0xff9d2e,
     levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
   },

@@ -55,7 +55,7 @@ export interface EnemyType {
   contactDamage: number
   /** XP the player gets for killing one. */
   xp: number
-  /** Credits in the chip dropped on death (placeholder values). */
+  /** Credits in the chip dropped on death. */
   credits: number
   /** Chance (0 to 1) that a death drops a chip at all. */
   creditChance: number
@@ -166,13 +166,13 @@ export const CREDITS = {
   magnetSpeed: 420,
   /** A chip this close to the player is collected. */
   collectRadius: 20,
-  /** Credits added to the run's total on a successful extraction (placeholder, Henrik tunes). */
+  /** Credits added to the run's total on a successful extraction. */
   extractionBonus: 15,
 }
 
 /** Data caches scattered on the map. Rare on purpose; the compass and objective marker never point to them. */
 export const CACHES = {
-  /** Caches per run, picked at random (placeholder, Henrik tunes). */
+  /** Caches per run, picked at random. */
   count: { min: 6, max: 10 },
   /** No cache this close to the start. */
   minDistFromStart: 600,

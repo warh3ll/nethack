@@ -23,7 +23,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Always work on a new branch, never directly on main. Do not merge to main until Henrik says so (he does that once he's happy with the result). When he does say so, merge and also push main to origin.
 - Small, runnable milestones: every change should leave the game playable.
 - Playtest features that come from `docs/PLAN.md` (they are usually larger) before calling them done: run the dev server and drive the game in a real browser, and check that the feature actually shows up and works, not just that it typechecks. Say plainly what was and wasn't exercised.
-- Placeholder art is generated in `src/scenes/BootScene.ts`; real assets load there under the same texture keys.
+- Textures are generated or loaded in `src/scenes/BootScene.ts`; swapping in new art there under the same texture keys is enough.
 
 ## Commands
 - `npm run dev`: dev server with hot reload

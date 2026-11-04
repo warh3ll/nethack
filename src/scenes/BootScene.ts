@@ -4,9 +4,9 @@ import { SKILLS } from '../data/skills';
 import { loadPlayerSheets, createPlayerAnims } from '../data/playerAnims';
 
 /**
- * Creates placeholder textures from code so the game runs with zero art.
- * When real assets exist, load them here (this.load.image / spritesheet)
- * under the same keys and the rest of the game picks them up.
+ * Creates textures from code and loads the sprite sheets.
+ * Load image assets here (this.load.image / spritesheet)
+ * under the texture keys the rest of the game uses.
  */
 export class BootScene extends Phaser.Scene {
   constructor() {

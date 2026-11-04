@@ -17,14 +17,14 @@ Controls: WASD or arrow keys to move. There is no manual attack: every weapon fi
 All tuning numbers live in two files, with no game logic in them:
 
 - `src/data/balance.ts`: player stats, enemy types and their XP, spawn rate, max level and XP curve, skill slots
-- `src/data/skills.ts`: skills (weapons and passives) and their per-level stats; ones marked `[PH]` are placeholders
+- `src/data/skills.ts`: skills (weapons and passives) and their per-level stats
 
 ## Builds
 `npm run build` produces a `dist/` folder that can be uploaded to itch.io as an HTML5 game.
 Every push and pull request also builds on GitHub: open the run under the **Actions** tab and download `nethack-web` at the bottom.
 
 ## Code layout
-- `src/scenes/BootScene.ts`: creates placeholder graphics (swap in real art here)
+- `src/scenes/BootScene.ts`: creates generated textures and loads art (swap assets in here)
 - `src/scenes/GameScene.ts`: the run: spawning, collisions, HUD, game over
 - `src/entities/`: player, enemies, bullets, weapons (enemies and bullets are pooled)
 - `src/systems/Progression.ts`: XP, levels, owned skills, upgrade offers, passive stat re-summing

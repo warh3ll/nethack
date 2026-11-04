@@ -22,7 +22,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Game over on HP 0, results screen on win and death (s7)
 - [x] Goon miniboss and Marksman ranged enemy with a shared, time-scaled spawn pool (s6)
 - [x] Credit chip drops with magnet pickup (s6, s9)
-- [x] Passive stat system, re-summed from scratch, with four placeholder passives (`[PH]` in `skills.ts`) (s5)
+- [x] Passive stat system, re-summed from scratch, with four passives (s5)
 - [x] Fallback level-up choice (heal) when nothing is useful (s5)
 - [x] GitHub Pages playtest deploy (`.github/workflows/pages.yml`)
 
@@ -33,15 +33,15 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 ### A. HUD and run polish (small, do first)
 - [x] Run clock shown as its own HUD element (it's currently in the one-line text with `lv`, `kills`, `credits`, `enemies`) (s7, s10)
 - [x] Remove the enemies counter; credits counter stays; items-found counter once caches exist (s10)
-- [x] Extraction bonus credits on win (15, placeholder in `balance.ts`) added to the run's credits (s9)
+- [x] Extraction bonus credits on win (15, in `balance.ts`) added to the run's credits (s9)
 - [x] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
 - [x] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5). `Progression.offerPool()` checks the free slot per kind; not yet reachable in play since there are fewer than 5 skills per group
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
-- [ ] Replace the `[PH]` passives with the real 5, including Health Regen (s4, s5). Base regen (0.1 HP/s) and a `[PH] Nanite Repair` passive are in; the real Health Regen passive is still to do
-- [ ] Remaining damage skills: 6 are planned, 3 exist (Auto-Pistol, Virus, Railgun) plus the `[PH] Scatter Gun`. Designs TBD with Henrik, so this is a design session first (s5)
+- [ ] Finalise the 5 passives, including Health Regen (s4, s5). Base regen (0.1 HP/s) and Nanite Repair are in
+- [ ] Remaining damage skills: 6 are planned, 3 exist (Auto-Pistol, Virus, Railgun) plus Scatter Gun. Designs TBD with Henrik, so this is a design session first (s5)
 - [ ] Per-skill level cap and upgrade rows for every skill (s5)
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
@@ -49,7 +49,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5). Placed at run start (`systems/Caches.ts`, `CACHES` in `balance.ts`); inert until opening lands
 - [x] Opening a cache grants a skill/passive using the slot rules; the player can only take it or discard it, and the cache is removed either way (s5). `Progression.rollCacheContents()`; credits if the pool is empty
 - [ ] Cache-opening UI (done: `CachePicker`, press E or tap the prompt) and the items-found counter (still to do, needs find-only items) (s10)
-- [ ] Rare find-only items, about 2.5% of caches. Needs the item system from D first, so a placeholder item list is fine (s4b)
+- [ ] Rare find-only items, about 2.5% of caches. Needs the item system from D first, so a rough first item list is fine (s4b)
 - [ ] Optional: rare cache drop from enemies (s5)
 
 ### D. Meta loop: save, menu, shop, items (turns it into a game you return to)
@@ -57,7 +57,7 @@ Best done together, in this order:
 - [ ] Credits persist across runs (kept on death) (s9)
 - [ ] Save to localStorage, plus export/import save code (s9)
 - [ ] Main menu scene: start run, shop, equipment (s9)
-- [ ] Item data file in `src/data/` (slots, stats, price) with two placeholder items per slot: Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small (s4b)
+- [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small (s4b)
 - [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
 - [ ] Item stats applied at run start through the same re-sum as passives
 - [ ] Dash on Shift from Feet items (the design doc says Shift; the old plan said Space) (s4)
