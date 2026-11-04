@@ -37,7 +37,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
-- [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
+- [x] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5). `Progression.offerPool()` checks the free slot per kind; not yet reachable in play since there are fewer than 5 skills per group
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
 - [ ] Replace the `[PH]` passives with the real 5, including Health Regen (s4, s5). Base regen (0.1 HP/s) and a `[PH] Nanite Repair` passive are in; the real Health Regen passive is still to do
@@ -46,9 +46,9 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
 ### C. Data caches
-- [ ] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5)
-- [ ] Opening a cache grants a skill/passive using the slot rules, no choice (s5)
-- [ ] Cache-opening UI and the items-found counter (s10)
+- [x] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5). Placed at run start (`systems/Caches.ts`, `CACHES` in `balance.ts`); inert until opening lands
+- [x] Opening a cache grants a skill/passive using the slot rules; the player can only take it or discard it, and the cache is removed either way (s5). `Progression.rollCacheContents()`; credits if the pool is empty
+- [ ] Cache-opening UI (done: `CachePicker`, press E or tap the prompt) and the items-found counter (still to do, needs find-only items) (s10)
 - [ ] Rare find-only items, about 2.5% of caches. Needs the item system from D first, so a placeholder item list is fine (s4b)
 - [ ] Optional: rare cache drop from enemies (s5)
 

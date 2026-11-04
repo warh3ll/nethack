@@ -46,7 +46,8 @@ function statLines(skillId: string, toLevel: number): string {
   return lines.join('\n');
 }
 
-function describe(u: Upgrade) {
+/** Card text and colour for an upgrade; shared with the cache screen. */
+export function describe(u: Upgrade) {
   if (u.type === 'heal') {
     const f = FALLBACK_UPGRADES.heal;
     return { tag: 'REPAIR', name: f.name, body: `${f.description}\n\n+${Math.round(u.fraction * 100)}% max HP`, color: 0xff2e88 };

@@ -4,6 +4,8 @@ import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
+import { DataCache } from '../entities/DataCache';
+import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
@@ -14,6 +16,7 @@ import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
+import { CachePicker } from '../ui/CachePicker';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
 import { ObjectiveMarker } from '../ui/ObjectiveMarker';
 import { ObjectivePanel } from '../ui/ObjectivePanel';
@@ -31,6 +34,7 @@ export class GameScene extends Phaser.Scene {
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
+  private caches: DataCache[] = [];
   private weapons: (Weapon | Virus)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
@@ -95,6 +99,13 @@ export class GameScene extends Phaser.Scene {
     };
     this.events.on(ENEMY_KILLED, dropChip);
     this.events.once('shutdown', () => this.events.off(ENEMY_KILLED, dropChip));
+
+    // Data caches: scattered on the map. Not objectives, so the compass and marker ignore them.
+    this.caches.forEach((c) => c.destroy());
+    this.caches = pickCachePositions().map((p) => new DataCache(this, p.x, p.y));
+
+    this.input.keyboard!.on('keydown-E', this.onOpenKey, this);
+    this.events.once('shutdown', () => this.input.keyboard?.off('keydown-E', this.onOpenKey, this));
 
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);
@@ -205,9 +216,42 @@ export class GameScene extends Phaser.Scene {
     }
     this.drawEnemyBars();
     this.updateChips(gameDelta / 1000);
+    this.updateCachePrompts();
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.endRun();
+  }
+
+  /** The cache within reach, if any. Not while typing a hack prompt (the E would be text) or during a modal. */
+  private reachableCache(): DataCache | null {
+    if (this.gameOver || this.paused || this.levelingUp || this.player.isDead || this.objectives.typing) return null;
+    return this.caches.find((c) => c.isNear(this.player.x, this.player.y)) ?? null;
+  }
+
+  private updateCachePrompts() {
+    const reach = this.reachableCache();
+    for (const c of this.caches) c.showPrompt(c === reach, () => this.openCache(c));
+  }
+
+  private onOpenKey() {
+    const c = this.reachableCache();
+    if (c) this.openCache(c);
+  }
+
+  /** Shows the cache's contents. The cache leaves the map whether the player takes or discards them. */
+  private openCache(cache: DataCache) {
+    if (this.levelingUp || this.gameOver || this.paused) return;
+    this.levelingUp = true; // same freeze as the level-up picker
+    this.joystick.release();
+    this.physics.pause();
+    const contents = this.progression.rollCacheContents();
+    new CachePicker(this, contents, (take) => {
+      if (take) this.applyUpgrade(contents);
+      this.caches = this.caches.filter((c) => c !== cache);
+      cache.destroy();
+      this.levelingUp = false;
+      this.physics.resume();
+    });
   }
 
   private updateChips(dtSeconds: number) {
