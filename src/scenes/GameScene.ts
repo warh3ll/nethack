@@ -183,7 +183,7 @@ export class GameScene extends Phaser.Scene {
     this.gameTime += gameDelta;
 
     this.elapsedMs += gameDelta;
-    this.player.update(this.joystick.vector);
+    this.player.update(this.joystick.vector, gameDelta);
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
     this.spawnEnemies(this.gameTime);

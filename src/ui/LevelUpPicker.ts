@@ -15,6 +15,7 @@ const LABELS: Record<string, string> = {
   spreadRange: 'spread range',
   spreadCount: 'spreads to',
   maxHp: 'max HP',
+  hpRegenPerSec: 'HP regen/sec',
   moveSpeedPct: 'move speed %',
   damagePct: 'damage %',
 };

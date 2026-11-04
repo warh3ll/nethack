@@ -47,6 +47,8 @@ export interface VirusStats {
 export interface PassiveStats {
   /** Flat extra max HP. */
   maxHp?: number
+  /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
+  hpRegenPerSec?: number
   /** Percent extra move speed (10 = +10%). */
   moveSpeedPct?: number
   /** Percent extra damage for everything the player's weapons fire. */
@@ -209,6 +211,14 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Placeholder passive. More max HP.',
     color: 0x9aa7c7,
     levels: [{ maxHp: 20 }, { maxHp: 40 }, { maxHp: 60 }],
+  },
+  phRegen: {
+    name: '[PH] Nanite Repair',
+    kind: 'passive',
+    placeholder: true,
+    description: 'Placeholder passive. Faster health regeneration.',
+    color: 0x5fe08a,
+    levels: [{ hpRegenPerSec: 0.1 }, { hpRegenPerSec: 0.25 }, { hpRegenPerSec: 0.5 }],
   },
   phServos: {
     name: '[PH] Leg Servos',
