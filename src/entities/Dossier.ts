@@ -5,8 +5,8 @@ const FONT = 'monospace';
 const GOLD = 0xffd23e;
 
 /**
- * A pick-up item with a pulsing ring: the dossier in the Encryption Key objective (a folder),
- * or the company secrets in the Brute-force objective (`texture`/`label`/`radius` override the defaults).
+ * A pick-up item with a pulsing ring: the dossier in the Grab encryption key objective (a folder),
+ * or the company secrets in the Steal secrets objective (`texture`/`label`/`radius` override the defaults).
  */
 export class Dossier {
   private sprite: Phaser.GameObjects.Image;

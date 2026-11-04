@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ENEMIES } from '../data/balance';
-import { BRUTE_FORCE, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
+import { STEAL_SECRETS, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
 import { CableServers } from '../entities/CableServers';
 import { Dossier } from '../entities/Dossier';
 import type { Enemy } from '../entities/Enemy';
@@ -23,7 +23,7 @@ export interface ObjectiveEntry {
   /** Only for 'connectServers' objectives: the state and the look of the two servers and the cable. */
   connect: Connect | null;
   cable: CableServers | null;
-  /** Only for 'bruteForce' objectives: the outposts (kept after they die, to count them) and their drone timers. */
+  /** Only for 'stealSecrets' objectives: the outposts (kept after they die, to count them) and their drone timers. */
   outposts: Outpost[] | null;
   done: boolean;
 }
@@ -86,7 +86,7 @@ export class Objectives {
         const gap = Phaser.Math.FloatBetween(CONNECT_SERVERS.gap.min, CONNECT_SERVERS.gap.max);
         const angle = Math.random() * Math.PI * 2;
         e.cable = new CableServers(scene, { x, y }, { x: x + Math.cos(angle) * gap, y: y + Math.sin(angle) * gap });
-      } else if (e.def.type === 'bruteForce') {
+      } else if (e.def.type === 'stealSecrets') {
         e.outposts = this.spawnOutposts(x, y);
       } else {
         e.dossier = new Dossier(scene, x, y);
@@ -102,13 +102,13 @@ export class Objectives {
 
   /** A random number of outposts on a ring around the centre; more outposts means a bit less hp each. */
   private spawnOutposts(cx: number, cy: number): Outpost[] {
-    const count = Phaser.Math.Between(BRUTE_FORCE.outposts.min, BRUTE_FORCE.outposts.max);
-    const hp = ENEMIES.outpost.hp - BRUTE_FORCE.hpLossPerExtra * (count - BRUTE_FORCE.outposts.min);
+    const count = Phaser.Math.Between(STEAL_SECRETS.outposts.min, STEAL_SECRETS.outposts.max);
+    const hp = ENEMIES.outpost.hp - STEAL_SECRETS.hpLossPerExtra * (count - STEAL_SECRETS.outposts.min);
     const start = Math.random() * Math.PI * 2;
     const outposts: Outpost[] = [];
     for (let i = 0; i < count; i++) {
       const a = start + (i / count) * Math.PI * 2;
-      const enemy = this.spawnEnemy(cx + Math.cos(a) * BRUTE_FORCE.ringRadius, cy + Math.sin(a) * BRUTE_FORCE.ringRadius, 'outpost', hp);
+      const enemy = this.spawnEnemy(cx + Math.cos(a) * STEAL_SECRETS.ringRadius, cy + Math.sin(a) * STEAL_SECRETS.ringRadius, 'outpost', hp);
       if (enemy) outposts.push({ enemy, spawnTimerMs: 0 });
     }
     return outposts;
@@ -125,26 +125,26 @@ export class Objectives {
     return { down: e.outposts.filter((o) => !Objectives.standing(o)).length, total: e.outposts.length };
   }
 
-  /** Brute-force: outposts spawn drones while the player is near; once all are down the secrets appear. */
-  private updateBruteForce(e: ObjectiveEntry, deltaMs: number) {
+  /** Steal secrets: outposts spawn drones while the player is near; once all are down the secrets appear. */
+  private updateStealSecrets(e: ObjectiveEntry, deltaMs: number) {
     const outposts = e.outposts!;
     if (e.dossier) {
-      if (this.playerWithin(e.dossier, BRUTE_FORCE.pickupRadius)) this.finish(e);
+      if (this.playerWithin(e.dossier, STEAL_SECRETS.pickupRadius)) this.finish(e);
       return;
     }
     let alive = 0;
     for (const o of outposts) {
       if (!Objectives.standing(o)) continue;
       alive++;
-      if (!this.playerWithin(o.enemy, BRUTE_FORCE.spawnTriggerRadius)) continue;
+      if (!this.playerWithin(o.enemy, STEAL_SECRETS.spawnTriggerRadius)) continue;
       o.spawnTimerMs -= deltaMs;
       if (o.spawnTimerMs > 0) continue;
-      o.spawnTimerMs = BRUTE_FORCE.spawnIntervalMs;
+      o.spawnTimerMs = STEAL_SECRETS.spawnIntervalMs;
       const a = Math.random() * Math.PI * 2;
       const r = o.enemy.stats.radius + ENEMIES.drone.radius + 6;
       this.spawnEnemy(o.enemy.x + Math.cos(a) * r, o.enemy.y + Math.sin(a) * r, 'drone');
     }
-    if (alive === 0) e.dossier = new Dossier(this.scene, e.def.x, e.def.y, 'secrets', 'SECRETS STOLEN', BRUTE_FORCE.pickupRadius);
+    if (alive === 0) e.dossier = new Dossier(this.scene, e.def.x, e.def.y, 'secrets', 'SECRETS STOLEN', STEAL_SECRETS.pickupRadius);
   }
 
   get isComplete() {
@@ -222,7 +222,7 @@ export class Objectives {
         continue;
       }
       if (e.outposts) {
-        this.updateBruteForce(e, deltaMs);
+        this.updateStealSecrets(e, deltaMs);
         continue;
       }
       if (e.dossier) {
