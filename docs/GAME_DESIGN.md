@@ -61,19 +61,19 @@ Rules to check every feature against. Edit these first.
 
 ### Skill list
 
-| Skill        | Kind    | Idea                                                                 | Status  |
-| ------------ | ------- | -------------------------------------------------------------------- | ------- |
-| Auto-Pistol  | weapon  | Fires at the nearest enemy; gains pierce and double shot with levels | in game |
+| Skill        | Kind    | Idea                                                                                                                                                                                                                                                                                             | Status  |
+| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Auto-Pistol  | weapon  | Fires at the nearest enemy; gains pierce and double shot with levels                                                                                                                                                                                                                             | in game |
 | Virus        | weapon  | Hacking weapon. Infects an enemy within 400 range for slow damage over time; when an infected enemy dies it spreads to another enemy within 200 range. Strong against dense swarms. Levels raise the damage over time and slightly raise infection range; levels 4-5 spread to up to two enemies | in game |
-| TBD          | weapon  |                                                                      |         |
-| TBD          | weapon  |                                                                      |         |
-| TBD          | weapon  |                                                                      |         |
-| TBD          | weapon  |                                                                      |         |
-| Health Regen | passive | Increases the player's passive health regeneration                   |         |
-| TBD          | passive |                                                                      |         |
-| TBD          | passive |                                                                      |         |
-| TBD          | passive |                                                                      |         |
-| TBD          | passive |                                                                      |         |
+| TBD          | weapon  |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | weapon  |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | weapon  |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | weapon  |                                                                                                                                                                                                                                                                                                  |         |
+| Health Regen | passive | Increases the player's passive health regeneration                                                                                                                                                                                                                                               |         |
+| TBD          | passive |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | passive |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | passive |                                                                                                                                                                                                                                                                                                  |         |
+| TBD          | passive |                                                                                                                                                                                                                                                                                                  |         |
 
 TBD: level cap per skill, evolutions/combinations, what happens when all slots are full and maxed.
 
@@ -93,7 +93,7 @@ TBD: level cap per skill, evolutions/combinations, what happens when all slots a
 - Some objectives are **timed**. A **run clock is always visible in the UI**.
 - **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
-  2. **Goon:** a brute of some sort, kind of like a miniboss, guards a dossier containing an encryption key. The goon has more health and damage than normal mobs.
+  2. **Encryption Key:** A brute of some sort guards a dossier, kind of like a miniboss, in the dossier is an encryption key. The goon has more health and damage than normal mobs, he should have a little health bar above him, he is also larger than the other enemies.
   3. **Brute-force:** the player attacks a location that has several layers or outposts. The outposts also spawn enemies when the player is close. Once all of them are down, the player can steal company secrets from within (this is an obejct the player should pick up) .
 - **Lose:** HP reaches 0. TBD: what a failed timed objective does (instant loss, penalty, or skipped).
 - **Win:** complete the final objective. TBD: run length target, difficulty ramp across objectives.
@@ -114,6 +114,7 @@ Some objectives require hacking the ICE protecting a server or objective.
   - **Smack** The players is prompted to spam space to physically hit the machine, it wriggles with each hit and requires 8-15 hits
   - **Inject** The player is prompted to type a short code snippet (2-4 words)
     - **Inject words** else, for, while, void, null, nil, int, char, bool, true, false, var, let, const, func, def, async, await, yield, try, catch, throw, break, eval, exec, main, self, this, new, enum, byte, bit, hex, json, yaml, regex, loop, array, hash, map, sort, stack, queue, heap, node, tree, hack, root, pwn, pwned, leet, 1337, vuln, xss, sqli, ddos, proxy, vpn, tor, port, shell, spoof, sniff, crack, brute, salt, token, admin, login, pass, key, rsa, aes, md5, sha, cron, worm, virus, bomb, patch, ghost, nmap, ACK, SYN, NAT, DNS, ICMP, TCP, UDP, HTTP, GET, POST, 404, 403, git, bash, zsh, sudo, chmod, grep, sed, awk, curl, wget, ssh, ping, kill, top, cat, echo, pipe, touch, mkdir, pwd, tar, diff, push, pull, fetch, merge, clone, stash, blame, fork, HEAD, init, tag, sync, mount
+  - **PIN** The player needs to enter a pin code, four random digits from 0-9
 
 ## 9. Meta progression
 
@@ -153,37 +154,37 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 **Progression and skills**
 
-- Section 5 says "Kinds: weapons, passives, and skills", but the skill table only has weapon and passive. What separates a "skill" from a weapon? Are nethacking skills active abilities (cooldown, button press) or auto-firing like weapons?
-- Level-ups and caches share the same slot rules. Do caches draw from a rarer/stronger pool, or the same one?
-- What happens when a level-up offers nothing useful (all slots full and maxed)? Heal, credits, reroll?
-- Can the player pick "nothing" or reroll the 3 choices? (Relates to pillar 3.)
+- Section 5 says "Kinds: weapons, passives, and skills", but the skill table only has weapon and passive. What separates a "skill" from a weapon? From now on we only have skills, passive skills (which increase stats) and damage skills (like Virus)
+- Level-ups and caches share the same slot rules. Do caches draw from a rarer/stronger pool, or the same one? Same one.
+- What happens when a level-up offers nothing useful (all slots full and maxed)? Choice of heal or credits.
+- Can the player pick "nothing" or reroll the 3 choices? (Relates to pillar 3.) Good call, we can allow one reroll per level-up, but we can also allow to skip, however that will leave the player without any rewawrd for that level-up. This means we remove the max level, and allow the player to keep leveling.
 
 **Map and objectives**
 
-- How is the player guided to the objective: marker, compass arrow, vague hint (distance only), or nothing? Does guidance differ per objective type?
-- Map edge: plain invisible wall, or something diegetic (firewall, grid edge)? Is 10000x10000 px right? Walk time at current player speed will tell us; a target of roughly 60-90 s edge to edge is my suggestion.
-- Are objective locations visible from the start, revealed one at a time, or only when the previous is done?
-- What does failing a timed objective do: instant loss, penalty (time, credits, harder next objective), or skipped?
-- Run length target (minutes) and how many objectives for the prototype (3?). Does enemy difficulty scale with the run clock, with objective number, or both?
-- Goon: does it stand guard at the dossier or hunt the player? "Move straight at the player" is a stated rule, but "guards" suggests otherwise (aggro radius?).
-- Brute-force outposts: are they destructible structures with HP, or enemy spawners that go down when something is cleared? What do they shoot/spawn?
+- How is the player guided to the objective: marker, compass arrow, vague hint (distance only), or nothing? Does guidance differ per objective type? We should always have a compass to the closest objective
+- Map edge: plain invisible wall, or something diegetic (firewall, grid edge)? Is 10000x10000 px right? Walk time at current player speed will tell us; a target of roughly 60-90 s edge to edge is my suggestion. Good suggestion, and make it a visible wall, in the future we'll try to add some textures to make it clearer.
+- Are objective locations visible from the start, revealed one at a time, or only when the previous is done? All of them should be possible to find, and technically you can do them in any order, for now.
+- What does failing a timed objective do: instant loss, penalty (time, credits, harder next objective), or skipped? Honestly, thinking about our core pillars, timed objectives doesn't seem like fun.
+- Run length target (minutes) and how many objectives for the prototype (3?). Does enemy difficulty scale with the run clock, with objective number, or both? As time goes, more dangerous enemies should join, they are not defined yet however.
+- Goon: does it stand guard at the dossier or hunt the player? "Move straight at the player" is a stated rule, but "guards" suggests otherwise (aggro radius?). It should have an aggro radius, and if the player goes too far away he will go back to guarding. Unless he is being shot at or damaged by the player, then he'll chase
+- Brute-force outposts: are they destructible structures with HP, or enemy spawners that go down when something is cleared? What do they shoot/spawn? Should be a few structures, like 2-5. The more the less HP they should have, but not by much.
 
 **Hacking**
 
-- Arrow keys still move the player during a prompt, but WASD letters go to the prompt. What about the Smack prompt, which uses Space? (Space is not a movement key, so it should be fine, but worth confirming.)
-- Is the prompt sequence random per hack, a fixed order, or chosen by server difficulty? Can the same prompt appear twice?
-- Is typing case-sensitive and are typos forgiven (backspace, restart on mistake)? Non-US keyboard layouts (e.g. Swedish) make `!?-$#@&` awkward; do we keep those characters?
-- What does "damage halts progress 0.2 s" do during a prompt: nothing, or does it interrupt the prompt?
+- Arrow keys still move the player during a prompt, but WASD letters go to the prompt. What about the Smack prompt, which uses Space? (Space is not a movement key, so it should be fine, but worth confirming.) It's fine for now.
+- Is the prompt sequence random per hack, a fixed order, or chosen by server difficulty? Can the same prompt appear twice? We should only allow the same hacking type once per server. But when it appears can be random over the duration of the hack. Still, keep the min/max in mind.
+- Is typing case-sensitive and are typos forgiven (backspace, restart on mistake)? Non-US keyboard layouts (e.g. Swedish) make `!?-$#@&` awkward; do we keep those characters? I fixed the password to make it more intuitive and fun.
+- What does "damage halts progress 0.2 s" do during a prompt: nothing, or does it interrupt the prompt? Doesn't interrupt, but affects total progress, it however does not add more prompts to the hack, it'll just atke longer to finish.
 
 **Economy and meta**
 
-- Credits: auto-picked up (magnet radius) or walked over? Do they persist on death 100%, or is there a bonus for extracting?
-- Does extraction have its own gameplay (timed typing under fire, a safe zone) or is it a final prompt? What does a successful run give beyond a death run?
-- "Very rare permanent upgrades" from caches: are they permanent for the whole save, or just for the character? Where is that stored (browser localStorage is the only option on itch.io, so clearing site data would wipe it)?
-- Equipment: are items fixed-stat purchases, or do they have tiers/rarities/random rolls? One of each slot purchasable once, or upgradable?
-- Dash: which key, cooldown, and does it grant invulnerability?
+- Credits: auto-picked up (magnet radius) or walked over? Do they persist on death 100%, or is there a bonus for extracting? Should be picked up with a magnet radius, death is a full reset so shouldn't persist. End of run bonus for credits, yes.
+- Does extraction have its own gameplay (timed typing under fire, a safe zone) or is it a final prompt? What does a successful run give beyond a death run? The player should find the extraction point, which is their own 127.0.0.1 address, they also need to type "log out" at the extraction zone.
+- "Very rare permanent upgrades" from caches: are they permanent for the whole save, or just for the character? Where is that stored (browser localStorage is the only option on itch.io, so clearing site data would wipe it)? Yes, permanent upgrades for the "account", these items are equipped at the main menu.
+- Equipment: are items fixed-stat purchases, or do they have tiers/rarities/random rolls? One of each slot purchasable once, or upgradable? One-time buy/find, not upgradeable, these should be unique items.
+- Dash: which key, cooldown, and does it grant invulnerability? Dash should be acquired via "feet" items, not yet added. Shift key seems good for dashing.
 
 **Scope and consistency**
 
-- Meta progression is now in scope. Is the main-menu shop part of the prototype or a later milestone?
-- Win/lose screens: what stats do we show (kills, credits, time, level)?
+- Meta progression is now in scope. Is the main-menu shop part of the prototype or a later milestone? We should build this so we can test the item functionality.
+- Win/lose screens: what stats do we show (kills, credits, time, level)? Credits gained, any items found, which objectives we completed, and the level we finished on.
