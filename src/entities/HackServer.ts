@@ -82,7 +82,7 @@ export class HackServer {
     this.title.setPosition(x, barY - 36).setText(inRange ? TITLES[p.kind] : 'OUT OF RANGE, GET CLOSER');
     const py = barY - 58;
     if (p.kind === 'smack') {
-      this.base.setText(`[SPACE]  ${p.hits}/${p.hitsNeeded}`);
+      this.base.setText(`[E]${p.hits}/${p.hitsNeeded}`);
       this.typed.setText('');
     } else {
       this.base.setText(p.text);
