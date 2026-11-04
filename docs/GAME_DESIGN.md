@@ -58,7 +58,7 @@ Rules to check every feature against. Edit these first.
 - **Slots:** 10 total: 5 active skill slots (damage and nethacking skills) and 5 passive slots (these should be visualized in the UI). The two groups are separate: once all 5 active slots are filled, level-ups only offer new passives or upgrades to skills the player already has (and vice versa). Data caches follow the same rules, except the player gets no choice. Level-ups and caches draw from the same pool.
 - **Kinds (decided):** there are only **skills**: damage skills (e.g. Auto-Pistol, Virus), nethacking skills, and passive skills (which increase stats). "Weapon" is no longer a separate kind.
 - **Where they come from:** data caches found randomly on the map. Caches should be rare, can also drop from enemies in rare cases.
-- **Prototype roster:** 11 skills, 6 damage skills and 5 passives. In game so far: Auto-Pistol, Virus, Railgun, Scatter Gun and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE). One more damage skill is still to come.
+- **Prototype roster:** 11 skills, 6 damage skills and 5 passives. In game so far: all 6 damage skills (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock) and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE).
 - Each skill has per-level stat rows, defined in data (`src/data/skills.ts`).
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
@@ -76,7 +76,7 @@ Rules to check every feature against. Edit these first.
 | Railgun           | damage  | Fires superfast shots with a 3 second cooldown between each, pierces enemies along the way, targets the highest HP enemy within its long range, cannot shoot enemies within 75px                                                                                                                 | in game |
 | Scatter Gun | damage | Short-range spread of pellets at the nearest enemy; more pellets and pierce with levels | in game |
 | Synaptic Overload | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           | in game |
-| TBD | damage |  |  |
+| EMP Shock | damage | "Lights out, chrome." Every few seconds a ring pulses out from the player, damaging and briefly stunning every enemy it reaches. Levels give a bigger radius and a longer stun (and a little more damage and a faster pulse) | in game |
 | Firewall | passive | Flat damage reduction on every hit you take | in game |
 | Healing Nanites | passive | Increases the player's passive health regeneration | in game |
 | Exoskeleton | passive | Servo assisted legs, +5/10/15% move speed | in game |
@@ -88,6 +88,8 @@ Rules to check every feature against. Edit these first.
   - **Black ICE:** an enemy whose touch damages the player takes 4/8/12 damage back. Only touch damage triggers it (not bullets), and only when the hit actually lands, so it fires at most once per invulnerability window. Flat, not boosted by OverClock.
 
 - **Synaptic Overload (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
+
+- **EMP Shock (decided):** a single ring that expands from the player to its radius; every enemy it reaches takes damage and is stunned (stops moving and shooting, shown with a cyan tint). The pulse waits until at least one enemy is in range, so it is never wasted on an empty screen. A stunned ranged enemy also holds its fire until the stun ends. A new stun never shortens a longer one already running. The pulse never hurts the player. Damage is boosted by OverClock. Outposts are immune to the stun (they still take the damage). Boss-type enemies such as the Goon are stunned for half as long (`stunMultiplier` per enemy in `balance.ts`). The ring has no targeting: anything within its radius is hit. _(numbers are placeholders for Henrik's balancing)_
 
 TBD: level cap per skill (the player's own level is uncapped), evolutions/combinations.
 

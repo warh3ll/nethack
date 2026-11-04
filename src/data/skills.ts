@@ -51,6 +51,18 @@ export interface SynapticStats {
   cooldownMs: number
 }
 
+/** Stats for EMP Shock: a ring pulses out from the player, damaging and stunning enemies. */
+export interface EmpStats {
+  /** Damage to every enemy the ring reaches. */
+  damage: number
+  /** How far (px) the ring travels from the player. */
+  radius: number
+  /** How long (ms) enemies hit by the ring are stunned (they stop moving and shooting). */
+  stunMs: number
+  /** Time (ms) between pulses. */
+  cooldownMs: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -94,12 +106,24 @@ export interface SynapticSkill extends SkillBase {
   levels: SynapticStats[]
 }
 
+/** Pulse weapon: no projectiles, see entities/EmpShock.ts. */
+export interface EmpSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'emp'
+  levels: EmpStats[]
+}
+
 export interface PassiveSkill extends SkillBase {
   kind: 'passive'
   levels: PassiveStats[]
 }
 
-export type SkillData = WeaponSkill | VirusSkill | SynapticSkill | PassiveSkill
+export type SkillData =
+  | WeaponSkill
+  | VirusSkill
+  | SynapticSkill
+  | EmpSkill
+  | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
   autoPistol: {
@@ -357,6 +381,21 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
+  empShock: {
+    name: 'EMP Shock',
+    kind: 'weapon',
+    behavior: 'emp',
+    description:
+      'Lights out, chrome. A ring pulses out from you, damaging and briefly stunning enemies.',
+    color: 0x2ef2ff,
+    levels: [
+      { damage: 8, radius: 120, stunMs: 800, cooldownMs: 4000 },
+      { damage: 10, radius: 150, stunMs: 1100, cooldownMs: 3800 },
+      { damage: 13, radius: 180, stunMs: 1400, cooldownMs: 3600 },
+      { damage: 16, radius: 215, stunMs: 1700, cooldownMs: 3400 },
+      { damage: 20, radius: 250, stunMs: 2000, cooldownMs: 3200 },
+    ],
+  },
   firewall: {
     name: 'Firewall',
     kind: 'passive',
@@ -420,7 +459,7 @@ export const FALLBACK_UPGRADES = {
 export function getSkillStats(
   id: string,
   level: number,
-): WeaponStats | VirusStats | SynapticStats | PassiveStats {
+): WeaponStats | VirusStats | SynapticStats | EmpStats | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
@@ -432,7 +471,8 @@ export function getWeaponStats(id: string, level: number): WeaponStats {
   if (
     skill?.kind !== 'weapon' ||
     skill.behavior === 'virus' ||
-    skill.behavior === 'synaptic'
+    skill.behavior === 'synaptic' ||
+    skill.behavior === 'emp'
   )
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
@@ -458,6 +498,17 @@ export function getSynapticStats(id: string, level: number): SynapticStats {
   )
     throw new Error(`"${id}" is not a synaptic skill`)
   return getSkillStats(id, level) as SynapticStats
+}
+
+export function getEmpStats(id: string, level: number): EmpStats {
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as EmpSkill).behavior === 'emp'
+    )
+  )
+    throw new Error(`"${id}" is not an EMP skill`)
+  return getSkillStats(id, level) as EmpStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {

@@ -19,6 +19,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   maxHp = 0;
   stats!: EnemyType;
   infection: Infection | null = null;
+  /** Game time until which the enemy is stunned (no moving, no shooting). */
+  private stunnedUntil = 0;
+  private stunTinted = false;
   /** Guard post (guards only): where the enemy stands and returns to. */
   private homeX = 0;
   private homeY = 0;
@@ -32,6 +35,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.stats = ENEMIES[typeKey];
     this.hp = this.maxHp = hp ?? this.stats.hp;
     this.infection = null;
+    this.stunnedUntil = 0;
+    this.stunTinted = false;
     this.homeX = x;
     this.homeY = y;
     this.chasing = false;
@@ -60,7 +65,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   /** Per-frame behaviour: swarm enemies head straight for the player, guards follow their aggro rules. */
-  act(playerX: number, playerY: number) {
+  act(playerX: number, playerY: number, time: number) {
+    if (time < this.stunnedUntil) {
+      if (!this.stunTinted) this.applyStunTint();
+      return this.setVelocity(0, 0);
+    }
+    if (this.stunTinted) {
+      this.stunTinted = false;
+      this.clearTint();
+    }
     if (this.stats.stationary) return this.setVelocity(0, 0);
     const guard = this.stats.guard;
     if (!guard) {
@@ -91,6 +104,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   shotAngle(time: number, playerX: number, playerY: number): number | null {
     const ranged = this.stats.ranged;
     if (!ranged) return null;
+    if (time < this.stunnedUntil) {
+      // Stunned: no shots, and the cooldown is held so it doesn't fire the instant the stun ends.
+      if (this.nextShotAt >= 0) this.nextShotAt = Math.max(this.nextShotAt, this.stunnedUntil);
+      return null;
+    }
     if (!this.chasing) {
       this.nextShotAt = -1;
       return null;
@@ -100,6 +118,19 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) > ranged.range) return null;
     this.nextShotAt = time + ranged.cooldownMs;
     return Phaser.Math.Angle.Between(this.x, this.y, playerX, playerY);
+  }
+
+  /** Stuns for `ms` from game time `now`, scaled by the enemy's stunMultiplier. A shorter stun never cuts a longer one short. */
+  stun(now: number, ms: number) {
+    const duration = ms * (this.stats.stunMultiplier ?? 1);
+    if (duration <= 0) return;
+    this.stunnedUntil = Math.max(this.stunnedUntil, now + duration);
+    this.applyStunTint();
+  }
+
+  private applyStunTint() {
+    this.stunTinted = true;
+    this.setTint(0x2ef2ff).setTintMode(Phaser.TintModes.MULTIPLY);
   }
 
   /** A guard that is provoked chases regardless of distance until it dies. */
@@ -121,7 +152,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
     if (flash) {
       this.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL);
-      this.scene.time.delayedCall(60, () => this.active && this.clearTint());
+      this.scene.time.delayedCall(60, () => {
+        if (!this.active) return;
+        this.clearTint();
+        if (this.stunTinted) this.applyStunTint(); // still stunned: back to the stun colour
+      });
     }
     return false;
   }

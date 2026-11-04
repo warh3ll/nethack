@@ -69,6 +69,8 @@ export interface EnemyType {
   healthBar?: boolean
   /** Never moves and can't be pushed (outposts). */
   stationary?: boolean
+  /** Scales the length of any stun on this enemy (default 1; 0.5 = half as long, 0 = immune). */
+  stunMultiplier?: number
   /**
    * Guards its spawn point instead of swarming. Stands still until the player comes within
    * `aggroRadius`, chases while the player is within `leashRadius`, then walks back to its post.
@@ -128,6 +130,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     radius: 28,
     color: 0xff8a2e,
     healthBar: true,
+    stunMultiplier: 0.5,
     guard: { aggroRadius: 380, leashRadius: 700 },
     ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
   },
@@ -144,6 +147,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     color: 0x9b5cff,
     healthBar: true,
     stationary: true,
+    stunMultiplier: 0,
   },
 }
 

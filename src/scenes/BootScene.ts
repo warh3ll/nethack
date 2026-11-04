@@ -44,7 +44,7 @@ export class BootScene extends Phaser.Scene {
     }
 
     for (const [key, s] of Object.entries(SKILLS)) {
-      if (s.kind !== 'weapon' || s.behavior === 'virus' || s.behavior === 'synaptic') continue;
+      if (s.kind !== 'weapon' || s.behavior === 'virus' || s.behavior === 'synaptic' || s.behavior === 'emp') continue;
       // Fast bullets are drawn long: the physics body is as wide as the texture, so they can't skip over enemies between frames.
       const w = s.levels.some((l) => (l as { projectileSpeed: number }).projectileSpeed > 1000) ? 32 : 10;
       g.fillStyle(s.color).fillRect(0, 0, w, 4);
