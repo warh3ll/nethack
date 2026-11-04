@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance';
-import { FALLBACK_UPGRADE, SKILLS, getPassiveStats, maxSkillLevel } from '../data/skills';
+import { FALLBACK_UPGRADES, SKILLS, getPassiveStats, maxSkillLevel } from '../data/skills';
 
 /** The player's live stats: base values from balance.ts plus all passive bonuses. */
 export interface PlayerStats {
@@ -13,7 +13,10 @@ export interface PlayerStats {
 export type Upgrade =
   /** Learn a skill (toLevel 1) or raise one the player already has. */
   | { type: 'skill'; skillId: string; toLevel: number }
-  | { type: 'heal'; amount: number };
+  /** Restores this fraction of max HP (fallback choice). */
+  | { type: 'heal'; fraction: number }
+  /** Grants credits for the run (fallback choice). */
+  | { type: 'credits'; amount: number };
 
 /** XP needed to go from `level` to `level + 1`. */
 export function xpToNextLevel(level: number): number {
@@ -83,7 +86,12 @@ export class Progression {
   /** Random distinct upgrade choices. On a reroll, pass the previous choices: those are only repeated if the pool is too small. */
   rollUpgrades(count = LEVELING.choices, previous: Upgrade[] = []): Upgrade[] {
     const options = this.offerPool();
-    if (options.length === 0) return [{ type: 'heal', amount: FALLBACK_UPGRADE.heal }];
+    if (options.length === 0) {
+      return [
+        { type: 'heal', fraction: FALLBACK_UPGRADES.heal.fraction },
+        { type: 'credits', amount: FALLBACK_UPGRADES.credits.amount },
+      ];
+    }
     const seen = (u: Upgrade) => previous.some((p) => p.type === 'skill' && u.type === 'skill' && p.skillId === u.skillId);
     const fresh = Phaser.Utils.Array.Shuffle(options.filter((u) => !seen(u)));
     const repeats = Phaser.Utils.Array.Shuffle(options.filter(seen));

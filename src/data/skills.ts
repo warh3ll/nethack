@@ -228,11 +228,10 @@ export const SKILLS: Record<string, SkillData> = {
   },
 }
 
-/** Offered when every owned skill is maxed and no slot is free (or no skill is left to offer). */
-export const FALLBACK_UPGRADE = {
-  name: 'Patch Up',
-  description: 'Restore HP.',
-  heal: 30,
+/** Offered together when every owned skill is maxed and no slot is free (or no skill is left to offer). */
+export const FALLBACK_UPGRADES = {
+  heal: { name: 'Patch Up', description: 'Restore HP.', fraction: 0.3 },
+  credits: { name: 'Cash Out', description: 'Take credits instead.', amount: 15 },
 }
 
 export function getSkillStats(

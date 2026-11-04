@@ -8,6 +8,7 @@ import { CreditChip } from '../entities/CreditChip';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
+import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
@@ -74,6 +75,7 @@ export class GameScene extends Phaser.Scene {
     this.pendingLevelUps = 0;
     this.progression = new Progression(STARTING_SKILL);
 
+    createParallax(this);
     createMap(this);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
@@ -238,7 +240,7 @@ export class GameScene extends Phaser.Scene {
   private showUpgradePicker() {
     const level = this.progression.level - this.pendingLevelUps + 1;
     const choices = this.progression.rollUpgrades();
-    // A heal fallback has nothing to reroll; a reroll with nothing new to show is hidden too.
+    // The heal/credits fallback has nothing to reroll; a reroll with nothing new to show is hidden too.
     const rerolls = this.progression.canReroll() ? LEVELING.rerolls : 0;
     new LevelUpPicker(this, level, choices, rerolls, (current) => (this.progression.canReroll() ? this.progression.rollUpgrades(LEVELING.choices, current) : null), (u) => {
       if (u) this.applyUpgrade(u); // null = skipped: no reward
@@ -254,7 +256,11 @@ export class GameScene extends Phaser.Scene {
 
   private applyUpgrade(u: Upgrade) {
     if (u.type === 'heal') {
-      this.player.heal(u.amount);
+      this.player.heal(this.player.maxHp * u.fraction);
+      return;
+    }
+    if (u.type === 'credits') {
+      this.credits += u.amount;
       return;
     }
     const hpBefore = this.player.maxHp;
