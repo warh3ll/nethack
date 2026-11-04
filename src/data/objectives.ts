@@ -13,7 +13,7 @@ export interface ObjectiveDef {
   y: number
 }
 
-/** The objectives of one run, completed in this order. Placeholder positions until the map exists. */
+/** The objectives of one run, completable in any order. Placeholder positions until the map exists. */
 export const RUN_OBJECTIVES: ObjectiveDef[] = [
   { id: 'hack1', type: 'hackServer', name: 'Hack server 1', x: 700, y: -450 },
   { id: 'hack2', type: 'hackServer', name: 'Hack server 2', x: -1100, y: -900 },

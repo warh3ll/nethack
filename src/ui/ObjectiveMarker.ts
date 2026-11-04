@@ -8,7 +8,7 @@ const SIZE = 12;
 const COLOR = 0xffd23e;
 
 /**
- * Arrow at the edge of the screen pointing at the current objective, with the distance next to it.
+ * Compass: arrow at the edge of the screen pointing at the closest unfinished objective, with the distance next to it.
  * Hidden while the objective is on screen.
  */
 export class ObjectiveMarker {
