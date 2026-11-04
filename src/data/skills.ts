@@ -42,8 +42,10 @@ export interface VirusStats {
  * (not the step from the previous level). Bonuses from all passives are added together.
  */
 export interface PassiveStats {
+  /** Damage dealt to enemies that hit the player. */
+  damage?: number
   /** Flat extra max HP. */
-  maxHp?: number
+  damageReduction?: number
   /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
   hpRegenPerSec?: number
   /** Percent extra move speed (10 = +10%). */
@@ -137,28 +139,115 @@ export const SKILLS: Record<string, SkillData> = {
     name: 'Virus',
     kind: 'weapon',
     behavior: 'virus',
-    description: 'Infects an enemy for slow damage over time. When it dies, the infection spreads.',
+    description:
+      'Infects an enemy for slow damage over time. When it dies, the infection spreads.',
     color: 0x5fe08a,
     levels: [
-      { dps: 2, cooldownMs: 1500, infectRange: 400, spreadRange: 200, spreadCount: 1, tickMs: 250 },
-      { dps: 3, cooldownMs: 1500, infectRange: 420, spreadRange: 200, spreadCount: 1, tickMs: 250 },
-      { dps: 4, cooldownMs: 1500, infectRange: 440, spreadRange: 200, spreadCount: 1, tickMs: 250 },
-      { dps: 5.5, cooldownMs: 1500, infectRange: 460, spreadRange: 200, spreadCount: 2, tickMs: 250 },
-      { dps: 7, cooldownMs: 1500, infectRange: 480, spreadRange: 200, spreadCount: 2, tickMs: 250 },
+      {
+        dps: 2,
+        cooldownMs: 1500,
+        infectRange: 400,
+        spreadRange: 200,
+        spreadCount: 1,
+        tickMs: 250,
+      },
+      {
+        dps: 3,
+        cooldownMs: 1500,
+        infectRange: 420,
+        spreadRange: 200,
+        spreadCount: 1,
+        tickMs: 250,
+      },
+      {
+        dps: 4,
+        cooldownMs: 1500,
+        infectRange: 440,
+        spreadRange: 200,
+        spreadCount: 1,
+        tickMs: 250,
+      },
+      {
+        dps: 5.5,
+        cooldownMs: 1500,
+        infectRange: 460,
+        spreadRange: 200,
+        spreadCount: 2,
+        tickMs: 250,
+      },
+      {
+        dps: 7,
+        cooldownMs: 1500,
+        infectRange: 480,
+        spreadRange: 200,
+        spreadCount: 2,
+        tickMs: 250,
+      },
     ],
   },
 
   railgun: {
     name: 'Railgun',
     kind: 'weapon',
-    description: 'Slow, superfast piercing shot at the toughest enemy in long range. Cannot hit close targets.',
+    description:
+      'Slow, superfast piercing shot at the toughest enemy in long range. Cannot hit close targets.',
     color: 0xff4fd8,
     levels: [
-      { damage: 40, cooldownMs: 3000, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 700, minRange: 75, targeting: 'highestHp' },
-      { damage: 52, cooldownMs: 2800, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 750, minRange: 75, targeting: 'highestHp' },
-      { damage: 66, cooldownMs: 2600, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 800, minRange: 75, targeting: 'highestHp' },
-      { damage: 82, cooldownMs: 2400, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 850, minRange: 75, targeting: 'highestHp' },
-      { damage: 100, cooldownMs: 2200, projectileSpeed: 1800, pierce: 99, projectiles: 1, spreadDeg: 0, range: 900, minRange: 75, targeting: 'highestHp' },
+      {
+        damage: 40,
+        cooldownMs: 3000,
+        projectileSpeed: 1800,
+        pierce: 99,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 700,
+        minRange: 75,
+        targeting: 'highestHp',
+      },
+      {
+        damage: 52,
+        cooldownMs: 2800,
+        projectileSpeed: 1800,
+        pierce: 99,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 750,
+        minRange: 75,
+        targeting: 'highestHp',
+      },
+      {
+        damage: 66,
+        cooldownMs: 2600,
+        projectileSpeed: 1800,
+        pierce: 99,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 800,
+        minRange: 75,
+        targeting: 'highestHp',
+      },
+      {
+        damage: 82,
+        cooldownMs: 2400,
+        projectileSpeed: 1800,
+        pierce: 99,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 850,
+        minRange: 75,
+        targeting: 'highestHp',
+      },
+      {
+        damage: 100,
+        cooldownMs: 2200,
+        projectileSpeed: 1800,
+        pierce: 99,
+        projectiles: 1,
+        spreadDeg: 0,
+        range: 900,
+        minRange: 75,
+        targeting: 'highestHp',
+      },
     ],
   },
 
@@ -197,40 +286,60 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
-  armorPlating: {
-    name: 'Armor Plating',
+  firewall: {
+    name: 'Firewall',
     kind: 'passive',
-    description: 'More max HP.',
+    description: 'Reduces incoming damage.',
     color: 0x9aa7c7,
-    levels: [{ maxHp: 20 }, { maxHp: 40 }, { maxHp: 60 }],
+    levels: [
+      { damageReduction: 1 },
+      { damageReduction: 2 },
+      { damageReduction: 3 },
+    ],
   },
-  naniteRepair: {
-    name: 'Nanite Repair',
+  healingNanites: {
+    name: 'Healing Nanites',
     kind: 'passive',
     description: 'Faster health regeneration.',
     color: 0x5fe08a,
-    levels: [{ hpRegenPerSec: 0.1 }, { hpRegenPerSec: 0.25 }, { hpRegenPerSec: 0.5 }],
+    levels: [
+      { hpRegenPerSec: 0.5 },
+      { hpRegenPerSec: 0.75 },
+      { hpRegenPerSec: 1 },
+    ],
   },
   legServos: {
-    name: 'Leg Servos',
+    name: 'Exoskeleton',
     kind: 'passive',
-    description: 'Faster movement.',
+    description: 'Servo assisted legs for faster movement.',
     color: 0x2ef2ff,
-    levels: [{ moveSpeedPct: 8 }, { moveSpeedPct: 16 }, { moveSpeedPct: 24 }],
+    levels: [{ moveSpeedPct: 5 }, { moveSpeedPct: 10 }, { moveSpeedPct: 15 }],
   },
   overclock: {
-    name: 'Overclock',
+    name: 'OverClock',
     kind: 'passive',
-    description: 'More damage from everything you fire.',
+    description: 'CPU upgrade. Increased damage for all weapons.',
     color: 0xff9d2e,
-    levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
+    levels: [{ damagePct: 3 }, { damagePct: 6 }, { damagePct: 9 }],
+  },
+  blackICE: {
+    name: 'Black ICE',
+    kind: 'passive',
+    description:
+      'Your internal ICE is now upgraded to retaliate against enemies that hit you',
+    color: 0xff9d2e,
+    levels: [{ damage: 4 }, { damage: 8 }, { damage: 12 }],
   },
 }
 
 /** Offered together when every owned skill is maxed and no slot is free (or no skill is left to offer). */
 export const FALLBACK_UPGRADES = {
   heal: { name: 'Patch Up', description: 'Restore HP.', fraction: 0.3 },
-  credits: { name: 'Cash Out', description: 'Take credits instead.', amount: 15 },
+  credits: {
+    name: 'Payday',
+    description: 'Take credits instead.',
+    amount: 15,
+  },
 }
 
 export function getSkillStats(
@@ -251,7 +360,12 @@ export function getWeaponStats(id: string, level: number): WeaponStats {
 }
 
 export function getVirusStats(id: string, level: number): VirusStats {
-  if (!(SKILLS[id]?.kind === 'weapon' && (SKILLS[id] as VirusSkill).behavior === 'virus'))
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as VirusSkill).behavior === 'virus'
+    )
+  )
     throw new Error(`"${id}" is not a virus skill`)
   return getSkillStats(id, level) as VirusStats
 }

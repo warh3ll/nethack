@@ -17,9 +17,9 @@ export const PLAYER = {
   /** How long after a shot the player keeps the shooting pose. */
   shootingPoseMs: 350,
   /** Animation speed (frames per second; every sheet has 8 frames). */
-  animFps: 8,
+  animFps: 12,
   /** Death animation speed, and how long the last frame is held before the results screen. */
-  deathFps: 8,
+  deathFps: 12,
   deathHoldMs: 700,
 }
 
