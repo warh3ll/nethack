@@ -21,6 +21,23 @@ export interface EnemyType {
   xp: number
   radius: number
   color: number
+  /** Show a small health bar above the enemy. */
+  healthBar?: boolean
+  /**
+   * Guards its spawn point instead of swarming. Stands still until the player comes within
+   * `aggroRadius`, chases while the player is within `leashRadius`, then walks back to its post.
+   * Damaging it makes it chase regardless of distance.
+   */
+  guard?: { aggroRadius: number; leashRadius: number }
+  /** Shoots at the player while chasing and within `range`. */
+  ranged?: {
+    damage: number
+    /** Bullet speed in pixels/second. */
+    speed: number
+    /** How far a bullet flies, and how close the player must be for the enemy to shoot. */
+    range: number
+    cooldownMs: number
+  }
 }
 
 export const ENEMIES: Record<string, EnemyType> = {
@@ -31,6 +48,18 @@ export const ENEMIES: Record<string, EnemyType> = {
     xp: 1,
     radius: 11,
     color: 0xff2e88,
+  },
+  // Miniboss that guards the dossier in the Encryption Key objective. Not part of the random swarm.
+  goon: {
+    hp: 150,
+    speed: 130,
+    contactDamage: 20,
+    xp: 15,
+    radius: 28,
+    color: 0xff8a2e,
+    healthBar: true,
+    guard: { aggroRadius: 380, leashRadius: 700 },
+    ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
   },
 }
 

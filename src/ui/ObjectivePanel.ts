@@ -57,7 +57,7 @@ export class ObjectivePanel {
       const state = states[i];
       const mark = state === 'done' ? '[x]' : state === 'active' ? '[>]' : '[ ]';
       // Show progress for anything started but unfinished (it decays when the player leaves).
-      const p = entry.hack.progress;
+      const p = entry.hack?.progress ?? 0;
       const pct = !entry.done && p > 0 ? `${Math.floor(p * 100)}%` : '';
       // Monospace: pad the name so the percentage lines up on the right.
       this.rows[i].setText(`${mark} ${entry.def.name.padEnd(19)}${pct.padStart(4)}`);

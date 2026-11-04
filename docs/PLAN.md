@@ -17,6 +17,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [ ] Large bounded map (~10000x10000) with a visible boundary wall; tune walk time to 60-90 s edge to edge (s7)
 - [ ] Camera and background so movement across the map is readable
 - [ ] Run clock in the HUD (elapsed time only) (s7)
+- [ ] HUD: remove the enemies counter; add credits and items-found counters once those exist (s10)
 - [x] Compass pointing at the closest unfinished objective (s7)
 - [ ] Random objective placement per run, 3-5 objectives, max two of one type (s7)
 - [x] Objectives completable in any order (replace the fixed order in `RUN_OBJECTIVES`) (s7)
@@ -39,21 +40,21 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 ## 4. Data caches
 - [ ] Caches scattered randomly on the map, rare (s3, s5)
 - [ ] Opening a cache grants a skill/passive using the slot rules, no choice (s5)
-- [ ] Rare cache/enemy drops of permanent items (s4b)
+- [ ] Rare drops of permanent items from a separate find-only list; about 2.5% of caches (s4b)
 - [ ] Cache-opening UI (s10)
 
 ## 5. Enemies
-- [ ] Goon miniboss: large, health bar, aggro radius, returns to guard, chases when damaged (s6)
+- [x] Goon miniboss: large, health bar, aggro radius, returns to guard, chases when damaged, shoots at the player, hunts forever once the dossier is taken (s6)
 - [ ] Enemy difficulty scaling with the run clock (s6)
 - [ ] New dangerous enemy types joining over time (designs TBD) (s6)
 
 ## 6. More objective types
-- [ ] Encryption Key: Goon guards a dossier (s7)
+- [x] Encryption Key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
 - [ ] Brute-force: 2-5 destructible outposts that spawn drones, then a pick-up secrets object (s7)
-- [ ] Fourth objective type for variety (see open questions)
+- [ ] Connect servers: grab a cable with E, attach it to a server 75-125 px away by holding E for 2.5 s (damage resets), with a cable line drawn (s7)
 
 ## 7. Economy and meta
-- [ ] Credit chip drops from enemies with magnet pickup (s6, s9)
+- [ ] Credit chip drops from enemies with magnet pickup: Drone 1, Goon 5 (placeholders in `balance.ts`) (s6, s9)
 - [ ] Credits persist across runs, kept on death, extraction bonus (s9)
 - [ ] Save to localStorage, plus export/import save code (s9)
 - [ ] Main menu scene (start run, shop, equipment) (s9)

@@ -5,7 +5,7 @@
 
 export interface ObjectiveDef {
   id: string
-  type: 'hackServer'
+  type: 'hackServer' | 'encryptionKey'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
   /** World position, relative to the player's start (0, 0). */
@@ -18,7 +18,16 @@ export const RUN_OBJECTIVES: ObjectiveDef[] = [
   { id: 'hack1', type: 'hackServer', name: 'Hack server 1', x: 700, y: -450 },
   { id: 'hack2', type: 'hackServer', name: 'Hack server 2', x: -1100, y: -900 },
   { id: 'hack3', type: 'hackServer', name: 'Hack server 3', x: 1500, y: 900 },
+  { id: 'key1', type: 'encryptionKey', name: 'Encryption key', x: -900, y: 800 },
 ]
+
+/** Encryption Key objective: a Goon stands guard next to a dossier; walking onto the dossier takes the key. */
+export const ENCRYPTION_KEY = {
+  /** The player picks up the dossier within this distance of it. */
+  pickupRadius: 36,
+  /** The Goon's guard post, relative to the dossier. */
+  goonOffset: { x: 70, y: 0 },
+}
 
 /** The extraction point (the player's own 127.0.0.1). Appears once the last objective is done. */
 export const EXTRACTION = {
