@@ -114,6 +114,8 @@ export const HACK = {
   promptCount: { min: 2, max: 3 },
   smackHits: { min: 8, max: 15 },
   injectWordCount: { min: 2, max: 4 },
+  /** Digits in a PIN prompt. */
+  pinLength: 4,
 }
 
 /**
