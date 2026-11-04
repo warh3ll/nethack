@@ -37,6 +37,20 @@ export interface VirusStats {
   tickMs: number
 }
 
+/** Stats for Synaptic Collapse: hack a random nearby enemy, it dies and explodes. */
+export interface SynapticStats {
+  /** Time (ms) the hack takes to upload. It restarts if the target dies or leaves the range band. */
+  hackMs: number
+  /** Targets are picked at random between minRange and maxRange from the player. */
+  minRange: number
+  maxRange: number
+  /** Damage to every other enemy within `radius` of the target when it explodes. */
+  damage: number
+  radius: number
+  /** Pause (ms) after an explosion before the next hack starts. */
+  cooldownMs: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -73,12 +87,19 @@ export interface VirusSkill extends SkillBase {
   levels: VirusStats[]
 }
 
+/** Hacking-type weapon: no projectiles, see entities/SynapticCollapse.ts. */
+export interface SynapticSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'synaptic'
+  levels: SynapticStats[]
+}
+
 export interface PassiveSkill extends SkillBase {
   kind: 'passive'
   levels: PassiveStats[]
 }
 
-export type SkillData = WeaponSkill | VirusSkill | PassiveSkill
+export type SkillData = WeaponSkill | VirusSkill | SynapticSkill | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
   autoPistol: {
@@ -286,6 +307,21 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
+  synapticCollapse: {
+    name: 'Synaptic Collapse',
+    kind: 'weapon',
+    behavior: 'synaptic',
+    description:
+      'Uploads a hack to a random enemy nearby. When it finishes, the enemy dies and explodes, hurting those around it.',
+    color: 0x4d7cff,
+    levels: [
+      { hackMs: 1500, minRange: 50, maxRange: 150, damage: 20, radius: 70, cooldownMs: 800 },
+      { hackMs: 1350, minRange: 50, maxRange: 150, damage: 30, radius: 85, cooldownMs: 800 },
+      { hackMs: 1200, minRange: 50, maxRange: 150, damage: 42, radius: 100, cooldownMs: 800 },
+      { hackMs: 1050, minRange: 50, maxRange: 150, damage: 56, radius: 115, cooldownMs: 800 },
+      { hackMs: 900, minRange: 50, maxRange: 150, damage: 72, radius: 130, cooldownMs: 800 },
+    ],
+  },
   firewall: {
     name: 'Firewall',
     kind: 'passive',
@@ -349,7 +385,7 @@ export const FALLBACK_UPGRADES = {
 export function getSkillStats(
   id: string,
   level: number,
-): WeaponStats | VirusStats | PassiveStats {
+): WeaponStats | VirusStats | SynapticStats | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
   const i = Math.min(Math.max(level, 1), skill.levels.length) - 1
@@ -358,7 +394,7 @@ export function getSkillStats(
 
 export function getWeaponStats(id: string, level: number): WeaponStats {
   const skill = SKILLS[id]
-  if (skill?.kind !== 'weapon' || skill.behavior === 'virus')
+  if (skill?.kind !== 'weapon' || skill.behavior === 'virus' || skill.behavior === 'synaptic')
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
 }
@@ -372,6 +408,12 @@ export function getVirusStats(id: string, level: number): VirusStats {
   )
     throw new Error(`"${id}" is not a virus skill`)
   return getSkillStats(id, level) as VirusStats
+}
+
+export function getSynapticStats(id: string, level: number): SynapticStats {
+  if (!(SKILLS[id]?.kind === 'weapon' && (SKILLS[id] as SynapticSkill).behavior === 'synaptic'))
+    throw new Error(`"${id}" is not a synaptic skill`)
+  return getSkillStats(id, level) as SynapticStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {

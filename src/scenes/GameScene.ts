@@ -13,6 +13,7 @@ import { createMap } from '../entities/MapWall';
 import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
+import { SynapticCollapse } from '../entities/SynapticCollapse';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
@@ -36,7 +37,7 @@ export class GameScene extends Phaser.Scene {
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
   private caches: DataCache[] = [];
-  private weapons: (Weapon | Virus)[] = [];
+  private weapons: (Weapon | Virus | SynapticCollapse)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
@@ -345,13 +346,16 @@ export class GameScene extends Phaser.Scene {
     const existing = this.weapons.find((w) => w.skillId === u.skillId);
     if (existing) existing.level = u.toLevel;
     else if (skill.behavior === 'virus') {
-      this.weapons.push(new Virus(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onInfectionKill(e)));
+      this.weapons.push(new Virus(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onSkillKill(e)));
+    } else if (skill.behavior === 'synaptic') {
+      this.weapons.push(new SynapticCollapse(u.skillId, this.player, this.enemies, this.progression.stats, this, (e) => this.onSkillKill(e)));
     } else {
       this.weapons.push(new Weapon(u.skillId, this.player, this.enemies, this.bullets, this.progression.stats));
     }
   }
 
-  private onInfectionKill(enemy: Enemy) {
+  /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Collapse). */
+  private onSkillKill(enemy: Enemy) {
     this.kills++;
     this.gainXp(enemy.stats.xp);
   }

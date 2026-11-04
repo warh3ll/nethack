@@ -58,7 +58,7 @@ Rules to check every feature against. Edit these first.
 - **Slots:** 10 total: 5 active skill slots (damage and nethacking skills) and 5 passive slots (these should be visualized in the UI). The two groups are separate: once all 5 active slots are filled, level-ups only offer new passives or upgrades to skills the player already has (and vice versa). Data caches follow the same rules, except the player gets no choice. Level-ups and caches draw from the same pool.
 - **Kinds (decided):** there are only **skills**: damage skills (e.g. Auto-Pistol, Virus), nethacking skills, and passive skills (which increase stats). "Weapon" is no longer a separate kind.
 - **Where they come from:** data caches found randomly on the map. Caches should be rare, can also drop from enemies in rare cases.
-- **Prototype roster:** 11 skills, 6 damage skills and 5 passives. In game so far: Auto-Pistol, Virus, Railgun, Scatter Gun and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE). Synaptic Collapse and one more damage skill are still to come.
+- **Prototype roster:** 11 skills, 6 damage skills and 5 passives. In game so far: Auto-Pistol, Virus, Railgun, Scatter Gun and all 5 passives (Firewall, Healing Nanites, Exoskeleton, OverClock, Black ICE). One more damage skill is still to come.
 - Each skill has per-level stat rows, defined in data (`src/data/skills.ts`).
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
@@ -75,7 +75,7 @@ Rules to check every feature against. Edit these first.
 | Virus             | damage  | Hacking weapon. Infects an enemy within 400 range for slow damage over time; when an infected enemy dies it spreads to another enemy within 200 range. Strong against dense swarms. Levels raise the damage over time and slightly raise infection range; levels 4-5 spread to up to two enemies | in game |
 | Railgun           | damage  | Fires superfast shots with a 3 second cooldown between each, pierces enemies along the way, targets the highest HP enemy within its long range, cannot shoot enemies within 75px                                                                                                                 | in game |
 | Scatter Gun | damage | Short-range spread of pellets at the nearest enemy; more pellets and pierce with levels | in game |
-| Synaptic Collapse | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           |         |
+| Synaptic Collapse | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           | in game |
 | TBD | damage |  |  |
 | Firewall | passive | Flat damage reduction on every hit you take | in game |
 | Healing Nanites | passive | Increases the player's passive health regeneration | in game |
@@ -86,6 +86,8 @@ Rules to check every feature against. Edit these first.
 - **Passive rules (decided):** each passive has 3 levels and each level row is the passive's total bonus. Bonuses from all passives are added together and re-summed from scratch on every change.
   - **Firewall:** flat damage taken off every hit (-1/-2/-3). A hit never does less than 1 damage (`PLAYER.minDamageTaken`).
   - **Black ICE:** an enemy whose touch damages the player takes 4/8/12 damage back. Only touch damage triggers it (not bullets), and only when the hit actually lands, so it fires at most once per invulnerability window. Flat, not boosted by OverClock.
+
+- **Synaptic Collapse (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
 
 TBD: level cap per skill (the player's own level is uncapped), evolutions/combinations.
 
@@ -163,7 +165,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 ## 12. Technical constraints that shape design
 
 - Hundreds of enemies on screen: object pooling is mandatory, and `maxEnemies` caps the swarm.
-- All tuning numbers live in `src/data/` (`balance.ts`, `skills.ts`, `guns.ts`) so balancing needs no logic changes.
+- All tuning numbers live in `src/data/` (`balance.ts`, `skills.ts`) so balancing needs no logic changes.
 - The game must stay playable after every change.
 - Always adhere to the design pillars in section 2.
 - Ask Henrik if unsure during a build, propose options

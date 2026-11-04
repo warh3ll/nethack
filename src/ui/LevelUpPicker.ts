@@ -14,6 +14,8 @@ const LABELS: Record<string, string> = {
   infectRange: 'infect range',
   spreadRange: 'spread range',
   spreadCount: 'spreads to',
+  hackMs: 'hack time ms',
+  radius: 'blast radius',
   damageReduction: 'damage reduction',
   retaliationDamage: 'retaliation damage',
   hpRegenPerSec: 'HP regen/sec',
@@ -22,7 +24,7 @@ const LABELS: Record<string, string> = {
 };
 
 /** Stats shown on a new weapon's card (the rest are noise at a glance). */
-const NEW_WEAPON_KEYS = ['damage', 'cooldownMs', 'projectiles', 'range', 'dps', 'infectRange', 'spreadRange', 'spreadCount'];
+const NEW_WEAPON_KEYS = ['damage', 'cooldownMs', 'projectiles', 'range', 'dps', 'infectRange', 'spreadRange', 'spreadCount', 'hackMs', 'radius'];
 
 /** Ignore clicks and key presses this long after the picker opens, so a click or mashed key from just before doesn't pick by accident. */
 const ARM_DELAY_MS = 300;
