@@ -19,6 +19,7 @@ export class CableServers {
   private cable: Phaser.GameObjects.Graphics;
   private bar: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
+  private labelOffset = (SERVER.frameSize * SERVER.spriteScale) / 2 + 42;
 
   constructor(
     private scene: Phaser.Scene,
@@ -54,7 +55,7 @@ export class CableServers {
     if (!state.grabbed) {
       this.label.setText(nearA || nearB ? '[E] GRAB CABLE' : 'GRAB CABLE AT EITHER SERVER');
       const nearest = nearB && !nearA ? this.b : this.a;
-      this.label.setPosition(nearest.x, nearest.y - 70);
+      this.label.setPosition(nearest.x, nearest.y - this.labelOffset);
       return;
     } else if (state.attachMs > 0) {
       this.label.setText('ATTACHING...');
@@ -63,7 +64,7 @@ export class CableServers {
     } else {
       this.label.setText(nearTarget ? 'HOLD [E] TO ATTACH' : 'BRING THE CABLE HERE  ([E] DROP)');
     }
-    this.label.setPosition(at.x, at.y - 70);
+    this.label.setPosition(at.x, at.y - this.labelOffset);
   }
 
   private ring(p: { x: number; y: number }, radius: number, active: boolean) {
