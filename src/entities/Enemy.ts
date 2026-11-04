@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ENEMIES, EnemyType } from '../data/balance';
+import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
 
 /** Scene event fired when an enemy dies, with the enemy as argument. */
 export const ENEMY_KILLED = 'enemy-killed';
@@ -12,7 +13,7 @@ export interface Infection {
 }
 
 /** Pooled enemy. Never destroyed during a run: spawn() reuses it, kill() returns it to the pool. */
-export class Enemy extends Phaser.Physics.Arcade.Image {
+export class Enemy extends Phaser.Physics.Arcade.Sprite {
   hp = 0;
   /** Starting hp of this spawn (may differ from stats.hp), for health bars. */
   maxHp = 0;
@@ -36,9 +37,20 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
     this.chasing = false;
     this.provoked = false;
     this.nextShotAt = -1;
-    this.setTexture(`enemy-${typeKey}`);
     this.enableBody(true, x, y, true, true);
-    this.body!.setCircle(this.stats.radius);
+    const sprite = ENEMY_SPRITES[typeKey];
+    if (sprite) {
+      // Animated sheet: the hit circle (world pixels) is centred on the frame, its offset is in unscaled frame pixels.
+      const key = enemyAnimKey(typeKey, MOVE_STATE);
+      this.setTexture(key).setScale(sprite.scale).play(key);
+      const k = this.stats.radius / sprite.scale;
+      this.body!.setCircle(this.stats.radius, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
+    } else {
+      // Pooled enemies are reused, so undo any sprite state left by a previous type.
+      this.anims.stop();
+      this.setTexture(`enemy-${typeKey}`).setScale(1);
+      this.body!.setCircle(this.stats.radius);
+    }
     // The swarm shoves itself around; this keeps it from being pushed through the wall.
     this.setCollideWorldBounds(true);
     // Stationary: frozen in place (no integration, can't be pushed). Pooled bodies must be reset for other types.
