@@ -37,7 +37,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
-- [ ] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5)
+- [x] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5). `Progression.offerPool()` checks the free slot per kind; not yet reachable in play since there are fewer than 5 skills per group
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
 - [ ] Replace the `[PH]` passives with the real 5, including Health Regen (s4, s5). Base regen (0.1 HP/s) and a `[PH] Nanite Repair` passive are in; the real Health Regen passive is still to do
