@@ -75,7 +75,7 @@ Rules to check every feature against. Edit these first.
 | Virus             | damage  | Hacking weapon. Infects an enemy within 400 range for slow damage over time; when an infected enemy dies it spreads to another enemy within 200 range. Strong against dense swarms. Levels raise the damage over time and slightly raise infection range; levels 4-5 spread to up to two enemies | in game |
 | Railgun           | damage  | Fires superfast shots with a 3 second cooldown between each, pierces enemies along the way, targets the highest HP enemy within its long range, cannot shoot enemies within 75px                                                                                                                 | in game |
 | Scatter Gun | damage | Short-range spread of pellets at the nearest enemy; more pellets and pierce with levels | in game |
-| Synaptic Collapse | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           | in game |
+| Synaptic Overload | damage  | Picks a target between 50-150px away, while they are in that range, a hack is being uploaded over 1.5 seconds, if it finishes that enemy is killed and explodes, hurting all enemies around it, damage and area increase with every level, and hacking time decreases.                           | in game |
 | TBD | damage |  |  |
 | Firewall | passive | Flat damage reduction on every hit you take | in game |
 | Healing Nanites | passive | Increases the player's passive health regeneration | in game |
@@ -87,7 +87,7 @@ Rules to check every feature against. Edit these first.
   - **Firewall:** flat damage taken off every hit (-1/-2/-3). A hit never does less than 1 damage (`PLAYER.minDamageTaken`).
   - **Black ICE:** an enemy whose touch damages the player takes 4/8/12 damage back. Only touch damage triggers it (not bullets), and only when the hit actually lands, so it fires at most once per invulnerability window. Flat, not boosted by OverClock.
 
-- **Synaptic Collapse (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
+- **Synaptic Overload (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
 
 TBD: level cap per skill (the player's own level is uncapped), evolutions/combinations.
 

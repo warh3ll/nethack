@@ -354,7 +354,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Collapse). */
+  /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Overload). */
   private onSkillKill(enemy: Enemy) {
     this.kills++;
     this.gainXp(enemy.stats.xp);

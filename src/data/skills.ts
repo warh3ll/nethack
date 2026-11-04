@@ -37,7 +37,7 @@ export interface VirusStats {
   tickMs: number
 }
 
-/** Stats for Synaptic Collapse: hack a random nearby enemy, it dies and explodes. */
+/** Stats for Synaptic Overload: hack a random nearby enemy, it dies and explodes. */
 export interface SynapticStats {
   /** Time (ms) the hack takes to upload. It restarts if the target dies or leaves the range band. */
   hackMs: number
@@ -307,19 +307,54 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
-  synapticCollapse: {
-    name: 'Synaptic Collapse',
+  synapticOverload: {
+    name: 'Synaptic Overload',
     kind: 'weapon',
     behavior: 'synaptic',
     description:
       'Uploads a hack to a random enemy nearby. When it finishes, the enemy dies and explodes, hurting those around it.',
     color: 0x4d7cff,
     levels: [
-      { hackMs: 1500, minRange: 50, maxRange: 150, damage: 20, radius: 70, cooldownMs: 800 },
-      { hackMs: 1350, minRange: 50, maxRange: 150, damage: 30, radius: 85, cooldownMs: 800 },
-      { hackMs: 1200, minRange: 50, maxRange: 150, damage: 42, radius: 100, cooldownMs: 800 },
-      { hackMs: 1050, minRange: 50, maxRange: 150, damage: 56, radius: 115, cooldownMs: 800 },
-      { hackMs: 900, minRange: 50, maxRange: 150, damage: 72, radius: 130, cooldownMs: 800 },
+      {
+        hackMs: 1500,
+        minRange: 50,
+        maxRange: 150,
+        damage: 20,
+        radius: 70,
+        cooldownMs: 5000,
+      },
+      {
+        hackMs: 1350,
+        minRange: 50,
+        maxRange: 150,
+        damage: 30,
+        radius: 85,
+        cooldownMs: 4500,
+      },
+      {
+        hackMs: 1200,
+        minRange: 50,
+        maxRange: 150,
+        damage: 42,
+        radius: 100,
+        cooldownMs: 4000,
+      },
+      {
+        hackMs: 1050,
+        minRange: 50,
+        maxRange: 150,
+        damage: 56,
+        radius: 115,
+        cooldownMs: 3500,
+      },
+      {
+        hackMs: 900,
+        minRange: 50,
+        maxRange: 150,
+        damage: 72,
+        radius: 130,
+        cooldownMs: 3000,
+      },
     ],
   },
   firewall: {
@@ -394,7 +429,11 @@ export function getSkillStats(
 
 export function getWeaponStats(id: string, level: number): WeaponStats {
   const skill = SKILLS[id]
-  if (skill?.kind !== 'weapon' || skill.behavior === 'virus' || skill.behavior === 'synaptic')
+  if (
+    skill?.kind !== 'weapon' ||
+    skill.behavior === 'virus' ||
+    skill.behavior === 'synaptic'
+  )
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
 }
@@ -411,7 +450,12 @@ export function getVirusStats(id: string, level: number): VirusStats {
 }
 
 export function getSynapticStats(id: string, level: number): SynapticStats {
-  if (!(SKILLS[id]?.kind === 'weapon' && (SKILLS[id] as SynapticSkill).behavior === 'synaptic'))
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as SynapticSkill).behavior === 'synaptic'
+    )
+  )
     throw new Error(`"${id}" is not a synaptic skill`)
   return getSkillStats(id, level) as SynapticStats
 }
