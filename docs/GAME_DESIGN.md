@@ -51,6 +51,7 @@ Rules to check every feature against. Edit these first.
 - **Decided:** items are unique, fixed-stat, one-time buy/find. No tiers, rarities, random rolls or upgrading. One of each item.
 - **Decided:** items (bought, or found via very rare cache drops) belong to the account and are equipped in the main menu.
 - The Feet slot holds the dash item(s).
+- **Find-only items (decided):** a separate list of items that can't be bought, only found. Rare: about **2.5% of caches** contain one.
 
 ## 5. Skills and progression
 
@@ -89,10 +90,10 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - Move straight at the player; no pathfinding, by design.
 - Deal contact damage.
 - **Drone:** basic swarm enemy _(in game)_.
-- **Goon:** miniboss-like brute with more health and damage than normal mobs; guards a dossier in the Encryption Key objective (section 7). Larger than other enemies, with a small health bar above him. Has an **aggro radius**: he stands guard until the player enters it, and returns to guarding if the player gets too far away. If the player shoots or damages him he chases regardless of distance.
+- **Goon:** miniboss-like brute with more health and damage than normal mobs; guards a dossier in the Encryption Key objective (section 7). Larger than other enemies, with a small health bar above him. Somewhat faster than a Drone, but clearly slower than the player. Once he is chasing he **shoots bullets towards the player** at intervals (the first shot comes one cooldown after the chase starts); his bullets hurt the player and are not blocked by other enemies. If the player takes the dossier while he is alive, he hunts the player regardless of distance until he is dead. Has an **aggro radius**: he stands guard until the player enters it, and returns to guarding if the player gets too far away. If the player shoots or damages him he chases regardless of distance.
 - **Difficulty over time (decided):** more dangerous enemy types join as the run clock advances. These are not defined yet.
 - TBD: further enemy types, elites.
-- Enemies can drop credit chips, tougher enemies will drop more credits. Credits are picked up automatically within a magnet radius.
+- Enemies can drop credit chips, tougher enemies will drop more credits. Credits are picked up automatically within a magnet radius. **Values (decided, placeholder):** Drone 1 credit, Goon 5 credits. To be refined later; they live in `balance.ts`.
 
 ## 7. Run structure and objectives
 
@@ -102,10 +103,11 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
 - **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes. **Leaving the extraction radius cancels the attempt** (typing and countdown reset); the player can move freely inside it and retry after re-entering. Taking damage does not cancel it.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
-- **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
+- **Objective types:** the four below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
-  2. **Encryption Key:** A Goon guards a dossier containing an encryption key (see Goon in section 6).
+  2. **Encryption Key:** A Goon guards a dossier containing an encryption key (see Goon in section 6) _(in game)_. **Decided:** the player takes the key by walking onto the dossier; killing the Goon is not required, so luring him away works. If he is still alive when the dossier is taken, he hunts the player regardless of distance until he is dead.
   3. **Brute-force:** the player attacks a location with **2-5 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
+  4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **75-125 px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
 - **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
@@ -144,7 +146,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - **Setting:** cyberpunk.
 - **Art direction:** TBD. Placeholder shapes are generated in `BootScene.ts`; real assets will replace them under the same texture keys.
 - **Audio:** TBD.
-- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
+- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
 
 ## 11. Scope
 
@@ -167,11 +169,8 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 **Objectives and run**
 
-- Objective types: with the "max two of a type" rule, 3-5 objectives need at least 3 types (5 needs 3 types). Three exist today, so that works, but should we add a fourth type soon for variety (candidates: defend a point, retrieve an item, eliminate a target)?
-- Does the compass show distance as well as direction?
+- Does the compass show distance as well as direction? The answer reads "No, just distance", which is ambiguous: should it show only the distance (no arrow), or only the arrow (no distance)? Today it shows both.
 
 **Economy and meta**
 
-- Rough credit values: how many credits per Drone, per Goon, and the extraction bonus? Fine to leave until the shop prices exist; I will use placeholders in `balance.ts` and you tune them.
-- Are credits and items shown to the player mid-run (HUD counter), or only on the results screen?
-- Cache drops of "very rare" permanent items: from which pool (the same shop items, or a separate find-only list)?
+- Extraction bonus: how many credits? Fine to leave until the shop prices exist; I will use a placeholder in `balance.ts` and you tune it.

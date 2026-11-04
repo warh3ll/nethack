@@ -16,24 +16,81 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
   hp = 0;
   stats!: EnemyType;
   infection: Infection | null = null;
+  /** Guard post (guards only): where the enemy stands and returns to. */
+  private homeX = 0;
+  private homeY = 0;
+  private chasing = false;
+  /** Set once a guard has been damaged: from then on it chases regardless of distance. */
+  private provoked = false;
+  /** Game time of the next shot; -1 = not armed yet (starts when a chase starts). */
+  private nextShotAt = -1;
 
   spawn(x: number, y: number, typeKey: string) {
     this.stats = ENEMIES[typeKey];
     this.hp = this.stats.hp;
     this.infection = null;
+    this.homeX = x;
+    this.homeY = y;
+    this.chasing = false;
+    this.provoked = false;
+    this.nextShotAt = -1;
     this.setTexture(`enemy-${typeKey}`);
     this.enableBody(true, x, y, true, true);
     this.body!.setCircle(this.stats.radius);
     this.clearTint();
   }
 
-  chase(targetX: number, targetY: number) {
+  /** Per-frame behaviour: swarm enemies head straight for the player, guards follow their aggro rules. */
+  act(playerX: number, playerY: number) {
+    const guard = this.stats.guard;
+    if (!guard) {
+      this.chasing = true;
+      return this.chase(playerX, playerY);
+    }
+
+    const d = Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY);
+    // Two radii so a guard at the edge of its range doesn't flicker between chasing and returning.
+    this.chasing = this.provoked || d <= guard.aggroRadius || (this.chasing && d <= guard.leashRadius);
+    if (this.chasing) return this.chase(playerX, playerY);
+
+    if (Phaser.Math.Distance.Between(this.x, this.y, this.homeX, this.homeY) > 6) {
+      this.scene.physics.moveTo(this, this.homeX, this.homeY, this.stats.speed);
+    } else {
+      this.setVelocity(0, 0);
+    }
+  }
+
+  /**
+   * Angle to shoot at the player if this enemy is ranged, chasing, in range and off cooldown; otherwise null.
+   * The first shot of a chase comes one full cooldown after it starts, so there's time to react.
+   */
+  shotAngle(time: number, playerX: number, playerY: number): number | null {
+    const ranged = this.stats.ranged;
+    if (!ranged) return null;
+    if (!this.chasing) {
+      this.nextShotAt = -1;
+      return null;
+    }
+    if (this.nextShotAt < 0) this.nextShotAt = time + ranged.cooldownMs;
+    if (time < this.nextShotAt) return null;
+    if (Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) > ranged.range) return null;
+    this.nextShotAt = time + ranged.cooldownMs;
+    return Phaser.Math.Angle.Between(this.x, this.y, playerX, playerY);
+  }
+
+  /** A guard that is provoked chases regardless of distance until it dies. */
+  provoke() {
+    this.provoked = true;
+  }
+
+  private chase(targetX: number, targetY: number) {
     this.scene.physics.moveTo(this, targetX, targetY, this.stats.speed);
   }
 
   /** Returns true if this hit killed the enemy. `flash: false` is for damage over time. */
   takeDamage(amount: number, flash = true): boolean {
     this.hp -= amount;
+    this.provoke();
     if (this.hp <= 0) {
       this.kill();
       return true;

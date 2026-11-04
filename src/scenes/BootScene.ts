@@ -33,6 +33,11 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture(`bullet-${key}`, 10, 4).clear();
     }
 
+    // Enemy bullet: glowing orange ball.
+    g.fillStyle(0xff8a2e).fillCircle(5, 5, 5);
+    g.fillStyle(0xffffff).fillCircle(5, 5, 2);
+    g.generateTexture('bullet-enemy', 10, 10).clear();
+
     // Hackable server: dark tower with status lights.
     g.fillStyle(0x0a0e1e).fillRect(0, 0, 40, 56);
     g.lineStyle(2, 0x2ef2ff).strokeRect(1, 1, 38, 54);
@@ -41,6 +46,12 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(i % 2 ? 0xff2e88 : 0x5fe08a).fillRect(8, 8 + i * 12, 4, 4);
     }
     g.generateTexture('server', 40, 56).clear();
+
+    // Dossier: gold folder with text lines.
+    g.fillStyle(0xffd23e).fillRect(0, 4, 28, 30);
+    g.fillRect(0, 0, 12, 6);
+    g.fillStyle(0x05060a).fillRect(5, 13, 18, 2).fillRect(5, 19, 18, 2).fillRect(5, 25, 12, 2);
+    g.generateTexture('dossier', 28, 34).clear();
 
     // Background grid tile.
     const t = 64;

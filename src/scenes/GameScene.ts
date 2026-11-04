@@ -5,6 +5,7 @@ import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
 import { Enemy } from '../entities/Enemy';
+import { EnemyBullet } from '../entities/EnemyBullet';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { Weapon } from '../entities/Weapon';
@@ -24,10 +25,12 @@ export class GameScene extends Phaser.Scene {
   private player!: Player;
   private enemies!: Phaser.Physics.Arcade.Group;
   private bullets!: Phaser.Physics.Arcade.Group;
+  private enemyBullets!: Phaser.Physics.Arcade.Group;
   private progression!: Progression;
   private weapons: (Weapon | Virus)[] = [];
   private background!: Phaser.GameObjects.TileSprite;
   private hud!: Phaser.GameObjects.Text;
+  private enemyBars!: Phaser.GameObjects.Graphics;
   private hpBar!: Phaser.GameObjects.Graphics;
   private xpBar!: Phaser.GameObjects.Graphics;
   private skillBar!: SkillBar;
@@ -71,6 +74,8 @@ export class GameScene extends Phaser.Scene {
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
     this.bullets = this.physics.add.group({ classType: Bullet, maxSize: 300, runChildUpdate: true });
 
+    this.enemyBullets = this.physics.add.group({ classType: EnemyBullet, maxSize: 60, runChildUpdate: true });
+
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
@@ -91,9 +96,17 @@ export class GameScene extends Phaser.Scene {
       if (this.player.takeDamage((e as Enemy).stats.contactDamage, this.gameTime)) this.objectives.onPlayerHit();
     });
 
+    this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => {
+      const bullet = b as EnemyBullet;
+      if (!bullet.active) return;
+      bullet.kill();
+      if (this.player.takeDamage(bullet.damage, this.gameTime)) this.objectives.onPlayerHit();
+    });
+
     // Keep the swarm from collapsing into a single blob.
     this.physics.add.collider(this.enemies, this.enemies);
 
+    this.enemyBars = this.add.graphics().setDepth(6);
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.xpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hud = this.add
@@ -109,6 +122,11 @@ export class GameScene extends Phaser.Scene {
       this.player,
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
+      (x, y) => {
+        const goon = this.enemies.get() as Enemy | null;
+        goon?.spawn(x, y, 'goon');
+        return goon;
+      },
     );
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
@@ -145,8 +163,15 @@ export class GameScene extends Phaser.Scene {
 
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
-      if (e.active) e.chase(this.player.x, this.player.y);
+      if (!e.active) continue;
+      e.act(this.player.x, this.player.y);
+      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y);
+      if (angle !== null && e.stats.ranged) {
+        const r = e.stats.ranged;
+        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range);
+      }
     }
+    this.drawEnemyBars();
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.endRun();
@@ -232,6 +257,20 @@ export class GameScene extends Phaser.Scene {
     const radius = Math.hypot(cam.width, cam.height) / 2 + SPAWNING.spawnMargin;
     const angle = Math.random() * Math.PI * 2;
     enemy.spawn(this.player.x + Math.cos(angle) * radius, this.player.y + Math.sin(angle) * radius, SPAWNING.enemyType);
+  }
+
+  /** Small health bar above enemies that have one (the Goon). */
+  private drawEnemyBars() {
+    this.enemyBars.clear();
+    for (const obj of this.enemies.getChildren()) {
+      const e = obj as Enemy;
+      if (!e.active || !e.stats.healthBar) continue;
+      const w = e.stats.radius * 2;
+      const x = e.x - w / 2;
+      const y = e.y - e.stats.radius - 12;
+      this.enemyBars.fillStyle(0x1a2140).fillRect(x, y, w, 5);
+      this.enemyBars.fillStyle(0xff2e88).fillRect(x, y, w * Math.max(0, e.hp / e.stats.hp), 5);
+    }
   }
 
   private drawHud() {
