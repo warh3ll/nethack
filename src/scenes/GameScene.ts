@@ -282,7 +282,18 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const radius = Math.hypot(cam.width, cam.height) / 2 + SPAWNING.spawnMargin;
     const angle = Math.random() * Math.PI * 2;
-    enemy.spawn(this.player.x + Math.cos(angle) * radius, this.player.y + Math.sin(angle) * radius, SPAWNING.enemyType);
+    enemy.spawn(this.player.x + Math.cos(angle) * radius, this.player.y + Math.sin(angle) * radius, this.rollEnemyType(seconds));
+  }
+
+  /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */
+  private rollEnemyType(seconds: number): string {
+    let roll = Math.random();
+    for (const s of SPAWNING.specialEnemies) {
+      const chance = s.startChance + s.chanceStep * Math.floor(seconds / s.stepSeconds);
+      if (roll < chance) return s.type;
+      roll -= chance;
+    }
+    return SPAWNING.enemyType;
   }
 
   /** Small health bar above enemies that have one (the Goon). */

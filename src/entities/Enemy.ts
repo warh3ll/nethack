@@ -51,6 +51,10 @@ export class Enemy extends Phaser.Physics.Arcade.Image {
     const guard = this.stats.guard;
     if (!guard) {
       this.chasing = true;
+      const ranged = this.stats.ranged;
+      if (ranged?.holdAtRange && Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) <= ranged.range) {
+        return this.setVelocity(0, 0);
+      }
       return this.chase(playerX, playerY);
     }
 
