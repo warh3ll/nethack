@@ -15,7 +15,7 @@ export function insideMap(x: number, y: number) {
 export function createMap(scene: Phaser.Scene) {
   const t = MAP.wallThickness;
   scene.physics.world.setBounds(-HALF, -HALF, MAP.size, MAP.size);
-  scene.add.tileSprite(-HALF, -HALF, MAP.size, MAP.size, 'grid').setOrigin(0);
+  scene.add.tileSprite(-HALF, -HALF, MAP.size, MAP.size, 'floor').setOrigin(0).setTileScale(MAP.floorScale);
 
   // The wall stands just outside the bounds, so the player stops flush against it.
   const wall = (x: number, y: number, w: number, h: number) => scene.add.tileSprite(x, y, w, h, 'wall').setOrigin(0).setDepth(1);

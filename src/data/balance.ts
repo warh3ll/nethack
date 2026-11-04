@@ -28,6 +28,8 @@ export const MAP = {
   size: 10000,
   /** How thick the boundary wall is drawn. */
   wallThickness: 96,
+  /** The floor tile (public/assets/floor/floor.png, 32x32) is drawn at this scale. */
+  floorScale: 2,
 }
 
 /**

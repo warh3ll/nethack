@@ -18,6 +18,8 @@ export class BootScene extends Phaser.Scene {
     this.load.setPath('assets/parallax/');
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
     loadPlayerSheets(this);
+    this.load.setPath('assets/floor/');
+    this.load.image('floor', 'floor.png');
     this.load.setPath('assets/server/');
     this.load.spritesheet('server', 'server.png', { frameWidth: 64, frameHeight: 64 });
   }
@@ -28,7 +30,7 @@ export class BootScene extends Phaser.Scene {
 
     // Pixel art sprites are scaled up, so sample them without smoothing (the default blurs them). Parallax and generated textures stay smooth.
     for (const key of this.textures.getTextureKeys()) {
-      if (key === 'server' || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      if (key === 'server' || key === 'floor' || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
 
     for (const [key, e] of Object.entries(ENEMIES)) {
@@ -76,12 +78,8 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillRect(14, 10, 4, 4);
     g.generateTexture('data-cache', 32, 28).clear();
 
-    // Background grid tile.
+    // Tile size of the wall texture below (the floor is loaded from public/assets/floor/floor.png).
     const t = 64;
-    g.fillStyle(0x05060a).fillRect(0, 0, t, t);
-    g.lineStyle(1, 0x1a2140).strokeRect(0, 0, t, t);
-    g.fillStyle(0x2a3a70).fillRect(0, 0, 2, 2);
-    g.generateTexture('grid', t, t).clear();
 
     // Boundary wall: hazard stripes that tile in every direction.
     g.fillStyle(0x1a0a18).fillRect(0, 0, t, t);
