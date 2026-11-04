@@ -17,7 +17,7 @@ export const PLAYER = {
   /** How long after a shot the player keeps the shooting pose. */
   shootingPoseMs: 350,
   /** Animation speed (frames per second; every sheet has 8 frames). */
-  animFps: 12,
+  animFps: 8,
   /** Death animation speed, and how long the last frame is held before the results screen. */
   deathFps: 8,
   deathHoldMs: 700,
@@ -105,7 +105,13 @@ export const ENEMIES: Record<string, EnemyType> = {
     creditChance: 0.1,
     radius: 11,
     color: 0xffd62e,
-    ranged: { damage: 6, speed: 260, range: 250, cooldownMs: 2000, holdAtRange: true },
+    ranged: {
+      damage: 6,
+      speed: 260,
+      range: 250,
+      cooldownMs: 2000,
+      holdAtRange: true,
+    },
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
@@ -155,7 +161,9 @@ export const SPAWNING = {
    * is a plain `enemyType`. The chance of each is `startChance` plus `chanceStep` for every
    * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...).
    */
-  specialEnemies: [{ type: 'marksman', startChance: 0.05, chanceStep: 0.01, stepSeconds: 30 }],
+  specialEnemies: [
+    { type: 'marksman', startChance: 0.05, chanceStep: 0.01, stepSeconds: 30 },
+  ],
 }
 
 /** Credit chips dropped by enemies. How many credits each enemy type drops is `credits` in ENEMIES. */
