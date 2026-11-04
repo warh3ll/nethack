@@ -202,7 +202,7 @@ export const CACHES = {
   openRadius: 80,
 }
 
-export const STARTING_SKILL = 'autoPistol'
+export const STARTING_SKILL = 'rootkit' // TEMP: testing Rootkit (was 'autoPistol')
 
 /** Skill slots: weapons (and other active skills) and passives each have their own group. */
 export const WEAPON_SLOTS = 5
