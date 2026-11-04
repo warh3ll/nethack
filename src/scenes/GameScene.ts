@@ -4,6 +4,8 @@ import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
+import { DataCache } from '../entities/DataCache';
+import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
@@ -31,6 +33,7 @@ export class GameScene extends Phaser.Scene {
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
+  private caches: DataCache[] = [];
   private weapons: (Weapon | Virus)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
@@ -95,6 +98,10 @@ export class GameScene extends Phaser.Scene {
     };
     this.events.on(ENEMY_KILLED, dropChip);
     this.events.once('shutdown', () => this.events.off(ENEMY_KILLED, dropChip));
+
+    // Data caches: scattered on the map. Not objectives, so the compass and marker ignore them.
+    this.caches.forEach((c) => c.destroy());
+    this.caches = pickCachePositions().map((p) => new DataCache(this, p.x, p.y));
 
     const stats = this.progression.stats;
     this.player = new Player(this, 0, 0, stats);

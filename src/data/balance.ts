@@ -161,6 +161,20 @@ export const CREDITS = {
   extractionBonus: 15,
 }
 
+/** Data caches scattered on the map. Rare on purpose; the compass and objective marker never point to them. */
+export const CACHES = {
+  /** Caches per run, picked at random (placeholder, Henrik tunes). */
+  count: { min: 6, max: 10 },
+  /** No cache this close to the start. */
+  minDistFromStart: 600,
+  /** Caches stay at least this far from the map edge. */
+  edgeMargin: 300,
+  /** No two caches closer than this. */
+  minSpacing: 1000,
+  /** Radius of the pulsing ring drawn around a cache. */
+  ringRadius: 40,
+}
+
 export const STARTING_SKILL = 'autoPistol'
 
 /** Skill slots: weapons (and other active skills) and passives each have their own group. */

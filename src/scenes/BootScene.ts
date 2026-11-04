@@ -71,6 +71,13 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillRect(17, 2, 4, 6);
     g.generateTexture('secrets', 30, 30).clear();
 
+    // Data cache: cyan crate with a bright core.
+    g.fillStyle(0x0a2a3a).fillRect(0, 0, 32, 28);
+    g.lineStyle(2, 0x2ef2ff).strokeRect(1, 1, 30, 26);
+    g.fillStyle(0x2ef2ff).fillRect(12, 8, 8, 12);
+    g.fillStyle(0xffffff).fillRect(14, 10, 4, 4);
+    g.generateTexture('data-cache', 32, 28).clear();
+
     // Background grid tile.
     const t = 64;
     g.fillStyle(0x05060a).fillRect(0, 0, t, t);
