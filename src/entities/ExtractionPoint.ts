@@ -7,6 +7,7 @@ const FONT = 'monospace';
 /** The extraction point: the player's own 127.0.0.1 address. Only built once revealed. Pure view; state lives in Objectives. */
 export class ExtractionPoint {
   private pulse: Phaser.GameObjects.GameObject[];
+  private title: Phaser.GameObjects.Text;
   private base: Phaser.GameObjects.Text;
   private typed: Phaser.GameObjects.Text;
   private countdown: Phaser.GameObjects.Text;
@@ -25,6 +26,7 @@ export class ExtractionPoint {
     scene.tweens.add({ targets: this.pulse, alpha: 0.45, duration: 700, yoyo: true, repeat: -1 });
 
     const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color }).setDepth(21);
+    this.title = text('13px', '#ffd23e').setOrigin(0.5);
     this.base = text('22px', '#ffffff').setOrigin(0, 0.5);
     this.typed = text('22px', '#5fe08a').setOrigin(0, 0.5);
     this.countdown = text('64px', '#5fe08a').setOrigin(0.5).setFontStyle('bold');
@@ -45,12 +47,14 @@ export class ExtractionPoint {
     const { x, y, radius } = EXTRACTION;
     const py = y - radius - 20;
     if (seconds > 0) {
+      this.title.setText('');
       this.base.setText('');
       this.typed.setText('');
       this.countdown.setPosition(x, py - 20).setText(String(seconds));
       return;
     }
     this.countdown.setText('');
+    this.title.setPosition(x, py + 22).setText('CONFIRM LOG OUT');
     this.base.setText(logoutText).setColor(this.scene.time.now < this.errorUntil ? '#ff2e88' : '#ffffff');
     this.typed.setText(logoutText.slice(0, typedCount));
     const left = x - this.base.width / 2;
