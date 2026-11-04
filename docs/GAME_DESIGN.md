@@ -100,7 +100,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
-- **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes.
+- **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes. **Leaving the extraction radius cancels the attempt** (typing and countdown reset); the player can move freely inside it and retry after re-entering. Taking damage does not cancel it.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
 - **Objective types:** the three below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
@@ -169,7 +169,6 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 - Objective types: with the "max two of a type" rule, 3-5 objectives need at least 3 types (5 needs 3 types). Three exist today, so that works, but should we add a fourth type soon for variety (candidates: defend a point, retrieve an item, eliminate a target)?
 - Does the compass show distance as well as direction?
-- Does extraction ("log out") need the player to stay at the extraction point, or can they leave mid-typing and the countdown cancel if they take damage?
 
 **Economy and meta**
 

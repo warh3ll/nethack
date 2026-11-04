@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { HACK, RUN_OBJECTIVES, type ObjectiveDef } from '../data/objectives';
+import { EXTRACTION, HACK, RUN_OBJECTIVES, type ObjectiveDef } from '../data/objectives';
+import { ExtractionPoint } from '../entities/ExtractionPoint';
 import { HackServer } from '../entities/HackServer';
 import type { Player } from '../entities/Player';
 import { Hack } from './Hack';
@@ -25,14 +26,23 @@ export class Objectives {
   }));
   /** The server the player is currently hacking, or null. */
   private engaged: ObjectiveEntry | null = null;
+  private scene: Phaser.Scene;
+  /** Revealed after the last objective is done; null before that. */
+  private extraction: ExtractionPoint | null = null;
+  /** Characters of the log-out text typed so far. */
+  private logoutTyped = 0;
+  /** Once the log-out text is complete: ms left on the countdown. */
+  private countdownMs = 0;
+  private counting = false;
 
   constructor(
     scene: Phaser.Scene,
     private player: Player,
     /** Keys are ignored while this returns false (paused, level-up picker, game over). */
     private acceptingInput: () => boolean,
-    private onAllDone: () => void,
+    private onExtracted: () => void,
   ) {
+    this.scene = scene;
     for (const e of this.entries) e.server = new HackServer(scene, e.def.x, e.def.y);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => scene.input.keyboard?.off('keydown', this.onKey, this));
@@ -42,8 +52,9 @@ export class Objectives {
     return this.entries.every((e) => e.done);
   }
 
-  /** World position of the closest unfinished objective to the player, or null when the run is complete. */
+  /** World position the compass points at: the closest unfinished objective, or the extraction point once all are done. */
   get target() {
+    if (this.isComplete) return { x: EXTRACTION.x, y: EXTRACTION.y };
     let best: ObjectiveEntry | null = null;
     let bestDist = Infinity;
     for (const e of this.entries) {
@@ -69,7 +80,16 @@ export class Objectives {
 
   /** True while typed letters belong to a prompt (so P must not pause, WASD must not move). */
   get typing() {
-    return this.engaged !== null && this.engaged.hack.typing;
+    return (this.engaged !== null && this.engaged.hack.typing) || this.loggingOut;
+  }
+
+  /** True while the player stands on the extraction point and still has to type the log-out text. */
+  private get loggingOut() {
+    return this.extraction !== null && !this.counting && this.onExtraction();
+  }
+
+  private onExtraction() {
+    return Phaser.Math.Distance.Between(this.player.x, this.player.y, EXTRACTION.x, EXTRACTION.y) <= EXTRACTION.radius;
   }
 
   /** Call when the player took damage. */
@@ -90,6 +110,19 @@ export class Objectives {
       if (e.hack.complete) this.finish(e);
     }
     this.player.typingLock = this.typing;
+
+    if (this.extraction) {
+      if (!this.onExtraction()) {
+        // Leaving the point cancels the log-out: the typing and the countdown start over.
+        this.logoutTyped = 0;
+        this.counting = false;
+        this.countdownMs = 0;
+      } else if (this.counting) {
+        this.countdownMs -= deltaMs;
+        if (this.countdownMs <= 0) this.onExtracted();
+      }
+      this.extraction.render(EXTRACTION.logoutText, this.logoutTyped, this.counting ? Math.ceil(this.countdownMs / 1000) : 0);
+    }
   }
 
   private inRange(e: ObjectiveEntry) {
@@ -118,10 +151,20 @@ export class Objectives {
       this.engaged = null;
       this.player.typingLock = false;
     }
-    if (this.isComplete) this.onAllDone();
+    if (this.isComplete) this.extraction = new ExtractionPoint(this.scene);
   }
 
   private onKey(ev: KeyboardEvent) {
+    if (this.loggingOut && !ev.repeat && this.acceptingInput()) {
+      if (ev.key.length !== 1) return;
+      if (ev.key !== EXTRACTION.logoutText[this.logoutTyped]) return this.extraction!.flashError();
+      this.logoutTyped++;
+      if (this.logoutTyped >= EXTRACTION.logoutText.length) {
+        this.counting = true;
+        this.countdownMs = EXTRACTION.countdownSeconds * 1000;
+      }
+      return;
+    }
     const e = this.engaged;
     if (ev.repeat || !e?.server || !this.acceptingInput()) return;
     const result = e.hack.onKey(ev.key);
