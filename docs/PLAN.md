@@ -58,8 +58,8 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 
 ## 6. More objective types
 
-- [x] Encryption Key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
-- [x] Brute-force: 2-5 destructible outposts that spawn drones, then a pick-up secrets object (s7). More outposts means slightly less hp each; drones spawn only while the player is near
+- [x] Grab encryption key: Goon guards a dossier (s7). Walking onto the dossier takes the key; killing the Goon is optional, but taking the dossier makes him hunt the player until he's dead
+- [x] Steal secrets: 2-4 destructible outposts that spawn drones, then a pick-up secrets object (s7). More outposts means slightly less hp each; drones spawn only while the player is near
 - [x] Connect servers: grab a cable with E, attach it to a server 300-400 px away (cable max 600 px) by holding E for 2.5 s (damage resets), with a cable line drawn (s7). The second server is placed randomly around the first; the cable stays in hand once grabbed
 - [ ] New hacking interaction - PIN code. The player needs to enter a pin code, four random digits from 0-9
 

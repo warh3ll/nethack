@@ -71,7 +71,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     color: 0xffd62e,
     ranged: { damage: 6, speed: 260, range: 250, cooldownMs: 2000, holdAtRange: true },
   },
-  // Miniboss that guards the dossier in the Encryption Key objective. Not part of the random swarm.
+  // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
     hp: 150,
     speed: 130,
@@ -85,8 +85,8 @@ export const ENEMIES: Record<string, EnemyType> = {
     guard: { aggroRadius: 380, leashRadius: 700 },
     ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
   },
-  // Destructible structure in the Brute-force objective. Its hp is the value for the fewest outposts;
-  // see BRUTE_FORCE in objectives.ts for how it shrinks with more of them.
+  // Destructible structure in the Steal secrets objective. Its hp is the value for the fewest outposts;
+  // see STEAL_SECRETS in objectives.ts for how it shrinks with more of them.
   outpost: {
     hp: 120,
     speed: 0,
