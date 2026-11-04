@@ -14,6 +14,7 @@ import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
 import { SynapticOverload } from '../entities/SynapticOverload';
+import { EmpShock } from '../entities/EmpShock';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
@@ -37,7 +38,7 @@ export class GameScene extends Phaser.Scene {
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
   private caches: DataCache[] = [];
-  private weapons: (Weapon | Virus | SynapticOverload)[] = [];
+  private weapons: (Weapon | Virus | SynapticOverload | EmpShock)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
   private enemyBars!: Phaser.GameObjects.Graphics;
@@ -220,7 +221,7 @@ export class GameScene extends Phaser.Scene {
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active) continue;
-      e.act(this.player.x, this.player.y);
+      e.act(this.player.x, this.player.y, this.gameTime);
       const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
@@ -349,11 +350,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** The runtime object for a damage skill, by its behavior. */
-  private createWeapon(skillId: string): Weapon | Virus | SynapticOverload {
+  private createWeapon(skillId: string): Weapon | Virus | SynapticOverload | EmpShock {
     const behavior = (SKILLS[skillId] as { behavior?: string }).behavior;
     const stats = this.progression.stats;
     if (behavior === 'virus') return new Virus(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'synaptic') return new SynapticOverload(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
+    if (behavior === 'emp') return new EmpShock(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     return new Weapon(skillId, this.player, this.enemies, this.bullets, stats);
   }
 
