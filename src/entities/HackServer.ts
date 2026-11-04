@@ -11,6 +11,7 @@ const TITLES: Record<PromptKind, string> = {
   ip: 'TYPE THE IP ADDRESS',
   password: 'TYPE THE PASSWORD',
   inject: 'INJECT THE CODE',
+  pin: 'ENTER THE PIN CODE',
   smack: 'SMACK THE SERVER',
 };
 

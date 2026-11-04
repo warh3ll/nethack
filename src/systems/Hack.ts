@@ -1,6 +1,6 @@
 import { HACK, INJECT_WORDS, PASSWORD_ADJECTIVES, PASSWORD_NOUNS } from '../data/objectives';
 
-export type PromptKind = 'ip' | 'password' | 'smack' | 'inject';
+export type PromptKind = 'ip' | 'password' | 'smack' | 'inject' | 'pin';
 export type KeyResult = 'ignored' | 'ok' | 'wrong' | 'done';
 
 export interface Prompt {
@@ -16,7 +16,7 @@ export interface Prompt {
 /** General interact key (lowercase KeyboardEvent.key). Used by smack now, cables later. */
 export const INTERACT_KEY = 'e';
 
-const KINDS: PromptKind[] =['ip', 'password', 'smack', 'inject'];
+const KINDS: PromptKind[] =['ip', 'password', 'smack', 'inject', 'pin'];
 
 const randInt = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
 const pick = <T>(arr: ArrayLike<T>) => arr[Math.floor(Math.random() * arr.length)];
@@ -35,6 +35,9 @@ function makePrompt(kind: PromptKind): Prompt {
   switch (kind) {
     case 'ip':
       prompt.text = Array.from({ length: 4 }, () => randInt(0, 255)).join('.');
+      break;
+    case 'pin':
+      prompt.text = Array.from({ length: HACK.pinLength }, () => randInt(0, 9)).join('');
       break;
     case 'password':
       prompt.text = `${pick(PASSWORD_ADJECTIVES)}-${pick(PASSWORD_NOUNS)}`;
