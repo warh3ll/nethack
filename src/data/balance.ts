@@ -109,7 +109,7 @@ export interface EnemyType {
 export const ENEMIES: Record<string, EnemyType> = {
   drone: {
     hp: 10,
-    speed: 70,
+    speed: 100,
     contactDamage: 8,
     xp: 1,
     credits: 1,
@@ -120,7 +120,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
     hp: 8,
-    speed: 70,
+    speed: 100,
     contactDamage: 6,
     xp: 2,
     credits: 2,
