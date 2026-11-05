@@ -59,8 +59,9 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 
 Best done together, in this order:
 
-- [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`, in memory only, so a page reload clears them until the save item lands
-- [ ] Save to localStorage, plus export/import save code (s9)
+- [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`
+- [x] Save to localStorage (s9). `systems/Save.ts`; saved only when a run ends, so leaving mid-run forfeits that run's credits
+- [ ] Export/import save code buttons in the main menu (s9). The code itself works (`account.exportCode()`, `account.importCode()`); only the UI is missing
 - [ ] Main menu scene: start run, shop, equipment (s9)
 - [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Chest, Hands, Back, Legs, Feet, Slicer, 4 trinkets (s4b)
 - [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
