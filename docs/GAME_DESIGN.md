@@ -152,6 +152,9 @@ Some objectives require hacking the ICE protecting a server or objective.
 - **Extraction bonus (decided):** a successful extraction gives an end-of-run credit bonus.
 - **Save code (decided):** the menu offers export/import of a save code, as a backup against wiped localStorage.
 - **Leaving mid-run (decided):** credits are banked only when a run ends by death or extraction. Closing the game or letting a session time out forfeits that run's credits, so an idle session can't be used to grind.
+- **Results screen (decided):** the player can reboot straight into a new run or return to the main menu.
+- **Quit to menu (decided):** the pause screen can quit the run after a confirmation, forfeiting that run's credits.
+- **Importing a save (decided):** a valid code asks for confirmation first, showing the current and new credit totals, since it replaces the current save.
 - Items can be bought from a store in the main menu and equipped there (section 4b).
 - Permanent upgrades are account-wide. Storage is browser localStorage (the only option on itch.io), so clearing site data wipes progress.
 - More progression TBD
