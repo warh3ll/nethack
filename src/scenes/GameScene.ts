@@ -5,6 +5,7 @@ import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
 import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
+import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
@@ -448,10 +449,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private endRun(won = false) {
+    if (this.gameOver) return; // credits must only be banked once
     this.gameOver = true;
     this.physics.pause();
     const bonus = won ? CREDITS.extractionBonus : 0;
     this.credits += bonus;
+    account.bankCredits(this.credits);
     this.drawHud();
     new ResultsScreen(this, {
       won,
@@ -462,6 +465,7 @@ export class GameScene extends Phaser.Scene {
       objectivesTotal: this.objectives.entries.length,
       credits: this.credits,
       bonus,
+      totalCredits: account.credits,
       items: 0, // TODO: caches and drops (PLAN section 4)
       stats: this.runStats,
     });

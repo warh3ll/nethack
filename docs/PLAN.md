@@ -54,7 +54,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 
 ### D. Meta loop: save, menu, shop, items (turns it into a game you return to)
 Best done together, in this order:
-- [ ] Credits persist across runs (kept on death) (s9)
+- [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`, in memory only, so a page reload clears them until the save item lands
 - [ ] Save to localStorage, plus export/import save code (s9)
 - [ ] Main menu scene: start run, shop, equipment (s9)
 - [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small (s4b)
