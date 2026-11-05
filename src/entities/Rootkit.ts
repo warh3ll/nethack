@@ -150,7 +150,7 @@ export class Rootkit {
     const e = h.enemy;
     const { x, y } = e;
     this.release(h);
-    if (e.takeDamage(e.hp, false)) this.onKill(e);
+    if (e.takeDamage(e.hp, false, this.skillId, false)) this.onKill(e);
     for (const obj of this.enemies.getChildren()) {
       const o = obj as Enemy;
       if (!o.active || o.hijacked || Phaser.Math.Distance.Between(x, y, o.x, o.y) > radius) continue;

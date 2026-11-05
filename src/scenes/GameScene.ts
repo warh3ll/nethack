@@ -7,6 +7,7 @@ import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
 import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
+import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
@@ -43,6 +44,7 @@ export class GameScene extends Phaser.Scene {
   private weapons: (Weapon | Virus | SynapticOverload | EmpShock | Rootkit)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
+  private runStats!: RunStats;
   private enemyBars!: Phaser.GameObjects.Graphics;
   private hpBar!: Phaser.GameObjects.Graphics;
   private hpText!: Phaser.GameObjects.Text;
@@ -156,6 +158,7 @@ export class GameScene extends Phaser.Scene {
 
     this.enemyBars = this.add.graphics().setDepth(6);
     new DamageNumbers(this);
+    this.runStats = new RunStats(this);
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hpText = this.add
       .text(16 + 220 + 8, 12, '', { fontFamily: 'monospace', fontSize: '14px', color: '#c8f7ff', stroke: '#05060a', strokeThickness: 3 })
@@ -217,6 +220,7 @@ export class GameScene extends Phaser.Scene {
 
     this.elapsedMs += gameDelta;
     this.player.update(this.joystick.vector, gameDelta);
+    this.runStats.trackPosition(this.player.x, this.player.y);
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
     this.spawnEnemies(this.gameTime);
@@ -332,7 +336,7 @@ export class GameScene extends Phaser.Scene {
 
   private applyUpgrade(u: Upgrade) {
     if (u.type === 'heal') {
-      this.player.heal(this.player.maxHp * u.fraction);
+      this.player.heal(this.player.maxHp * u.fraction, PATCH_UP);
       return;
     }
     if (u.type === 'credits') {
@@ -459,6 +463,7 @@ export class GameScene extends Phaser.Scene {
       credits: this.credits,
       bonus,
       items: 0, // TODO: caches and drops (PLAN section 4)
+      stats: this.runStats,
     });
     this.joystick.release();
     this.pauseButton.setVisible(false);

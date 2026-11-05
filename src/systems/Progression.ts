@@ -12,6 +12,8 @@ export interface PlayerStats {
   maxHp: number
   /** HP regenerated per second. */
   hpRegenPerSec: number
+  /** Part of hpRegenPerSec that each passive adds (the rest is base regen). For the run stats. */
+  hpRegenBySkill: Record<string, number>
   /** Flat damage taken off every hit the player receives. */
   damageReduction: number
   /** Damage dealt back to an enemy whose touch hurts the player. */
@@ -45,6 +47,7 @@ export class Progression {
   readonly stats: PlayerStats = {
     maxHp: 0,
     hpRegenPerSec: 0,
+    hpRegenBySkill: {},
     damageReduction: 0,
     retaliationDamage: 0,
     moveSpeed: 0,
@@ -162,6 +165,7 @@ export class Progression {
     let damageReduction = 0
     let retaliation = 0
     let hpRegen = 0
+    const regenBySkill: Record<string, number> = {}
     let moveSpeedPct = 0
     let damagePct = 0
     for (const [id, lvl] of this.skills) {
@@ -170,6 +174,7 @@ export class Progression {
       damageReduction += p.damageReduction ?? 0
       retaliation += p.retaliationDamage ?? 0
       hpRegen += p.hpRegenPerSec ?? 0
+      if (p.hpRegenPerSec) regenBySkill[id] = p.hpRegenPerSec
       moveSpeedPct += p.moveSpeedPct ?? 0
       damagePct += p.damagePct ?? 0
     }
@@ -177,6 +182,7 @@ export class Progression {
     this.stats.damageReduction = damageReduction
     this.stats.retaliationDamage = retaliation
     this.stats.hpRegenPerSec = PLAYER.hpRegenPerSec + hpRegen
+    this.stats.hpRegenBySkill = regenBySkill
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100)
     this.stats.damageMult = 1 + damagePct / 100
   }

@@ -3,6 +3,11 @@ import { DASH, PLAYER } from '../data/balance';
 import { FRAME, dirFromAngle, playerAnimKey, type Dir8, type PlayerState } from '../data/playerAnims';
 import type { PlayerStats } from '../systems/Progression';
 
+/** Scene event fired when the player actually gains HP: (amount, sourceId). */
+export const PLAYER_HEALED = 'player-healed';
+/** Source id for the base regeneration every run has (not from a skill). */
+export const BASE_REGEN = 'baseRegen';
+
 export class Player extends Phaser.Physics.Arcade.Sprite {
   hp: number;
   /** While true (a hack prompt wants typing), the WASD letters don't move the player; the arrow keys still do. */
@@ -59,7 +64,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.playDeath();
       return;
     }
-    this.heal((this.stats.hpRegenPerSec * deltaMs) / 1000);
+    this.regenerate(deltaMs);
     this.dashCooldownMs = Math.max(0, this.dashCooldownMs - deltaMs);
     this.dashSafeMs = Math.max(0, this.dashSafeMs - deltaMs);
     const k = this.keys;
@@ -136,8 +141,27 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.play(playerAnimKey('death', this.facing));
   }
 
-  heal(amount: number) {
-    this.hp = Math.min(this.maxHp, this.hp + amount);
+  /** Passive regeneration; the HP actually gained is credited to base regen and the passives behind it. */
+  private regenerate(deltaMs: number) {
+    const rate = this.stats.hpRegenPerSec;
+    if (rate <= 0) return;
+    const gained = this.heal((rate * deltaMs) / 1000);
+    if (gained <= 0) return;
+    let rest = gained;
+    for (const [id, perSec] of Object.entries(this.stats.hpRegenBySkill)) {
+      const share = (gained * perSec) / rate;
+      this.scene.events.emit(PLAYER_HEALED, share, id);
+      rest -= share;
+    }
+    this.scene.events.emit(PLAYER_HEALED, rest, BASE_REGEN);
+  }
+
+  /** Heals up to max HP and returns how much was actually gained. With `sourceId` the gain is reported for the run stats. */
+  heal(amount: number, sourceId?: string): number {
+    const gained = Math.max(0, Math.min(this.maxHp, this.hp + amount) - this.hp);
+    this.hp += gained;
+    if (sourceId && gained > 0) this.scene.events.emit(PLAYER_HEALED, gained, sourceId);
+    return gained;
   }
 
   /** Returns true if damage was applied (false while invulnerable). */
