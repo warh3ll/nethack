@@ -143,7 +143,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     credits: 3,
     creditChance: 0.2,
     radius: 18,
-    color: 0xffff2e,
+    color: 0x800020,
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
