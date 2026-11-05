@@ -43,7 +43,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
 - [x] Remaining damage skills: all 7 damage skills exist (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock, Rootkit; the roster was raised from 6 to 7) (s5)
-- [ ] Both weapon skills and passive skills should only have 3 levels (currently weapons have 5, remove level 2 and 4.)
+- [x] Both weapon skills and passive skills should only have 3 levels. Old levels 1, 3 and 5 kept; Virus spread and Rootkit hijack stay at 1 at every level, and Synaptic Overload hack time is 500/400/300 ms
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
 ### C. Data caches
