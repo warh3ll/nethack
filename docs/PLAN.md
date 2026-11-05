@@ -31,12 +31,14 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 Roughly in the order I'd do them. Each is a few sessions' worth at most and leaves the game playable.
 
 ### A. HUD and run polish (small, do first)
+
 - [x] Run clock shown as its own HUD element (it's currently in the one-line text with `lv`, `kills`, `credits`, `enemies`) (s7, s10)
 - [x] Remove the enemies counter; credits counter stays; items-found counter once caches exist (s10)
 - [x] Extraction bonus credits on win (15, in `balance.ts`) added to the run's credits (s9)
 - [x] Verify the 3-5 objective rule, the extraction-cancel rule and the results screen against the design doc in one playtest pass
 
 ### B. Skills and level-up rules (the biggest gap in the core loop)
+
 - [x] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5). `Progression.offerPool()` checks the free slot per kind; not yet reachable in play since there are fewer than 5 skills per group
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
@@ -46,6 +48,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
 ### C. Data caches
+
 - [x] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5). Placed at run start (`systems/Caches.ts`, `CACHES` in `balance.ts`); inert until opening lands
 - [x] Opening a cache grants a skill/passive using the slot rules; the player can only take it or discard it, and the cache is removed either way (s5). `Progression.rollCacheContents()`; credits if the pool is empty
 - [ ] Cache-opening UI (done: `CachePicker`, press E or tap the prompt) and the items-found counter (still to do, needs find-only items) (s10)
@@ -53,25 +56,30 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [ ] Optional: rare cache drop from enemies (s5)
 
 ### D. Meta loop: save, menu, shop, items (turns it into a game you return to)
+
 Best done together, in this order:
+
 - [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`, in memory only, so a page reload clears them until the save item lands
 - [ ] Save to localStorage, plus export/import save code (s9)
 - [ ] Main menu scene: start run, shop, equipment (s9)
-- [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Arms, Hands, Back, Legs, Feet, Deck, 4 small (s4b)
+- [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Chest, Hands, Back, Legs, Feet, Slicer, 4 trinkets (s4b)
 - [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
 - [ ] Item stats applied at run start through the same re-sum as passives
-- [ ] Dash on Shift from Feet items (the design doc says Shift; the old plan said Space) (s4)
+- [ ] Fast runs awards more credits, up to three minutes give 100% extra credits, at 7 minutes there is 0% extra in top of the default completion bonus
 
 ### E. Enemies and difficulty
+
 - [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6)
 - [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
 - [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
 - [x] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
 
 ### F. More objective types (optional, after the above)
+
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
 
 ### G. Polish and release
+
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled
 - [x] Floating damage numbers over enemies, coloured like the skill that did the damage
 - [ ] Balance pass on `src/data/` once B, C and D exist (Henrik)
