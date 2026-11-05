@@ -61,8 +61,8 @@ Best done together, in this order:
 
 - [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`
 - [x] Save to localStorage (s9). `systems/Save.ts`; saved only when a run ends, so leaving mid-run forfeits that run's credits
-- [ ] Export/import save code buttons in the main menu (s9). The code itself works (`account.exportCode()`, `account.importCode()`); only the UI is missing
-- [ ] Main menu scene: start run, shop, equipment (s9)
+- [x] Export/import save code buttons in the main menu (s9). `ui/SaveCodeDialog.ts`; importing asks for confirmation first
+- [x] Main menu scene: start run, shop, equipment (s9). `scenes/MenuScene.ts`; shop and equipment are shown as offline until their UI lands. Results screen offers reboot or main menu; pause screen offers quit to menu, which forfeits the run's credits
 - [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Chest, Hands, Back, Legs, Feet, Slicer, 4 trinkets (s4b)
 - [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
 - [ ] Item stats applied at run start through the same re-sum as passives

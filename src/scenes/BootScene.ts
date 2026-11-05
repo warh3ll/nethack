@@ -93,6 +93,6 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture('wall', t, t);
 
     g.destroy();
-    this.scene.start('game');
+    this.scene.start('menu');
   }
 }

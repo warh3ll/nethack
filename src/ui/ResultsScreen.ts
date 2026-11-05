@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
 import { sourceInfo, type RunStats } from '../systems/RunStats';
+import { addButton } from './Button';
+
+/** Where the player can go from the end-of-run screen. */
+export interface ResultActions {
+  reboot: () => void;
+  menu: () => void;
+}
 
 /** Everything the end-of-run screen shows (GAME_DESIGN section 7). */
 export interface RunResult {
@@ -31,6 +38,9 @@ const TRACK_COLOR = 0x1a2140;
 const WIDE_WIDTH = 820;
 /** Distance is shown in metres at the same scale as the compass (10 px = 1 m). */
 const PX_PER_METRE = 10;
+const BUTTON_W = 170;
+const BUTTON_H = 44;
+const BUTTON_GAP = 20;
 
 function formatTime(ms: number) {
   const t = Math.floor(ms / 1000);
@@ -45,7 +55,7 @@ const css = (c: number) => Phaser.Display.Color.IntegerToColor(c).rgba;
  * Everything is laid out at its natural size in a container, which is then scaled down to fit small screens.
  */
 export class ResultsScreen {
-  constructor(scene: Phaser.Scene, r: RunResult) {
+  constructor(scene: Phaser.Scene, r: RunResult, actions: ResultActions) {
     const cam = scene.cameras.main;
     const accent = r.won ? WIN_COLOR : LOSE_COLOR;
     const wide = cam.width >= WIDE_WIDTH;
@@ -124,9 +134,13 @@ export class ResultsScreen {
       sy += GAP;
     }
 
-    const prompt = text(0, 0, 'press R or tap to reboot', SIZE, accent);
-    prompt.setX(contentW / 2).setY(Math.max(sy, summaryBottom) + 20);
-    const contentH = prompt.y + prompt.height;
+    const buttonY = Math.max(sy, summaryBottom) + 20;
+    const buttonX = (contentW - BUTTON_W * 2 - BUTTON_GAP) / 2;
+    const button = (x: number, label: string, run: () => void) =>
+      addButton(scene, root, { x, y: buttonY, width: BUTTON_W, height: BUTTON_H, label, color: accent, run });
+    button(buttonX, '[R] reboot', actions.reboot);
+    button(buttonX + BUTTON_W + BUTTON_GAP, '[M] main menu', actions.menu);
+    const contentH = buttonY + BUTTON_H;
 
     // Fit: centre, and shrink if the content is bigger than the screen.
     const fit = Math.min(1, (cam.width - 32) / contentW, (cam.height - 32) / contentH);

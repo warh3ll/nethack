@@ -22,6 +22,7 @@ import { Rootkit } from '../entities/Rootkit';
 import { Weapon } from '../entities/Weapon';
 import { Objectives } from '../systems/Objectives';
 import { Progression, type Upgrade } from '../systems/Progression';
+import { addButton } from '../ui/Button';
 import { CachePicker } from '../ui/CachePicker';
 import { LevelUpPicker } from '../ui/LevelUpPicker';
 import { ObjectiveMarker } from '../ui/ObjectiveMarker';
@@ -68,6 +69,8 @@ export class GameScene extends Phaser.Scene {
   private gameOver = false;
   private paused = false;
   private pauseOverlay?: Phaser.GameObjects.Container;
+  /** True while the pause screen asks whether to give up the run. */
+  private confirmingQuit = false;
   /** True from the level-up burst until the last pending upgrade is picked. The run is frozen meanwhile. */
   private levelingUp = false;
   private pendingLevelUps = 0;
@@ -197,10 +200,21 @@ export class GameScene extends Phaser.Scene {
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
     this.paused = false;
+    this.pauseOverlay = undefined;
+    this.confirmingQuit = false;
     this.input.keyboard!.on('keydown-ESC', this.togglePause, this);
     // P is a letter too: while a hack prompt is taking typed input it must not pause.
     this.input.keyboard!.on('keydown-P', () => {
       if (!this.objectives.typing) this.togglePause();
+    });
+    this.input.keyboard!.on('keydown-Q', () => {
+      if (this.paused) this.setConfirmingQuit(true);
+    });
+    this.input.keyboard!.on('keydown-Y', () => {
+      if (this.confirmingQuit) this.quitToMenu();
+    });
+    this.input.keyboard!.on('keydown-N', () => {
+      if (this.confirmingQuit) this.setConfirmingQuit(false);
     });
     this.pauseButton = this.createPauseButton();
 
@@ -456,6 +470,12 @@ export class GameScene extends Phaser.Scene {
     this.credits += bonus;
     account.bankCredits(this.credits);
     this.drawHud();
+    const reboot = () => this.scene.restart();
+    const toMenu = () => this.scene.start('menu');
+    let armed = false;
+    const tapped = (go: () => void) => {
+      if (armed) go();
+    };
     new ResultsScreen(this, {
       won,
       level: this.progression.level,
@@ -468,12 +488,15 @@ export class GameScene extends Phaser.Scene {
       totalCredits: account.credits,
       items: 0, // TODO: caches and drops (PLAN section 4)
       stats: this.runStats,
+    }, {
+      reboot: () => tapped(reboot),
+      menu: () => tapped(toMenu),
     });
     this.joystick.release();
     this.pauseButton.setVisible(false);
-    const restart = () => this.scene.restart();
-    this.input.keyboard!.once('keydown-R', restart);
-    this.time.delayedCall(RESTART_ARM_DELAY_MS, () => this.input.once('pointerdown', restart));
+    this.input.keyboard!.once('keydown-R', reboot);
+    this.input.keyboard!.once('keydown-M', toMenu);
+    this.time.delayedCall(RESTART_ARM_DELAY_MS, () => (armed = true));
   }
 
   private togglePause() {
@@ -484,34 +507,67 @@ export class GameScene extends Phaser.Scene {
       this.physics.pause();
       this.tweens.pauseAll();
       this.time.paused = true;
-      const cam = this.cameras.main;
-      this.pauseOverlay = this.add
-        .container(0, 0, [
-          // Tap anywhere to resume (touch has no Esc key).
-          this.add
-            .rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6)
-            .setOrigin(0)
-            .setScrollFactor(0)
-            .setInteractive()
-            .on('pointerdown', () => this.togglePause()),
-          this.add
-            .text(cam.width / 2, cam.height / 2, 'PAUSED\n\npress Esc or P\nor tap to resume', {
-              fontFamily: 'monospace',
-              fontSize: '24px',
-              color: '#2ef2ff',
-              align: 'center',
-            })
-            .setOrigin(0.5),
-        ])
-        .setScrollFactor(0)
-        .setDepth(150);
+      this.drawPauseOverlay();
     } else {
       this.physics.resume();
       this.tweens.resumeAll();
       this.time.paused = false;
+      this.confirmingQuit = false;
       this.pauseOverlay?.destroy();
       this.pauseOverlay = undefined;
     }
+  }
+
+  private drawPauseOverlay() {
+    this.pauseOverlay?.destroy();
+    const cam = this.cameras.main;
+    const quitting = this.confirmingQuit;
+    const lost = `${this.credits} credit${this.credits === 1 ? '' : 's'}`;
+    const message = quitting ? `QUIT TO MENU?\n\nYou lose the ${lost}\nfrom this run.` : 'PAUSED\n\npress Esc or P\nor tap to resume';
+    const overlay = this.add
+      .container(0, 0, [
+        // Tap anywhere to resume (touch has no Esc key).
+        this.add
+          .rectangle(0, 0, cam.width, cam.height, 0x05060a, 0.6)
+          .setOrigin(0)
+          .setScrollFactor(0)
+          .setInteractive()
+          .on('pointerdown', () => this.togglePause()),
+        this.add
+          .text(cam.width / 2, cam.height / 2, message, {
+            fontFamily: 'monospace',
+            fontSize: '24px',
+            color: quitting ? '#ff2e88' : '#2ef2ff',
+            align: 'center',
+          })
+          .setOrigin(0.5),
+      ])
+      .setScrollFactor(0)
+      .setDepth(150);
+    this.pauseOverlay = overlay;
+
+    const y = cam.height / 2 + 90;
+    const button = (x: number, width: number, label: string, color: string, run: () => void) =>
+      addButton(this, overlay, { x, y, width, height: 44, label, color, run });
+    if (quitting) {
+      button(cam.width / 2 - 170, 160, '[Y] quit', '#ff2e88', () => this.quitToMenu());
+      button(cam.width / 2 + 10, 160, '[N] keep playing', '#2ef2ff', () => this.setConfirmingQuit(false));
+    } else {
+      button(cam.width / 2 - 110, 220, '[Q] quit to menu', '#ff2e88', () => this.setConfirmingQuit(true));
+    }
+  }
+
+  private setConfirmingQuit(confirming: boolean) {
+    this.confirmingQuit = confirming;
+    this.drawPauseOverlay();
+  }
+
+  /** Gives up the run: nothing is banked (GAME_DESIGN section 9, leaving mid-run). */
+  private quitToMenu() {
+    // The pause outlives the scene change unless it is released here.
+    this.time.paused = false;
+    this.tweens.resumeAll();
+    this.scene.start('menu');
   }
 
   /** Top-right pause button, mainly for touch screens (no Esc key there). */

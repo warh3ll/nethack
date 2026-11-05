@@ -19,6 +19,43 @@
         bottom: env(safe-area-inset-bottom, 0px);
         left: env(safe-area-inset-left, 0px);
       }
+      /* Save code dialog: plain HTML so codes can be pasted, which also means undoing the touch and selection locks above. */
+      .save-dialog {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        padding: 16px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        background: rgba(5, 6, 10, 0.85);
+        color: #c8f7ff;
+        font: 15px monospace;
+        touch-action: auto;
+      }
+      .save-dialog .panel { width: 100%; max-width: 520px; margin: auto; padding: 20px; box-sizing: border-box; background: #0d1226; border: 2px solid #5a6a99; }
+      .save-dialog h2 { margin: 0; color: #2ef2ff; font-size: 22px; }
+      .save-dialog label { display: block; margin: 16px 0 6px; color: #7f93b8; }
+      .save-dialog textarea {
+        display: block;
+        width: 100%;
+        height: 72px;
+        padding: 8px;
+        box-sizing: border-box;
+        resize: none;
+        background: #05060a;
+        color: #c8f7ff;
+        border: 1px solid #5a6a99;
+        font: 16px monospace;
+        word-break: break-all;
+        user-select: text;
+        -webkit-user-select: text;
+        -webkit-touch-callout: default;
+      }
+      .save-dialog .row { margin-top: 8px; text-align: right; }
+      .save-dialog button { min-width: 110px; min-height: 44px; background: #1a2140; color: #2ef2ff; border: 2px solid #5a6a99; font: 15px monospace; cursor: pointer; }
+      .save-dialog button:hover { border-color: #2ef2ff; }
+      .save-dialog .status { min-height: 20px; margin-top: 12px; color: #ff2e88; }
+      .save-dialog .status.good { color: #5fe08a; }
     </style>
   </head>
   <body>
