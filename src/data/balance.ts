@@ -7,7 +7,7 @@
 export const PLAYER = {
   maxHp: 100,
   /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
-  hpRegenPerSec: 0.1,
+  hpRegenPerSec: 0.25,
   moveSpeed: 200,
   radius: 14,
   /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */

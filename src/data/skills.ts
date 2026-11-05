@@ -323,9 +323,9 @@ export const SKILLS: Record<string, SkillData> = {
   },
 
   scatterGun: {
-    name: 'Scatter Gun',
+    name: 'Shredder',
     kind: 'weapon',
-    description: 'Short-range spread at the nearest enemy.',
+    description: 'Short-range shotgun that fires at the nearest enemy.',
     color: 0xc77dff,
     levels: [
       {
@@ -366,7 +366,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x4d7cff,
     levels: [
       {
-        hackMs: 1200,
+        hackMs: 500,
         minRange: 75,
         maxRange: 450,
         damage: 20,
@@ -374,7 +374,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 2500,
       },
       {
-        hackMs: 1050,
+        hackMs: 450,
         minRange: 75,
         maxRange: 450,
         damage: 30,
@@ -382,7 +382,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 2250,
       },
       {
-        hackMs: 900,
+        hackMs: 400,
         minRange: 75,
         maxRange: 450,
         damage: 42,
@@ -390,7 +390,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 2000,
       },
       {
-        hackMs: 750,
+        hackMs: 350,
         minRange: 75,
         maxRange: 450,
         damage: 56,
