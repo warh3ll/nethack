@@ -13,6 +13,8 @@ export interface RunResult {
   credits: number;
   /** Part of `credits` that came from the extraction bonus (shown on its own row). */
   bonus: number;
+  /** Credits banked across all runs, this one included. */
+  totalCredits: number;
   /** Items found this run. Stays 0 until caches and drops exist (PLAN section 4). */
   items: number;
   /** Damage per skill, healing and distance, shown beside the summary. */
@@ -70,6 +72,7 @@ export class ResultsScreen {
       ['distance travelled', `${whole(r.stats.distancePixels / PX_PER_METRE)} m`],
       ['credits gained', String(r.credits - r.bonus)],
       ...(r.bonus > 0 ? ([['extraction bonus', `+${r.bonus}`]] as [string, string][]) : []),
+      ['total credits', String(r.totalCredits)],
       ['items found', String(r.items)],
     ];
     const contentW = wide ? COL * 2 + 80 : COL;

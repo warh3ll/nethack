@@ -4,7 +4,7 @@ In this document I will detail item designs. Their cost, stats, name, and if it 
 
 ## SLOTS
 
-Available item slots are: Head, Chest, Hands, Back, Legs, Feet, Slicer (hacking tool), and four small item slots.
+Available item slots are: Head, Chest, Hands, Back, Legs, Feet, Slicer (hacking tool), and trinkets (the player can have up to 4 trinkets).
 
 ## EXAMPLE
 
@@ -14,4 +14,18 @@ Cost: [COST IN CREDITS]
 Stats: [AFFECTED STATS]
 Data Cache: [YES/NO]
 
-## HEAD ITEMS
+## HEAD
+
+## CHEST
+
+## HANDS
+
+## BACK
+
+## LEGS
+
+## FEET
+
+## SLICER
+
+## TRINKETS
