@@ -141,7 +141,7 @@ export class Rootkit {
       if (!o.active || o.hijacked) continue;
       const reach = e.stats.radius + o.stats.radius + 4;
       if (Phaser.Math.Distance.Between(e.x, e.y, o.x, o.y) > reach) continue;
-      if (o.takeDamage(damage)) this.onKill(o);
+      if (o.takeDamage(damage, true, this.skillId)) this.onKill(o);
     }
   }
 
@@ -154,7 +154,7 @@ export class Rootkit {
     for (const obj of this.enemies.getChildren()) {
       const o = obj as Enemy;
       if (!o.active || o.hijacked || Phaser.Math.Distance.Between(x, y, o.x, o.y) > radius) continue;
-      if (o.takeDamage(damage)) this.onKill(o);
+      if (o.takeDamage(damage, true, this.skillId)) this.onKill(o);
     }
     this.playBoom(x, y, radius);
   }

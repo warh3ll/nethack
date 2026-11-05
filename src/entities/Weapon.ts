@@ -35,7 +35,7 @@ export class Weapon {
       const offset = (i - (s.projectiles - 1) / 2) * spread;
       const b = this.bullets.get() as Bullet | null;
       if (!b) return; // pool exhausted
-      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, s.range, `bullet-${this.skillId}`);
+      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, s.range, `bullet-${this.skillId}`, this.skillId);
     }
   }
 

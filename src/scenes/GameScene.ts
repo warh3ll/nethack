@@ -7,6 +7,7 @@ import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
 import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
+import { DamageNumbers } from '../effects/DamageNumbers';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
@@ -124,7 +125,7 @@ export class GameScene extends Phaser.Scene {
       const bullet = (a instanceof Bullet ? a : b) as Bullet;
       const enemy = (a instanceof Enemy ? a : b) as Enemy;
       if (!bullet.active || !enemy.active || enemy.hijacked) return; // hijacked enemies are allies
-      if (bullet.tryHit(enemy) && enemy.takeDamage(bullet.damage)) {
+      if (bullet.tryHit(enemy) && enemy.takeDamage(bullet.damage, true, bullet.skillId)) {
         this.kills++;
         this.gainXp(enemy.stats.xp);
       }
@@ -137,7 +138,7 @@ export class GameScene extends Phaser.Scene {
       this.objectives.onPlayerHit();
       // Black ICE: the enemy whose touch landed takes damage back.
       const back = this.progression.stats.retaliationDamage;
-      if (back > 0 && enemy.takeDamage(back)) {
+      if (back > 0 && enemy.takeDamage(back, true, 'blackICE')) {
         this.kills++;
         this.gainXp(enemy.stats.xp);
       }
@@ -154,6 +155,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemies, this.enemies);
 
     this.enemyBars = this.add.graphics().setDepth(6);
+    new DamageNumbers(this);
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hpText = this.add
       .text(16 + 220 + 8, 12, '', { fontFamily: 'monospace', fontSize: '14px', color: '#c8f7ff', stroke: '#05060a', strokeThickness: 3 })

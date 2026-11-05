@@ -5,6 +5,8 @@ import { insideMap } from './MapWall';
 /** Pooled projectile. */
 export class Bullet extends Phaser.Physics.Arcade.Image {
   damage = 0;
+  /** The skill that fired this (its colour tints the damage numbers). */
+  skillId = '';
   pierceLeft = 0;
   private maxDistance = 0;
   private startX = 0;
@@ -12,13 +14,14 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
   /** Enemies already hit by this bullet, so a piercing bullet can't hit the same one twice. */
   private hit = new Set<Enemy>();
 
-  fire(x: number, y: number, angle: number, speed: number, damage: number, pierce: number, range: number, texture: string) {
+  fire(x: number, y: number, angle: number, speed: number, damage: number, pierce: number, range: number, texture: string, skillId: string) {
     this.setTexture(texture);
     this.enableBody(true, x, y, true, true);
     this.setRotation(angle);
     this.body!.setSize(this.width, this.width).setOffset(0, -(this.width - this.height) / 2);
     this.scene.physics.velocityFromRotation(angle, speed, this.body!.velocity);
     this.damage = damage;
+    this.skillId = skillId;
     this.pierceLeft = pierce;
     this.maxDistance = range;
     this.startX = x;

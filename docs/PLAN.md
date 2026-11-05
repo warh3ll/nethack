@@ -72,6 +72,7 @@ Best done together, in this order:
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
 
 ### G. Polish and release
+- [x] Floating damage numbers over enemies, coloured like the skill that did the damage
 - [ ] Balance pass on `src/data/` once B, C and D exist (Henrik)
 - [ ] Real art and texture swap in `BootScene.ts`, boundary wall textures (s10)
 - [ ] Audio (s10)

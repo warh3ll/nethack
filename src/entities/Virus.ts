@@ -58,7 +58,7 @@ export class Virus {
         const e = obj as Enemy;
         if (!e.active || !e.infection) continue;
         // Killing here fires ENEMY_KILLED, which spreads the infection.
-        if (e.takeDamage((e.infection.dps * s.tickMs) / 1000, false)) this.onKill(e);
+        if (e.takeDamage((e.infection.dps * s.tickMs) / 1000, false, this.skillId)) this.onKill(e);
       }
     }
 
