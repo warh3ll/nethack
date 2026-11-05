@@ -126,7 +126,7 @@ export interface EnemyType {
 export const ENEMIES: Record<string, EnemyType> = {
   drone: {
     hp: 10,
-    speed: 100,
+    speed: 85,
     contactDamage: 8,
     xp: 1,
     credits: 1,
@@ -137,7 +137,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
     hp: 8,
-    speed: 120,
+    speed: 75,
     contactDamage: 6,
     xp: 2,
     credits: 2,
@@ -147,14 +147,14 @@ export const ENEMIES: Record<string, EnemyType> = {
     ranged: {
       damage: 6,
       speed: 260,
-      range: 250,
+      range: 350,
       cooldownMs: 2000,
       holdAtRange: true,
     },
   },
   heavy: {
     hp: 45,
-    speed: 90,
+    speed: 100,
     contactDamage: 12,
     xp: 3,
     credits: 3,
@@ -202,7 +202,7 @@ export const SPAWNING = {
   /** How much the interval shrinks every second of the run. */
   intervalDecayPerSecond: 5,
   /** Enemies appear on a ring this far outside the screen edge. */
-  spawnMargin: 200,
+  spawnMargin: 500,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
@@ -214,8 +214,20 @@ export const SPAWNING = {
    * Keep the `maxChance` values adding up to less than 1, or plain enemies stop spawning.
    */
   specialEnemies: [
-    { type: 'marksman', startChance: 0.10, chanceStep: 0.025, stepSeconds: 30, maxChance: 0.3 },
-    { type: 'heavy', startChance: 0, chanceStep: 0.075, stepSeconds: 25, maxChance: 0.25 },
+    {
+      type: 'marksman',
+      startChance: 0.1,
+      chanceStep: 0.025,
+      stepSeconds: 30,
+      maxChance: 0.3,
+    },
+    {
+      type: 'heavy',
+      startChance: 0,
+      chanceStep: 0.075,
+      stepSeconds: 25,
+      maxChance: 0.25,
+    },
   ],
 }
 

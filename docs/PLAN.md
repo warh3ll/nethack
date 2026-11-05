@@ -42,9 +42,8 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Separate offer rules for active vs passive slots: when one group is full, only offer upgrades there plus the other group (s5). `Progression.offerPool()` checks the free slot per kind; not yet reachable in play since there are fewer than 5 skills per group
 - [x] One reroll per level-up, and skip (s5)
 - [x] Fallback choice when nothing is useful: heal 30% of max HP or 15 credits (s5)
-- [ ] Finalise the 5 passives, including Health Regen (s4, s5). Base regen (0.1 HP/s) and Nanite Repair are in
 - [x] Remaining damage skills: all 7 damage skills exist (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock, Rootkit; the roster was raised from 6 to 7) (s5)
-- [ ] Per-skill level cap and upgrade rows for every skill (s5)
+- [ ] Both weapon skills and passive skills should only have 3 levels (currently weapons have 5, remove level 2 and 4.)
 - [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
 
 ### C. Data caches
