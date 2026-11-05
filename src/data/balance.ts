@@ -25,6 +25,22 @@ export const PLAYER = {
   deathHoldMs: 700,
 }
 
+/** The dash (Space + a direction). */
+export const DASH = {
+  /** Distance covered by one dash, in pixels. */
+  distance: 260,
+  /** How long the dash takes. */
+  durationMs: 180,
+  /** Time from the start of one dash until the next is allowed. */
+  cooldownMs: 5000,
+  /** Extra invulnerability after the dash ends (the player is also invulnerable during it). */
+  invulnerableAfterMs: 250,
+  /** Teal streak following the player: colour, width at the head (px), and how long it takes to fade. */
+  trailColor: 0x2ef2ff,
+  trailWidth: 22,
+  trailFadeMs: 350,
+}
+
 /** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */
 export const MAP = {
   size: 10000,

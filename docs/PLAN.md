@@ -66,7 +66,7 @@ Best done together, in this order:
 - [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6)
 - [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
 - [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
-- [ ] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
+- [x] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
 
 ### F. More objective types (optional, after the above)
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
