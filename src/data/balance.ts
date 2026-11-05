@@ -7,7 +7,7 @@
 export const PLAYER = {
   maxHp: 100,
   /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
-  hpRegenPerSec: 0.25,
+  hpRegenPerSec: 0.15,
   moveSpeed: 200,
   radius: 14,
   /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
@@ -120,7 +120,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
     hp: 8,
-    speed: 100,
+    speed: 120,
     contactDamage: 6,
     xp: 2,
     credits: 2,
@@ -134,6 +134,16 @@ export const ENEMIES: Record<string, EnemyType> = {
       cooldownMs: 2000,
       holdAtRange: true,
     },
+  },
+  heavy: {
+    hp: 45,
+    speed: 90,
+    contactDamage: 12,
+    xp: 3,
+    credits: 3,
+    creditChance: 0.2,
+    radius: 11,
+    color: 0xffff2e,
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
@@ -171,9 +181,9 @@ export const SPAWNING = {
   /** Spawn interval at the start of a run. */
   startIntervalMs: 900,
   /** The interval shrinks toward this over time. */
-  minIntervalMs: 400,
+  minIntervalMs: 250,
   /** How much the interval shrinks every second of the run. */
-  intervalDecayPerSecond: 4,
+  intervalDecayPerSecond: 5,
   /** Enemies appear on a ring this far outside the screen edge. */
   spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
@@ -186,7 +196,8 @@ export const SPAWNING = {
    * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...).
    */
   specialEnemies: [
-    { type: 'marksman', startChance: 0.05, chanceStep: 0.01, stepSeconds: 30 },
+    { type: 'marksman', startChance: 0.10, chanceStep: 0.025, stepSeconds: 30 },
+    { type: 'heavy', startChance: 0, chanceStep: 0.075, stepSeconds: 25 },
   ],
 }
 
