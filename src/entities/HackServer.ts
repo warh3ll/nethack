@@ -60,7 +60,7 @@ export class HackServer {
     const { x, y } = this;
 
     this.ring.clear();
-    this.ring.fillStyle(CYAN, inRange ? 0.06 : 0.02).fillCircle(x, y, HACK.range);
+    this.ring.fillStyle(CYAN, inRange ? this.zoneAlpha() : 0.02).fillCircle(x, y, HACK.range);
     this.ring.lineStyle(2, CYAN, inRange ? 0.6 : 0.25).strokeCircle(x, y, HACK.range);
 
     const barX = x - BAR_W / 2;
@@ -93,6 +93,12 @@ export class HackServer {
     const left = x - this.base.width / 2;
     this.base.setPosition(left, py);
     this.typed.setPosition(left, py);
+  }
+
+  /** Background opacity while the player is in range: a slow sine pulse so the zone feels active. */
+  private zoneAlpha() {
+    const wave = (Math.sin((this.scene.time.now / HACK.zonePulseMs) * Math.PI * 2) + 1) / 2;
+    return HACK.zoneAlphaMin + (HACK.zoneAlphaMax - HACK.zoneAlphaMin) * wave;
   }
 
   /** Floating "HACKED" and then the server is gone. */
