@@ -162,7 +162,7 @@ export class GameScene extends Phaser.Scene {
     this.xpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hud = this.add
       // Wraps on narrow (phone) screens instead of running under the pause button.
-      .text(16, 46, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff', wordWrap: { width: this.scale.width - 80 } })
+      .text(16, 40, '', { fontFamily: 'monospace', fontSize: '16px', color: '#c8f7ff', wordWrap: { width: this.scale.width - 80 } })
       .setScrollFactor(0)
       .setDepth(100);
 
@@ -430,9 +430,7 @@ export class GameScene extends Phaser.Scene {
     this.xpBar.fillStyle(0x1a2140).fillRect(16, 30, w, 5);
     this.xpBar.fillStyle(0xffd23e).fillRect(16, 30, w * xpFrac, 5);
 
-    const dashFrac = this.player.dashReadiness;
-    this.xpBar.fillStyle(0x1a2140).fillRect(16, 37, w, 3);
-    this.xpBar.fillStyle(dashFrac >= 1 ? 0x2ef2ff : 0x3a6a78).fillRect(16, 37, w * dashFrac, 3);
+    this.skillBar.setDashProgress(this.player.dashReadiness);
 
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
