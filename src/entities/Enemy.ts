@@ -5,6 +5,9 @@ import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
 /** Scene event fired when an enemy dies, with the enemy as argument. */
 export const ENEMY_KILLED = 'enemy-killed';
 
+/** Scene event fired when a skill damages an enemy: (enemy, amount, skillId). */
+export const ENEMY_DAMAGED = 'enemy-damaged';
+
 const HIJACK_TINT = 0xff5a7a;
 
 /** Set on an enemy infected by the Virus. Spread copies these numbers onto the next victims. */
@@ -161,7 +164,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   /** Returns true if this hit killed the enemy. `flash: false` is for damage over time. */
-  takeDamage(amount: number, flash = true): boolean {
+  takeDamage(amount: number, flash = true, skillId?: string): boolean {
+    // Only attributed damage gets a floating number (outright kills like the hack execute pass no skill).
+    if (skillId) this.scene.events.emit(ENEMY_DAMAGED, this, amount, skillId);
     this.hp -= amount;
     this.provoke();
     if (this.hp <= 0) {

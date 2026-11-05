@@ -85,7 +85,7 @@ export class SynapticOverload {
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active || Phaser.Math.Distance.Between(x, y, e.x, e.y) > radius) continue;
-      if (e.takeDamage(damage)) this.onKill(e);
+      if (e.takeDamage(damage, true, this.skillId)) this.onKill(e);
     }
     this.playBoom(x, y, radius);
   }

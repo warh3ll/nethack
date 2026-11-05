@@ -41,6 +41,23 @@ export const DASH = {
   trailFadeMs: 350,
 }
 
+/** Floating damage numbers over enemies (coloured like the skill that did the damage). */
+export const DAMAGE_NUMBERS = {
+  fontSize: 16,
+  /** Colour when the damage has no skill colour. */
+  defaultColor: 0xffffff,
+  /** How far the number floats up, and how long until it has faded out. */
+  risePx: 30,
+  durationMs: 700,
+  /** Spawn height above the top of the enemy's hit circle, and the random sideways spread (px). */
+  heightAbove: 6,
+  jitterX: 8,
+  /** Hits on one enemy from the same skill within this time add up into one number. */
+  mergeMs: 120,
+  /** Max numbers on screen at once (the oldest is recycled beyond this). */
+  poolSize: 80,
+}
+
 /** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */
 export const MAP = {
   size: 10000,
