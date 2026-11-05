@@ -142,7 +142,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     xp: 3,
     credits: 3,
     creditChance: 0.2,
-    radius: 11,
+    radius: 18,
     color: 0xffff2e,
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
@@ -193,11 +193,12 @@ export const SPAWNING = {
   /**
    * Harder enemies sharing the same spawn pool: each spawn rolls these in order, and if none hits it
    * is a plain `enemyType`. The chance of each is `startChance` plus `chanceStep` for every
-   * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...).
+   * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...), but never more than `maxChance`.
+   * Keep the `maxChance` values adding up to less than 1, or plain enemies stop spawning.
    */
   specialEnemies: [
-    { type: 'marksman', startChance: 0.10, chanceStep: 0.025, stepSeconds: 30 },
-    { type: 'heavy', startChance: 0, chanceStep: 0.075, stepSeconds: 25 },
+    { type: 'marksman', startChance: 0.10, chanceStep: 0.025, stepSeconds: 30, maxChance: 0.3 },
+    { type: 'heavy', startChance: 0, chanceStep: 0.075, stepSeconds: 25, maxChance: 0.25 },
   ],
 }
 
