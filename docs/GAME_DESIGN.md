@@ -65,8 +65,8 @@ Rules to check every feature against. Edit these first.
 - One starting skill: Auto-Pistol _(in game)_.
 - **Nothing useful to offer (decided):** when a level-up has nothing useful (all slots full and skills maxed), the player chooses between a heal (30% of max HP) or credits (amount TBD until the economy is set).
 - **XP curve (decided):** steady pace, with the XP needed per level increasing slightly each level. No level cap. Numbers in `balance.ts`.
-- **Nethacking skills:** not in the prototype roster. The 12 skills are damage skills and passives only.
 - **Reroll and skip (decided):** one reroll of the 3 choices per level-up. The player may also skip, but then gets no reward for that level-up.
+- Both weapon skills and passive skills should only have 3 levels (currently weapons have 5, remove level 2 and 4.)
 
 ### Skill list
 
