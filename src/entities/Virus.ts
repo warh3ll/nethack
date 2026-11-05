@@ -6,7 +6,14 @@ import { ENEMY_KILLED, type Enemy } from './Enemy';
 const INFECTED_COLOR = 0x5fe08a;
 
 /** Look of the spread animation (cosmetic only, not balance). */
-const JUMP_FX = { radius: 5, durationMs: 160, pulseMs: 250 };
+const JUMP_FX = {
+  radius: 5,
+  /** Packet speed in pixels/second, so a long jump takes visibly longer than a short one. */
+  speed: 900,
+  /** A jump never takes less than this, so very short ones still show. */
+  minDurationMs: 120,
+  pulseMs: 250,
+};
 
 /**
  * Hacking weapon: infects an enemy in range, which then takes damage over time.
@@ -48,7 +55,7 @@ export class Virus {
       const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
       if (target) {
         this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount);
-        this.playJump(this.owner.x, this.owner.y, target.x, target.y);
+        this.playJump(this.owner.x, this.owner.y, target);
         this.nextInfectAt = time + s.cooldownMs;
       }
     }
@@ -77,28 +84,44 @@ export class Virus {
       const next = this.nearestUninfected(dead.x, dead.y, inf.spreadRange, dead);
       if (!next) return;
       this.infect(next, inf.dps, inf.spreadRange, inf.spreadCount);
-      this.playJump(dead.x, dead.y, next.x, next.y);
+      this.playJump(dead.x, dead.y, next);
     }
   }
 
-  /** Cosmetic: a glowing packet flies to the new victim, from the player or from the dead enemy. Circles are pooled and reused. */
-  private playJump(fromX: number, fromY: number, toX: number, toY: number) {
+  /**
+   * Cosmetic: a glowing packet flies to the new victim, from the player or from the dead enemy.
+   * It follows the victim as it moves; if the victim dies mid-flight it finishes at the last spot. Circles are pooled and reused.
+   */
+  private playJump(fromX: number, fromY: number, target: Enemy) {
     let dot = this.jumpPool.find((d) => !d.visible);
     if (!dot) {
       dot = this.scene.add.circle(0, 0, JUMP_FX.radius, INFECTED_COLOR).setDepth(6);
       this.jumpPool.push(dot);
     }
-    dot.setPosition(fromX, fromY).setScale(1.6).setAlpha(1).setVisible(true);
-    this.scene.tweens.add({
-      targets: dot,
-      x: toX,
-      y: toY,
-      scale: 0.6,
-      alpha: 0.4,
-      duration: JUMP_FX.durationMs,
+    const packet = dot;
+    packet.setPosition(fromX, fromY).setScale(1.6).setAlpha(1).setVisible(true);
+    let toX = target.x;
+    let toY = target.y;
+    const distance = Phaser.Math.Distance.Between(fromX, fromY, toX, toY);
+    this.scene.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: Math.max(JUMP_FX.minDurationMs, (distance / JUMP_FX.speed) * 1000),
       ease: 'Quad.easeIn',
+      onUpdate: (tween) => {
+        // Infection is cleared on death, so this also stops following a pooled enemy that respawned.
+        if (target.active && target.infection) {
+          toX = target.x;
+          toY = target.y;
+        }
+        const t = tween.getValue() ?? 0;
+        packet
+          .setPosition(Phaser.Math.Linear(fromX, toX, t), Phaser.Math.Linear(fromY, toY, t))
+          .setScale(Phaser.Math.Linear(1.6, 0.6, t))
+          .setAlpha(Phaser.Math.Linear(1, 0.4, t));
+      },
       onComplete: () => {
-        dot.setVisible(false);
+        packet.setVisible(false);
         // Pulse on arrival.
         this.pulseAt(toX, toY);
       },
