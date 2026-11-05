@@ -81,7 +81,7 @@ export class SynapticOverload {
   /** The target dies outright, then everything near where it stood takes damage. */
   private explode(target: Enemy, damage: number, radius: number) {
     const { x, y } = target;
-    if (target.takeDamage(target.hp, false)) this.onKill(target);
+    if (target.takeDamage(target.hp, false, this.skillId, false)) this.onKill(target);
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active || Phaser.Math.Distance.Between(x, y, e.x, e.y) > radius) continue;

@@ -25,7 +25,8 @@ export class DamageNumbers {
     scene.events.once('shutdown', () => scene.events.off(ENEMY_DAMAGED, this.onDamaged, this));
   }
 
-  private onDamaged(enemy: Enemy, amount: number, skillId: string) {
+  private onDamaged(enemy: Enemy, amount: number, skillId: string, _dealt: number, showNumber: boolean) {
+    if (!showNumber) return;
     const color = SKILLS[skillId]?.color ?? DAMAGE_NUMBERS.defaultColor;
     const now = this.scene.time.now;
     const live = this.pool.find(
