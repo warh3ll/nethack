@@ -430,6 +430,8 @@ export class GameScene extends Phaser.Scene {
     this.xpBar.fillStyle(0x1a2140).fillRect(16, 30, w, 5);
     this.xpBar.fillStyle(0xffd23e).fillRect(16, 30, w * xpFrac, 5);
 
+    this.skillBar.setDashProgress(this.player.dashReadiness);
+
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
     const lv = this.progression.isMaxLevel ? 'MAX' : this.progression.level;

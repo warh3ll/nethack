@@ -25,12 +25,17 @@ export class SkillBar {
   private slots: Slot[] = [];
   /** Current slot size in px (BOX, or smaller on narrow screens). */
   private box = BOX;
+  /** Dash recharge bar, drawn just above the slots across their full width. */
+  private dashGfx: Phaser.GameObjects.Graphics;
+  private dashFrac = 1;
+  private dashRect = { x: 0, y: 0, w: 0 };
 
   constructor(
     private scene: Phaser.Scene,
     private progression: Progression,
   ) {
     this.gfx = scene.add.graphics().setScrollFactor(0).setDepth(100);
+    this.dashGfx = scene.add.graphics().setScrollFactor(0).setDepth(100);
     for (let i = 0; i < WEAPON_SLOTS + PASSIVE_SLOTS; i++) {
       const letter = scene.add
         .text(0, 0, '', { fontFamily: 'monospace', fontSize: '20px', fontStyle: 'bold', color: '#05060a' })
@@ -59,6 +64,8 @@ export class SkillBar {
     const y = this.scene.scale.height - MARGIN_BOTTOM - this.box;
     for (const s of this.slots) s.letter.setFontSize(Math.round(20 * Math.max(k, 0.6)));
 
+    this.dashRect = { x, y: y - 9, w: totalW };
+    this.drawDash();
     this.gfx.clear();
     let slotIndex = 0;
     const drawGroup = (count: number, owned: string[]) => {
@@ -70,6 +77,20 @@ export class SkillBar {
     };
     drawGroup(WEAPON_SLOTS, weapons);
     drawGroup(PASSIVE_SLOTS, passives);
+  }
+
+  /** 0..1, how far the dash has recharged (1 = ready). */
+  setDashProgress(frac: number) {
+    if (frac === this.dashFrac) return;
+    this.dashFrac = frac;
+    this.drawDash();
+  }
+
+  private drawDash() {
+    const { x, y, w } = this.dashRect;
+    this.dashGfx.clear();
+    this.dashGfx.fillStyle(0x1a2140, 0.85).fillRect(x, y, w, 4);
+    this.dashGfx.fillStyle(this.dashFrac >= 1 ? 0x2ef2ff : 0x3a6a78).fillRect(x, y, w * this.dashFrac, 4);
   }
 
   private drawSlot(index: number, x: number, y: number, skillId?: string) {
