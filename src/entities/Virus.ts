@@ -48,6 +48,7 @@ export class Virus {
       const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
       if (target) {
         this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount);
+        this.playJump(this.owner.x, this.owner.y, target.x, target.y);
         this.nextInfectAt = time + s.cooldownMs;
       }
     }
@@ -80,7 +81,7 @@ export class Virus {
     }
   }
 
-  /** Cosmetic: a glowing packet flies from the dead enemy to the new victim. Circles are pooled and reused. */
+  /** Cosmetic: a glowing packet flies to the new victim, from the player or from the dead enemy. Circles are pooled and reused. */
   private playJump(fromX: number, fromY: number, toX: number, toY: number) {
     let dot = this.jumpPool.find((d) => !d.visible);
     if (!dot) {

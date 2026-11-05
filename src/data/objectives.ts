@@ -109,6 +109,10 @@ export const SERVER = {
 export const HACK = {
   /** The player must stay within this distance of the server for the hack to progress. */
   range: 220,
+  /** While the player is in range, the zone's background colour pulses between these opacities (0 to 1), one cycle per `zonePulseMs`. */
+  zoneAlphaMin: 0.05,
+  zoneAlphaMax: 0.16,
+  zonePulseMs: 1200,
   /** Time the hack takes with no interruptions, from 0% to 100%. Prompts and damage add to this. */
   durationMs: 20000,
   /** Progress lost per second (fraction of the whole bar) while the player is out of range. */
