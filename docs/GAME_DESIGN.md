@@ -38,7 +38,8 @@ Rules to check every feature against. Edit these first.
 ## 4. Player
 
 - One playable character in the prototype _(in game)_; more are TBD.
-- Movement: direct control. Dash is gained via "feet" items (not yet added); key is **Shift**.
+- Movement: direct control.
+- Dash: A small dash can be performed with **Space**, items may upgrade cooldown, dash distance. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
 - Health with a brief invulnerability window after each hit, by default the player has a small health regen, this can be upgraded by passive skills and items.
 - Auto-firing skills can be gained through data caches or level up upgrades.
 - Pause with Escape or P _(in game)_.
