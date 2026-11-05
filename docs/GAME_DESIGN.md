@@ -151,6 +151,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - **Credits on death (decided):** credits collected are kept in full even if the player dies. A successful extraction only adds an end-of-run credit bonus on top.
 - **Extraction bonus (decided):** a successful extraction gives an end-of-run credit bonus.
 - **Save code (decided):** the menu offers export/import of a save code, as a backup against wiped localStorage.
+- **Leaving mid-run (decided):** credits are banked only when a run ends by death or extraction. Closing the game or letting a session time out forfeits that run's credits, so an idle session can't be used to grind.
 - Items can be bought from a store in the main menu and equipped there (section 4b).
 - Permanent upgrades are account-wide. Storage is browser localStorage (the only option on itch.io), so clearing site data wipes progress.
 - More progression TBD
