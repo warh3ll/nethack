@@ -10,6 +10,7 @@ import { pickCachePositions } from '../systems/Caches';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
+import { DefensiveMatrixFx } from '../effects/DefensiveMatrixFx';
 import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
@@ -69,6 +70,7 @@ export class GameScene extends Phaser.Scene {
   private gameOver = false;
   private paused = false;
   private pauseOverlay?: Phaser.GameObjects.Container;
+  private matrixFx!: DefensiveMatrixFx;
   /** True while the pause screen asks whether to give up the run. */
   private confirmingQuit = false;
   /** True from the level-up burst until the last pending upgrade is picked. The run is frozen meanwhile. */
@@ -140,11 +142,14 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
       const enemy = e as Enemy;
       if (enemy.stats.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
-      if (!this.player.takeDamage(enemy.stats.contactDamage, this.gameTime)) return;
-      this.objectives.onPlayerHit();
-      // Black ICE: the enemy whose touch landed takes damage back.
+      const hit = this.player.takeDamage(enemy.stats.contactDamage, this.gameTime);
+      if (!hit) return;
+      if (hit === 'damaged') this.objectives.onPlayerHit();
+      // Defensive Matrix: the enemy whose touch landed takes damage back, blocked or not.
       const back = this.progression.stats.retaliationDamage;
-      if (back > 0 && enemy.takeDamage(back, true, 'blackICE')) {
+      if (back <= 0) return;
+      this.matrixFx.spike(enemy);
+      if (enemy.takeDamage(back, true, 'defensiveMatrix')) {
         this.kills++;
         this.gainXp(enemy.stats.xp);
       }
@@ -154,7 +159,7 @@ export class GameScene extends Phaser.Scene {
       const bullet = b as EnemyBullet;
       if (!bullet.active) return;
       bullet.kill();
-      if (this.player.takeDamage(bullet.damage, this.gameTime)) this.objectives.onPlayerHit();
+      if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.objectives.onPlayerHit();
     });
 
     // Keep the swarm from collapsing into a single blob.
@@ -162,6 +167,7 @@ export class GameScene extends Phaser.Scene {
 
     this.enemyBars = this.add.graphics().setDepth(6);
     new DamageNumbers(this);
+    this.matrixFx = new DefensiveMatrixFx(this, this.player);
     this.runStats = new RunStats(this);
     this.hpBar = this.add.graphics().setScrollFactor(0).setDepth(100);
     this.hpText = this.add

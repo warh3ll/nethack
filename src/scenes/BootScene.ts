@@ -56,6 +56,27 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillCircle(5, 5, 2);
     g.generateTexture('bullet-enemy', 10, 10).clear();
 
+    // Defensive Matrix shield: a faceted hexagon around the player, then the shards it bursts into.
+    const matrixColor = SKILLS.defensiveMatrix.color;
+    const hexSize = 96;
+    const hexRadius = 44;
+    const hex = Array.from({ length: 6 }, (_, i) => {
+      const a = (Math.PI / 3) * i + Math.PI / 6;
+      return new Phaser.Math.Vector2(hexSize / 2 + Math.cos(a) * hexRadius, hexSize / 2 + Math.sin(a) * hexRadius);
+    });
+    g.fillStyle(matrixColor, 0.16).fillPoints(hex, true);
+    g.lineStyle(1, matrixColor, 0.45);
+    for (const p of hex) g.lineBetween(hexSize / 2, hexSize / 2, p.x, p.y);
+    g.lineStyle(3, matrixColor, 1).strokePoints(hex, true, true);
+    g.generateTexture('shield-hex', hexSize, hexSize).clear();
+    g.fillStyle(matrixColor).fillTriangle(0, 0, 14, 4, 2, 10);
+    g.generateTexture('shield-shard', 14, 10).clear();
+
+    // Retaliation spike: a long blade pointing right with a bright core. Stretched to length when used.
+    g.fillStyle(matrixColor).fillTriangle(0, 0, 64, 7, 0, 14);
+    g.fillStyle(0xffffff).fillTriangle(0, 4, 48, 7, 0, 10);
+    g.generateTexture('retaliation-spike', 64, 14).clear();
+
     // Credit chip: small gold microchip.
     g.fillStyle(0xffd23e).fillRect(1, 1, 10, 10);
     g.fillStyle(0x05060a).fillRect(4, 4, 4, 4);

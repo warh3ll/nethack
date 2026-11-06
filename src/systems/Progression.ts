@@ -16,8 +16,12 @@ export interface PlayerStats {
   hpRegenBySkill: Record<string, number>
   /** Flat damage taken off every hit the player receives. */
   damageReduction: number
-  /** Damage dealt back to an enemy whose touch hurts the player. */
+  /** Damage dealt back to an enemy whose touch reaches the player, blocked or not. */
   retaliationDamage: number
+  /** Hits the shield absorbs when fully charged (0 = no shield). */
+  shieldHits: number
+  /** Time (ms) for the shield to get one hit back. */
+  shieldRechargeMs: number
   moveSpeed: number
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number
@@ -50,6 +54,8 @@ export class Progression {
     hpRegenBySkill: {},
     damageReduction: 0,
     retaliationDamage: 0,
+    shieldHits: 0,
+    shieldRechargeMs: 0,
     moveSpeed: 0,
     damageMult: 1,
   }
@@ -164,6 +170,8 @@ export class Progression {
   recomputeStats() {
     let damageReduction = 0
     let retaliation = 0
+    let shieldHits = 0
+    const shieldRecharges: number[] = []
     let hpRegen = 0
     const regenBySkill: Record<string, number> = {}
     let moveSpeedPct = 0
@@ -173,6 +181,8 @@ export class Progression {
       const p = getPassiveStats(id, lvl)
       damageReduction += p.damageReduction ?? 0
       retaliation += p.retaliationDamage ?? 0
+      shieldHits += p.shieldHits ?? 0
+      if (p.shieldRechargeMs) shieldRecharges.push(p.shieldRechargeMs)
       hpRegen += p.hpRegenPerSec ?? 0
       if (p.hpRegenPerSec) regenBySkill[id] = p.hpRegenPerSec
       moveSpeedPct += p.moveSpeedPct ?? 0
@@ -181,6 +191,8 @@ export class Progression {
     this.stats.maxHp = PLAYER.maxHp
     this.stats.damageReduction = damageReduction
     this.stats.retaliationDamage = retaliation
+    this.stats.shieldHits = shieldHits
+    this.stats.shieldRechargeMs = shieldRecharges.length > 0 ? Math.min(...shieldRecharges) : 0
     this.stats.hpRegenPerSec = PLAYER.hpRegenPerSec + hpRegen
     this.stats.hpRegenBySkill = regenBySkill
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100)

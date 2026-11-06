@@ -180,7 +180,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Destructible structure in the Steal secrets objective. Its hp is the value for the fewest outposts;
   // see STEAL_SECRETS in objectives.ts for how it shrinks with more of them.
   outpost: {
-    hp: 120,
+    hp: 90,
     speed: 0,
     contactDamage: 0,
     xp: 5,
@@ -198,11 +198,11 @@ export const SPAWNING = {
   /** Spawn interval at the start of a run. */
   startIntervalMs: 900,
   /** The interval shrinks toward this over time. */
-  minIntervalMs: 250,
+  minIntervalMs: 400,
   /** How much the interval shrinks every second of the run. */
-  intervalDecayPerSecond: 5,
+  intervalDecayPerSecond: 6,
   /** Enemies appear on a ring this far outside the screen edge. */
-  spawnMargin: 500,
+  spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
@@ -275,7 +275,7 @@ export const LEVELING = {
    * With 20 and 12: 20, 32, 44, ... 236 XP for level 19 to 20 (2432 XP in total to reach 20).
    * Formula: XP for level n -> n+1 = xpForLevel2 + xpIncreasePerLevel * (n - 1).
    */
-  xpIncreasePerLevel: 12,
+  xpIncreasePerLevel: 15,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**

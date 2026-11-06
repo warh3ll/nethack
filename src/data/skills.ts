@@ -86,9 +86,13 @@ export interface RootkitStats {
  * (not the step from the previous level). Bonuses from all passives are added together.
  */
 export interface PassiveStats {
-  /** Damage dealt back to an enemy that damages the player by touching them (once per hit that lands). */
+  /** Damage dealt back to an enemy whose touch reaches the player, whether the shield blocks it or not. */
   retaliationDamage?: number
-  /** Flat damage taken off every hit the player receives (a hit never does less than PLAYER.minDamageTaken). */
+  /** Hits the shield absorbs completely. Added up across passives, so items can raise it. */
+  shieldHits?: number
+  /** Time (ms) for the shield to get one hit back. The fastest source wins. */
+  shieldRechargeMs?: number
+  /** Flat damage taken off every hit the player receives (a hit the shield doesn't block never does less than PLAYER.minDamageTaken). */
   damageReduction?: number
   /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
   hpRegenPerSec?: number
@@ -159,31 +163,31 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xfff35c,
     levels: [
       {
-        damage: 7,
-        cooldownMs: 600,
-        projectileSpeed: 520,
+        damage: 2,
+        cooldownMs: 400,
+        projectileSpeed: 700,
         pierce: 0,
         projectiles: 1,
         spreadDeg: 0,
         range: 500,
       },
       {
-        damage: 9,
-        cooldownMs: 480,
-        projectileSpeed: 560,
+        damage: 3,
+        cooldownMs: 350,
+        projectileSpeed: 700,
         pierce: 1,
-        projectiles: 2,
+        projectiles: 1,
         spreadDeg: 0,
         range: 550,
       },
       {
-        damage: 12,
-        cooldownMs: 400,
-        projectileSpeed: 600,
-        pierce: 3,
-        projectiles: 3,
-        spreadDeg: 8,
-        range: 650,
+        damage: 4,
+        cooldownMs: 300,
+        projectileSpeed: 700,
+        pierce: 2,
+        projectiles: 1,
+        spreadDeg: 500,
+        range: 600,
       },
     ],
   },
@@ -197,28 +201,28 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x5fe08a,
     levels: [
       {
+        dps: 1,
+        cooldownMs: 2500,
+        infectRange: 300,
+        spreadRange: 200,
+        spreadCount: 1,
+        tickMs: 350,
+      },
+      {
         dps: 2,
-        cooldownMs: 1500,
-        infectRange: 400,
-        spreadRange: 200,
-        spreadCount: 1,
-        tickMs: 250,
+        cooldownMs: 2000,
+        infectRange: 300,
+        spreadRange: 300,
+        spreadCount: 2,
+        tickMs: 350,
       },
       {
-        dps: 4,
+        dps: 3,
         cooldownMs: 1500,
-        infectRange: 440,
-        spreadRange: 200,
-        spreadCount: 1,
-        tickMs: 250,
-      },
-      {
-        dps: 7,
-        cooldownMs: 1500,
-        infectRange: 480,
-        spreadRange: 200,
-        spreadCount: 1,
-        tickMs: 250,
+        infectRange: 300,
+        spreadRange: 400,
+        spreadCount: 3,
+        tickMs: 350,
       },
     ],
   },
@@ -231,7 +235,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xff4fd8,
     levels: [
       {
-        damage: 40,
+        damage: 25,
         cooldownMs: 3000,
         projectileSpeed: 1800,
         pierce: 99,
@@ -242,7 +246,7 @@ export const SKILLS: Record<string, SkillData> = {
         targeting: 'highestHp',
       },
       {
-        damage: 66,
+        damage: 30,
         cooldownMs: 2600,
         projectileSpeed: 1800,
         pierce: 99,
@@ -253,7 +257,7 @@ export const SKILLS: Record<string, SkillData> = {
         targeting: 'highestHp',
       },
       {
-        damage: 100,
+        damage: 35,
         cooldownMs: 2200,
         projectileSpeed: 1800,
         pierce: 99,
@@ -314,23 +318,23 @@ export const SKILLS: Record<string, SkillData> = {
         minRange: 75,
         maxRange: 450,
         damage: 20,
-        radius: 70,
+        radius: 100,
         cooldownMs: 2500,
       },
       {
         hackMs: 400,
         minRange: 75,
         maxRange: 450,
-        damage: 42,
-        radius: 100,
+        damage: 32,
+        radius: 130,
         cooldownMs: 2000,
       },
       {
         hackMs: 300,
         minRange: 75,
         maxRange: 450,
-        damage: 72,
-        radius: 130,
+        damage: 45,
+        radius: 160,
         cooldownMs: 1500,
       },
     ],
@@ -340,7 +344,7 @@ export const SKILLS: Record<string, SkillData> = {
     kind: 'weapon',
     behavior: 'emp',
     description:
-      'Lights out, chrome. A ring pulses out from you, damaging and briefly stunning enemies.',
+      'A ring pulses out from you, damaging and briefly stunning enemies.',
     color: 0x2ef2ff,
     levels: [
       { damage: 8, radius: 120, stunMs: 800, cooldownMs: 4000 },
@@ -424,16 +428,16 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xff9d2e,
     levels: [{ damagePct: 3 }, { damagePct: 6 }, { damagePct: 9 }],
   },
-  blackICE: {
-    name: 'Black ICE',
+  defensiveMatrix: {
+    name: 'Defensive Matrix',
     kind: 'passive',
     description:
-      'Your internal ICE retaliates against enemies that hurt you by touch.',
+      'Gains a shield that will protect from one hit, it also retaliates against melee enemies.',
     color: 0x7a5cff,
     levels: [
-      { retaliationDamage: 4 },
-      { retaliationDamage: 8 },
-      { retaliationDamage: 12 },
+      { retaliationDamage: 4, shieldHits: 1, shieldRechargeMs: 5000 },
+      { retaliationDamage: 8, shieldHits: 1, shieldRechargeMs: 4000 },
+      { retaliationDamage: 12, shieldHits: 1, shieldRechargeMs: 3000 },
     ],
   },
 }

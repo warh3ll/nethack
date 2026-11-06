@@ -8,10 +8,19 @@ export const PLAYER_HEALED = 'player-healed';
 /** Source id for the base regeneration every run has (not from a skill). */
 export const BASE_REGEN = 'baseRegen';
 
+/** What a hit did: took HP, was absorbed by the shield, or never landed at all (null). */
+export type HitResult = 'damaged' | 'blocked' | null;
+
 export class Player extends Phaser.Physics.Arcade.Sprite {
   hp: number;
   /** While true (a hack prompt wants typing), the WASD letters don't move the player; the arrow keys still do. */
   typingLock = false;
+  /** Hits the shield can absorb right now (Defensive Matrix). */
+  shieldCharges = 0;
+  /** The stat as last seen, to notice the shield growing. */
+  private shieldMax = 0;
+  /** Ms until the shield gets a hit back; 0 while it is full. */
+  private shieldRechargeLeftMs = 0;
   private invulnerableUntil = 0;
   private facing: Dir8 = 'down';
   /** Ms left of the shooting pose; refilled by every shot (see noteShot). */
@@ -65,6 +74,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
     this.regenerate(deltaMs);
+    this.updateShield(deltaMs);
     this.dashCooldownMs = Math.max(0, this.dashCooldownMs - deltaMs);
     this.dashSafeMs = Math.max(0, this.dashSafeMs - deltaMs);
     const k = this.keys;
@@ -141,6 +151,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.play(playerAnimKey('death', this.facing));
   }
 
+  /** A bigger shield comes charged, like extra max HP. Lost hits return one at a time, and being hit doesn't delay that. */
+  private updateShield(deltaMs: number) {
+    const max = this.stats.shieldHits;
+    if (max > this.shieldMax) this.shieldCharges += max - this.shieldMax;
+    this.shieldMax = max;
+    if (this.shieldCharges >= max) {
+      this.shieldRechargeLeftMs = 0;
+      return;
+    }
+    this.shieldRechargeLeftMs -= deltaMs;
+    if (this.shieldRechargeLeftMs > 0) return;
+    this.shieldCharges++;
+    this.shieldRechargeLeftMs = this.shieldCharges < max ? this.stats.shieldRechargeMs : 0;
+  }
+
   /** Passive regeneration; the HP actually gained is credited to base regen and the passives behind it. */
   private regenerate(deltaMs: number) {
     const rate = this.stats.hpRegenPerSec;
@@ -164,12 +189,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     return gained;
   }
 
-  /** Returns true if damage was applied (false while invulnerable). */
-  takeDamage(amount: number, now: number): boolean {
-    if (now < this.invulnerableUntil || this.dashMs > 0 || this.dashSafeMs > 0 || this.isDead) return false;
-    this.hp = Math.max(0, this.hp - Math.max(PLAYER.minDamageTaken, amount - this.stats.damageReduction));
+  /** A charged shield absorbs the hit completely; either way a hit that lands starts the invulnerability window. */
+  takeDamage(amount: number, now: number): HitResult {
+    if (now < this.invulnerableUntil || this.dashMs > 0 || this.dashSafeMs > 0 || this.isDead) return null;
     this.invulnerableUntil = now + PLAYER.invulnerableMs;
+    if (this.shieldCharges > 0) {
+      this.shieldCharges--;
+      if (this.shieldRechargeLeftMs <= 0) this.shieldRechargeLeftMs = this.stats.shieldRechargeMs;
+      return 'blocked';
+    }
+    this.hp = Math.max(0, this.hp - Math.max(PLAYER.minDamageTaken, amount - this.stats.damageReduction));
     this.scene.tweens.add({ targets: this, alpha: 0.3, duration: 80, yoyo: true, repeat: 2 });
-    return true;
+    return 'damaged';
   }
 }

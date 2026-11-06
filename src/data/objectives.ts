@@ -19,7 +19,7 @@ export interface ObjectiveDef {
  * x, y is the middle of the compound.)
  */
 export const RUN_GENERATION = {
-  count: { min: 3, max: 5 },
+  count: { min: 4, max: 5 },
   /** The same objective type can occur at most this many times in one run. */
   maxPerType: 2,
   /** Types every run must contain at least once (hacking is the core of the game). */
@@ -47,7 +47,7 @@ export const RUN_GENERATION = {
 /** Steal secrets objective: destroy every outpost (they spawn drones while the player is near), then pick up the secrets. */
 export const STEAL_SECRETS = {
   /** Outposts per objective, picked at random. */
-  outposts: { min: 2, max: 4 },
+  outposts: { min: 2, max: 3 },
   /** Outposts stand on a circle of this radius around the objective position. */
   ringRadius: 170,
   /** Each outpost beyond the minimum count takes this much hp off every outpost (see ENEMIES.outpost.hp). */
@@ -55,7 +55,7 @@ export const STEAL_SECRETS = {
   /** An outpost spawns drones only while the player is within this distance of it. */
   spawnTriggerRadius: 650,
   /** Time between drones from one outpost. */
-  spawnIntervalMs: 2500,
+  spawnIntervalMs: 4000,
   /** The player picks up the secrets within this distance. */
   pickupRadius: 36,
 }
@@ -63,7 +63,7 @@ export const STEAL_SECRETS = {
 /** Connect servers objective: grab a cable (E) at the first server, hold E at the other to attach it (start at either). */
 export const CONNECT_SERVERS = {
   /** The second server is placed this far from the first, in a random direction. */
-  gap: { min: 500, max: 600 },
+  gap: { min: 500, max: 800 },
   /** Press E within this distance of either server to grab the cable. */
   grabRadius: 60,
   /** Hold E within this distance of the other server to attach it. */
@@ -71,7 +71,7 @@ export const CONNECT_SERVERS = {
   /** How long E must be held. Taking damage resets it. */
   attachMs: 2500,
   /** With the cable in hand the player can't get farther than this from the server it is attached to (they can still circle it). */
-  maxCableLength: 800,
+  maxCableLength: 1000,
   /** Pressing E away from the second server drops the cable; this is how long it takes to wind back. */
   unwindMs: 600,
 }
@@ -92,7 +92,7 @@ export const EXTRACTION = {
   /** The player must stay inside this radius to log out; leaving cancels the typing and the countdown. */
   radius: 140,
   /** What to type at the extraction point (case-sensitive, mistypes just get retyped). */
-  logoutText: 'log out',
+  logoutText: 'exit',
   /** Seconds of countdown after the text is typed, then the run is won. */
   countdownSeconds: 3,
 }
@@ -108,25 +108,25 @@ export const SERVER = {
 
 export const HACK = {
   /** The player must stay within this distance of the server for the hack to progress. */
-  range: 220,
+  range: 250,
   /** While the player is in range, the zone's background colour pulses between these opacities (0 to 1), one cycle per `zonePulseMs`. */
   zoneAlphaMin: 0.05,
   zoneAlphaMax: 0.16,
   zonePulseMs: 1200,
   /** Time the hack takes with no interruptions, from 0% to 100%. Prompts and damage add to this. */
-  durationMs: 20000,
+  durationMs: 17000,
   /** Progress lost per second (fraction of the whole bar) while the player is out of range. */
   decayPerSecond: 0.01,
   /** Taking damage halts the progress for this long. */
   damageHaltMs: 200,
   /** While a hack is running (player in range), enemies spawn this much faster (interval x this). */
-  spawnIntervalMultiplier: 0.8,
+  spawnIntervalMultiplier: 0.5,
   /** Game speed while a prompt is being typed (1 = normal, 0.3 = 30%). Everything but the hack itself slows. */
   typingTimeScale: 0.3,
   /** Prompts per hack. They are spread evenly along the bar. */
-  promptCount: { min: 2, max: 3 },
-  smackHits: { min: 8, max: 15 },
-  injectWordCount: { min: 2, max: 4 },
+  promptCount: { min: 3, max: 4 },
+  smackHits: { min: 8, max: 12 },
+  injectWordCount: { min: 2, max: 3 },
   /** Digits in a PIN prompt. */
   pinLength: 4,
 }
@@ -325,16 +325,14 @@ export const INJECT_WORDS = [
   'patch',
   'ghost',
   'nmap',
-  'ACK',
-  'SYN',
-  'NAT',
-  'DNS',
-  'ICMP',
-  'TCP',
-  'UDP',
-  'HTTP',
-  'GET',
-  'POST',
+  'nat',
+  'dns',
+  'icmp',
+  'tcp',
+  'udp',
+  'http',
+  'get',
+  'post',
   '404',
   '403',
   'git',
@@ -343,7 +341,6 @@ export const INJECT_WORDS = [
   'sudo',
   'chmod',
   'grep',
-  'sed',
   'awk',
   'curl',
   'wget',
@@ -367,7 +364,7 @@ export const INJECT_WORDS = [
   'stash',
   'blame',
   'fork',
-  'HEAD',
+  'head',
   'init',
   'tag',
   'sync',
