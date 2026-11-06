@@ -86,9 +86,13 @@ export interface RootkitStats {
  * (not the step from the previous level). Bonuses from all passives are added together.
  */
 export interface PassiveStats {
-  /** Damage dealt back to an enemy that damages the player by touching them (once per hit that lands). */
+  /** Damage dealt back to an enemy whose touch reaches the player, whether the shield blocks it or not. */
   retaliationDamage?: number
-  /** Flat damage taken off every hit the player receives (a hit never does less than PLAYER.minDamageTaken). */
+  /** Hits the shield absorbs completely. Added up across passives, so items can raise it. */
+  shieldHits?: number
+  /** Time (ms) for the shield to get one hit back. The fastest source wins. */
+  shieldRechargeMs?: number
+  /** Flat damage taken off every hit the player receives (a hit the shield doesn't block never does less than PLAYER.minDamageTaken). */
   damageReduction?: number
   /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
   hpRegenPerSec?: number
@@ -424,16 +428,16 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xff9d2e,
     levels: [{ damagePct: 3 }, { damagePct: 6 }, { damagePct: 9 }],
   },
-  blackICE: {
+  defensiveMatrix: {
     name: 'Defensive Matrix',
     kind: 'passive',
     description:
       'Gains a shield that will protect from one hit, it also retaliates against melee enemies.',
     color: 0x7a5cff,
     levels: [
-      { retaliationDamage: 4 },
-      { retaliationDamage: 8 },
-      { retaliationDamage: 12 },
+      { retaliationDamage: 4, shieldHits: 1, shieldRechargeMs: 5000 },
+      { retaliationDamage: 8, shieldHits: 1, shieldRechargeMs: 4000 },
+      { retaliationDamage: 12, shieldHits: 1, shieldRechargeMs: 3000 },
     ],
   },
 }

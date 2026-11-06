@@ -25,6 +25,8 @@ const LABELS: Record<string, string> = {
   explosionRadius: 'blast radius',
   damageReduction: 'damage reduction',
   retaliationDamage: 'retaliation damage',
+  shieldHits: 'shield hits',
+  shieldRechargeMs: 'shield recharge ms',
   hpRegenPerSec: 'HP regen/sec',
   moveSpeedPct: 'move speed %',
   damagePct: 'damage %',
