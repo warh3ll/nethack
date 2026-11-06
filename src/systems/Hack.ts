@@ -123,8 +123,16 @@ export class Hack {
       if (p.hits < p.hitsNeeded) return 'ok';
     } else {
       if (key.length !== 1) return 'ignored'; // Shift, arrows, etc.
-      if (key !== p.text[p.typed]) return 'wrong';
-      p.typed++;
+      const expected = p.text[p.typed];
+      if (p.kind === 'ip' && expected === '.') {
+        // Lenient dots: '.', ',' or space all count, and so does just typing the next digit.
+        if (key === '.' || key === ',' || key === ' ') p.typed++;
+        else if (key === p.text[p.typed + 1]) p.typed += 2;
+        else return 'wrong';
+      } else {
+        if (key !== expected) return 'wrong';
+        p.typed++;
+      }
       if (p.typed < p.text.length) return 'ok';
     }
     this.prompt = null;
