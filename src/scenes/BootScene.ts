@@ -103,6 +103,17 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillRect(14, 10, 4, 4);
     g.generateTexture('data-cache', 32, 28).clear();
 
+    // Camera pole: a pole with a camera on top and a small computer box on it.
+    g.fillStyle(0x4a5578).fillRect(16, 10, 5, 60);
+    g.fillStyle(0x2a3358).fillRect(8, 68, 21, 4);
+    g.fillStyle(0xc8d4f0).fillRect(6, 2, 22, 11);
+    g.fillStyle(0x1a2140).fillRect(1, 5, 6, 5);
+    g.fillStyle(0xff2e88).fillRect(24, 4, 3, 3);
+    g.fillStyle(0x0a2a3a).fillRect(10, 34, 18, 16);
+    g.lineStyle(2, 0x2ef2ff).strokeRect(11, 35, 16, 14);
+    g.fillStyle(0x2ef2ff).fillRect(14, 38, 10, 5);
+    g.generateTexture('camera-pole', 36, 72).clear();
+
     // Tile size of the wall texture below (the floor is loaded from public/assets/floor/floor.png).
     const t = 64;
 

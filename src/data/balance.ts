@@ -58,6 +58,27 @@ export const DAMAGE_NUMBERS = {
   poolSize: 80,
 }
 
+/** The minimap unlocked by the camera pole. It always shows the whole map. */
+export const MINIMAP = {
+  /** Width and height in pixels. */
+  size: 150,
+  /** Distance from the screen edges. */
+  margin: 16,
+  /** Gap above the skill bar on screens too narrow to fit beside it. */
+  skillBarGap: 12,
+  dotRadius: 2.5,
+  /** Size of the player arrow. */
+  arrowSize: 7,
+  fadeInMs: 400,
+  backgroundColor: 0x05060a,
+  backgroundAlpha: 0.75,
+  borderColor: 0x2ef2ff,
+  objectiveColor: 0xffd23e,
+  cacheColor: 0x2ef2ff,
+  extractionColor: 0x5fe08a,
+  playerColor: 0xffffff,
+}
+
 /** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */
 export const MAP = {
   size: 10000,

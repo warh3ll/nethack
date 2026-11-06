@@ -30,6 +30,11 @@ function shuffled<T>(arr: readonly T[]): T[] {
   return a;
 }
 
+/** A random PIN code, as typed in prompts. */
+export function makePin() {
+  return Array.from({ length: HACK.pinLength }, () => randInt(0, 9)).join('');
+}
+
 function makePrompt(kind: PromptKind): Prompt {
   const prompt: Prompt = { kind, text: '', typed: 0, hits: 0, hitsNeeded: 0 };
   switch (kind) {
@@ -37,7 +42,7 @@ function makePrompt(kind: PromptKind): Prompt {
       prompt.text = Array.from({ length: 4 }, () => randInt(0, 255)).join('.');
       break;
     case 'pin':
-      prompt.text = Array.from({ length: HACK.pinLength }, () => randInt(0, 9)).join('');
+      prompt.text = makePin();
       break;
     case 'password':
       prompt.text = `${pick(PASSWORD_ADJECTIVES)}-${pick(PASSWORD_NOUNS)}`;

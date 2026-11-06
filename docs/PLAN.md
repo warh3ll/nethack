@@ -79,6 +79,8 @@ Best done together, in this order:
 
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
 
+- [x] Camera pole: optional three-step hack (hold E, PIN, type "Reveal") that unlocks a minimap for the rest of the run (s7). `systems/CameraHack.ts`, `entities/CameraPole.ts`, `ui/Minimap.ts`; numbers in `CAMERA_POLE` and `MINIMAP`. The pole texture is a generated placeholder (`camera-pole` in `BootScene.ts`)
+
 ### G. Polish and release
 
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled

@@ -79,6 +79,15 @@ export class SkillBar {
     drawGroup(PASSIVE_SLOTS, passives);
   }
 
+  /** Top edge of the bar, dash recharge included. */
+  get top() {
+    return this.dashRect.y;
+  }
+
+  get right() {
+    return this.dashRect.x + this.dashRect.w;
+  }
+
   /** 0..1, how far the dash has recharged (1 = ready). */
   setDashProgress(frac: number) {
     if (frac === this.dashFrac) return;
