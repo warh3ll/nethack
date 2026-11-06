@@ -7,6 +7,7 @@ import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
 import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
+import { generateCity, pickSeed } from '../systems/City';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
@@ -44,6 +45,8 @@ export class GameScene extends Phaser.Scene {
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private chips!: Phaser.GameObjects.Group;
   private progression!: Progression;
+  /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
+  private citySeed = 0;
   private caches: DataCache[] = [];
   private weapons: (Weapon | Virus | SynapticOverload | EmpShock | Rootkit)[] = [];
   private hud!: Phaser.GameObjects.Text;
@@ -99,7 +102,8 @@ export class GameScene extends Phaser.Scene {
     this.progression = new Progression(STARTING_SKILL);
 
     createParallax(this);
-    createMap(this);
+    this.citySeed = pickSeed();
+    createMap(this, generateCity(this.citySeed));
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
@@ -538,7 +542,7 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const quitting = this.confirmingQuit;
     const lost = `${this.credits} credit${this.credits === 1 ? '' : 's'}`;
-    const message = quitting ? `QUIT TO MENU?\n\nYou lose the ${lost}\nfrom this run.` : 'PAUSED\n\npress Esc or P\nor tap to resume';
+    const message = quitting ? `QUIT TO MENU?\n\nYou lose the ${lost}\nfrom this run.` : `PAUSED\n\npress Esc or P\nor tap to resume\n\nmap seed ${this.citySeed}`;
     const overlay = this.add
       .container(0, 0, [
         // Tap anywhere to resume (touch has no Esc key).

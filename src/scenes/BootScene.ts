@@ -20,8 +20,9 @@ export class BootScene extends Phaser.Scene {
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
     loadPlayerSheets(this);
     loadEnemySheets(this);
-    this.load.setPath('assets/floor/');
-    this.load.image('floor', 'floor.png');
+    this.load.setPath('assets/city/');
+    this.load.image('city-ground', 'ground.png');
+    this.load.image('city-building', 'building-1.png');
     this.load.setPath('assets/server/');
     this.load.spritesheet('server', 'server.png', { frameWidth: 64, frameHeight: 64 });
   }
@@ -33,7 +34,7 @@ export class BootScene extends Phaser.Scene {
 
     // Pixel art sprites are scaled up, so sample them without smoothing (the default blurs them). Parallax and generated textures stay smooth.
     for (const key of this.textures.getTextureKeys()) {
-      if (key === 'server' || key === 'floor' || key.startsWith('enemy-') || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      if (key === 'server' || key.startsWith('city-') || key.startsWith('enemy-') || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
 
     for (const [key, e] of Object.entries(ENEMIES)) {
@@ -114,7 +115,7 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x2ef2ff).fillRect(14, 38, 10, 5);
     g.generateTexture('camera-pole', 36, 72).clear();
 
-    // Tile size of the wall texture below (the floor is loaded from public/assets/floor/floor.png).
+    // Tile size of the wall texture below.
     const t = 64;
 
     // Boundary wall: hazard stripes that tile in every direction.

@@ -82,6 +82,48 @@ Candidates from the design doc: boss fight, defend a point, retrieve an item, el
 
 - [x] Camera pole: optional three-step hack (hold E, PIN, type "reveal") that unlocks a minimap for the rest of the run (s7). `systems/CameraHack.ts`, `entities/CameraPole.ts`, `ui/Minimap.ts`; numbers in `CAMERA_POLE` and `MINIMAP`. The pole texture is a generated placeholder (`camera-pole` in `BootScene.ts`)
 
+### H. Street-level city (s6, s7)
+
+Replaces the open map with a generated city. In this order, each step leaves the game playable. Prototype numbers so far: 64 px tiles, map 10240 px, avenues 576 px and streets 448 px between buildings, alleys 128 px.
+
+- [x] Generator and look: seeded city data, placeholder streets and buildings, no collision yet. `systems/City.ts`, `entities/CityView.ts`, numbers in `data/city.ts`. Reserved plazas and a fixed number of alleys are in the generator already. `?seed=123` in the URL replays a map, and the pause screen shows the seed
+- [ ] Placement: player start and extraction on the start plaza, objectives on the reserved plazas, caches and camera pole on valid spots, servers against buildings
+- [ ] Collision, flow field and spawn points together: solid buildings, enemies navigate by flow field, factories and small exits replace the spawn ring, spawn distances are fixed world distances that don't depend on screen size, far-behind enemies are recycled so stragglers can't fill the enemy cap
+- [ ] Destructible factories that release small groups after a colour flash; destroying one lowers the overall spawn rate. Small exits get a shorter flash
+- [ ] Shots: buildings stop bullets, guns need a clear line, Marksman and Goon too; hacking skills reach through walls
+- [ ] Dressing: lane markings, crosswalks, non-solid props, street layout on the minimap
+- [ ] Districts for variety, and real building art (do together with "Real art and texture swap" in G)
+
+#### Art to make (Henrik)
+
+All at the same scale as the floor, player and drones: 32x32 px tiles, shown at 2x in game (64x64). Neighbouring tiles must line up at the edges. Placeholders are in `public/assets/city/` (`ground.png`, `building-1.png`, 256x128 px): paint over them and keep the file names. `docs/art/` has the same sheets enlarged, with every tile labelled; those are only a guide, the game does not load them. Start with one building style and the ground sheet; the game runs on placeholders until then.
+
+**Building style sheet** (one per style, about 25 tiles, fits an 8x4 sheet of 256x128 px):
+
+- [ ] Roof, 9 pieces: 4 corners, 4 edges, and a centre that tiles seamlessly
+- [ ] Roof details, 3-4 pieces the game scatters around: vents, AC units, antennas and the like
+- [ ] Front, 3 rows x 3 columns: top row, repeatable window row and street level, each with left end, middle and right end. 3 tiles (96 px) tall in total
+- [ ] Front variants, 3-5 swappable street-level tiles: door (about 48 px tall, check against the player sprite), shopfront, neon sign
+- [ ] More building styles once the first one works in game
+
+Only the south side gets a front. The north, east and west sides just show the roof edge.
+
+**Ground sheet:**
+
+- [ ] Road surface
+- [ ] Lane dashes, horizontal and vertical
+- [ ] Crosswalks, horizontal and vertical
+- [ ] Sidewalk, 9 pieces: 4 corners, 4 curb edges and a centre
+- [ ] Alley surface
+- [ ] Plaza surface
+
+**Spawn points:**
+
+- [ ] Factory, one large whole image (for example 256x192 px); the generator fits it into a block and the leftover space becomes a yard
+- [ ] Factory core, the visible part to shoot, by its door
+- [ ] Factory damaged and destroyed versions
+- [ ] Small exits, a single 32x32 tile each, placed in the street-level row: hatch, loading bay, subway exit
+
 ### G. Polish and release
 
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled

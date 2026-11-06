@@ -79,13 +79,12 @@ export const MINIMAP = {
   playerColor: 0xffffff,
 }
 
-/** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */
+/** The map is a square centred on the player's start. Straight edge to edge takes size / PLAYER.moveSpeed seconds (51 s); streets add about 30%. */
 export const MAP = {
-  size: 10000,
+  /** A multiple of CITY.tileSize, since the city is built from whole tiles. */
+  size: 10240,
   /** How thick the boundary wall is drawn. */
   wallThickness: 96,
-  /** The floor tile (public/assets/floor/floor.png, 32x32) is drawn at this scale. */
-  floorScale: 2,
 }
 
 /**
