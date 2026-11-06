@@ -208,7 +208,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 1,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
       {
@@ -217,7 +217,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 2,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
       {
@@ -226,7 +226,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 3,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
     ],

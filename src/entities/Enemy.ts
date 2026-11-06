@@ -7,8 +7,6 @@ export const ENEMY_KILLED = 'enemy-killed';
 
 /** Scene event fired when a skill damages an enemy: (enemy, amount, skillId, dealt, showNumber). `dealt` excludes overkill. */
 export const ENEMY_DAMAGED = 'enemy-damaged';
-/** Scene event that only floats a number over an enemy, no damage: (enemy, amount, skillId). For damage over time, shown per second. */
-export const SHOW_DAMAGE_NUMBER = 'show-damage-number';
 
 const HIJACK_TINT = 0xff5a7a;
 
@@ -16,8 +14,6 @@ const HIJACK_TINT = 0xff5a7a;
 export interface Infection {
   /** Game time when the infection runs out. Every new victim gets a fresh one. */
   expiresAt: number;
-  /** Game time of the next floating damage number on this enemy. */
-  nextNumberAt: number;
 }
 
 /** Pooled enemy. Never destroyed during a run: spawn() reuses it, kill() returns it to the pool. */

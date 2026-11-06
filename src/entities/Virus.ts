@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
-import { DAMAGE_NUMBERS } from '../data/balance';
 import { getVirusStats } from '../data/skills';
 import type { PlayerStats } from '../systems/Progression';
-import { ENEMY_KILLED, SHOW_DAMAGE_NUMBER, type Enemy } from './Enemy';
+import { ENEMY_KILLED, type Enemy } from './Enemy';
 
 const INFECTED_COLOR = 0x5fe08a;
 
@@ -54,18 +53,12 @@ export class Virus {
 
   update(time: number) {
     const s = this.stats;
-    const dps = s.dps * this.playerStats.damageMult;
     this.now = time;
 
-    // Every frame, so the numbers, the ring and the damage all stop on time.
+    // Expired infections end here, every frame, so the ring and the damage stop on time.
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
-      if (!e.active || !e.infection) continue;
-      if (time >= e.infection.nextNumberAt) {
-        e.infection.nextNumberAt += DAMAGE_NUMBERS.dotIntervalMs;
-        this.scene.events.emit(SHOW_DAMAGE_NUMBER, e, (dps * DAMAGE_NUMBERS.dotIntervalMs) / 1000, this.skillId);
-      }
-      if (time >= e.infection.expiresAt) e.infection = null;
+      if (e.active && e.infection && time >= e.infection.expiresAt) e.infection = null;
     }
 
     if (time >= this.nextInfectAt) {
@@ -78,13 +71,14 @@ export class Virus {
     }
 
     if (time >= this.nextTickAt) {
-      // Stays on schedule instead of restarting from this frame, so real damage per second matches the shown number.
+      // Stays on schedule instead of restarting from this frame, so ticks don't drift and an infection gets all of them.
       this.nextTickAt = time - this.nextTickAt < s.tickMs ? this.nextTickAt + s.tickMs : time + s.tickMs;
+      const tickDamage = (s.dps * this.playerStats.damageMult * s.tickMs) / 1000;
       for (const obj of this.enemies.getChildren()) {
         const e = obj as Enemy;
         if (!e.active || !e.infection) continue;
         // Killing here fires ENEMY_KILLED, which spreads the infection.
-        if (e.takeDamage((dps * s.tickMs) / 1000, false, this.skillId, false)) this.onKill(e);
+        if (e.takeDamage(tickDamage, false, this.skillId)) this.onKill(e);
       }
     }
 
@@ -92,10 +86,7 @@ export class Virus {
   }
 
   private infect(e: Enemy) {
-    e.infection = {
-      expiresAt: this.now + this.stats.maxDurationMs,
-      nextNumberAt: this.now + DAMAGE_NUMBERS.dotIntervalMs,
-    };
+    e.infection = { expiresAt: this.now + this.stats.maxDurationMs };
   }
 
   private spreadFrom(dead: Enemy) {

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { DAMAGE_NUMBERS } from '../data/balance';
 import { SKILLS } from '../data/skills';
-import { ENEMY_DAMAGED, SHOW_DAMAGE_NUMBER, type Enemy } from '../entities/Enemy';
+import { ENEMY_DAMAGED, type Enemy } from '../entities/Enemy';
 
 interface Entry {
   text: Phaser.GameObjects.Text;
@@ -22,18 +22,11 @@ export class DamageNumbers {
 
   constructor(private scene: Phaser.Scene) {
     scene.events.on(ENEMY_DAMAGED, this.onDamaged, this);
-    scene.events.on(SHOW_DAMAGE_NUMBER, this.show, this);
-    scene.events.once('shutdown', () => {
-      scene.events.off(ENEMY_DAMAGED, this.onDamaged, this);
-      scene.events.off(SHOW_DAMAGE_NUMBER, this.show, this);
-    });
+    scene.events.once('shutdown', () => scene.events.off(ENEMY_DAMAGED, this.onDamaged, this));
   }
 
   private onDamaged(enemy: Enemy, amount: number, skillId: string, _dealt: number, showNumber: boolean) {
-    if (showNumber) this.show(enemy, amount, skillId);
-  }
-
-  private show(enemy: Enemy, amount: number, skillId: string) {
+    if (!showNumber) return;
     const color = SKILLS[skillId]?.color ?? DAMAGE_NUMBERS.defaultColor;
     const now = this.scene.time.now;
     const live = this.pool.find(

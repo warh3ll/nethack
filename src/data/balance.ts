@@ -54,8 +54,6 @@ export const DAMAGE_NUMBERS = {
   jitterX: 8,
   /** Hits on one enemy from the same skill within this time add up into one number. */
   mergeMs: 120,
-  /** Damage over time shows one number per enemy this often, not one per tick. At 1000 it reads as damage per second. */
-  dotIntervalMs: 1000,
   /** Max numbers on screen at once (the oldest is recycled beyond this). */
   poolSize: 80,
 }
