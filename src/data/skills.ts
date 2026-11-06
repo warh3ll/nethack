@@ -35,7 +35,7 @@ export interface VirusStats {
   spreadCount: number
   /** How often (ms) the damage over time is applied. */
   tickMs: number
-  /** Max lifetime (ms) of an infection, counted from the first infection and inherited by every spread, so the chain ends and the next one uses current stats. */
+  /** How long (ms) an infection lasts on one enemy. Every new victim gets the full time. */
   maxDurationMs: number
 }
 

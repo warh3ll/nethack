@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
+import { DAMAGE_NUMBERS } from '../data/balance';
 import { getVirusStats } from '../data/skills';
 import type { PlayerStats } from '../systems/Progression';
-import { ENEMY_KILLED, type Enemy } from './Enemy';
+import { ENEMY_KILLED, SHOW_DAMAGE_NUMBER, type Enemy } from './Enemy';
 
 const INFECTED_COLOR = 0x5fe08a;
 
@@ -18,6 +19,7 @@ const JUMP_FX = {
 /**
  * Hacking weapon: infects an enemy in range, which then takes damage over time.
  * When an infected enemy dies (from anything), the infection jumps to nearby enemies.
+ * Every infection runs on the current level and damage bonus, so an upgrade reaches running chains at once.
  * Stats come from data/skills.ts.
  */
 export class Virus {
@@ -52,47 +54,57 @@ export class Virus {
 
   update(time: number) {
     const s = this.stats;
+    const dps = s.dps * this.playerStats.damageMult;
     this.now = time;
 
-    // Expired infections end here, every frame, so the ring and the damage stop on time.
+    // Every frame, so the numbers, the ring and the damage all stop on time.
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
-      if (e.active && e.infection && time >= e.infection.expiresAt) e.infection = null;
+      if (!e.active || !e.infection) continue;
+      if (time >= e.infection.nextNumberAt) {
+        e.infection.nextNumberAt += DAMAGE_NUMBERS.dotIntervalMs;
+        this.scene.events.emit(SHOW_DAMAGE_NUMBER, e, (dps * DAMAGE_NUMBERS.dotIntervalMs) / 1000, this.skillId);
+      }
+      if (time >= e.infection.expiresAt) e.infection = null;
     }
 
     if (time >= this.nextInfectAt) {
       const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
       if (target) {
-        this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount, time + s.maxDurationMs);
+        this.infect(target);
         this.playJump(this.owner.x, this.owner.y, target);
         this.nextInfectAt = time + s.cooldownMs;
       }
     }
 
     if (time >= this.nextTickAt) {
-      this.nextTickAt = time + s.tickMs;
+      // Stays on schedule instead of restarting from this frame, so real damage per second matches the shown number.
+      this.nextTickAt = time - this.nextTickAt < s.tickMs ? this.nextTickAt + s.tickMs : time + s.tickMs;
       for (const obj of this.enemies.getChildren()) {
         const e = obj as Enemy;
         if (!e.active || !e.infection) continue;
         // Killing here fires ENEMY_KILLED, which spreads the infection.
-        if (e.takeDamage((e.infection.dps * s.tickMs) / 1000, false, this.skillId)) this.onKill(e);
+        if (e.takeDamage((dps * s.tickMs) / 1000, false, this.skillId, false)) this.onKill(e);
       }
     }
 
     this.drawInfected();
   }
 
-  private infect(e: Enemy, dps: number, spreadRange: number, spreadCount: number, expiresAt: number) {
-    e.infection = { dps, spreadRange, spreadCount, expiresAt };
+  private infect(e: Enemy) {
+    e.infection = {
+      expiresAt: this.now + this.stats.maxDurationMs,
+      nextNumberAt: this.now + DAMAGE_NUMBERS.dotIntervalMs,
+    };
   }
 
   private spreadFrom(dead: Enemy) {
-    const inf = dead.infection;
-    if (!inf || this.now >= inf.expiresAt) return;
-    for (let i = 0; i < inf.spreadCount; i++) {
-      const next = this.nearestUninfected(dead.x, dead.y, inf.spreadRange, dead);
+    if (!dead.infection) return;
+    const s = this.stats;
+    for (let i = 0; i < s.spreadCount; i++) {
+      const next = this.nearestUninfected(dead.x, dead.y, s.spreadRange, dead);
       if (!next) return;
-      this.infect(next, inf.dps, inf.spreadRange, inf.spreadCount, inf.expiresAt);
+      this.infect(next);
       this.playJump(dead.x, dead.y, next);
     }
   }

@@ -7,16 +7,17 @@ export const ENEMY_KILLED = 'enemy-killed';
 
 /** Scene event fired when a skill damages an enemy: (enemy, amount, skillId, dealt, showNumber). `dealt` excludes overkill. */
 export const ENEMY_DAMAGED = 'enemy-damaged';
+/** Scene event that only floats a number over an enemy, no damage: (enemy, amount, skillId). For damage over time, shown per second. */
+export const SHOW_DAMAGE_NUMBER = 'show-damage-number';
 
 const HIJACK_TINT = 0xff5a7a;
 
-/** Set on an enemy infected by the Virus. Spread copies these numbers onto the next victims. */
+/** Set on an enemy infected by the Virus. Holds timers only: its strength always comes from the Virus's current level. */
 export interface Infection {
-  dps: number;
-  spreadRange: number;
-  spreadCount: number;
-  /** Game time when the infection runs out. Spread copies it, so a whole chain ends together. */
+  /** Game time when the infection runs out. Every new victim gets a fresh one. */
   expiresAt: number;
+  /** Game time of the next floating damage number on this enemy. */
+  nextNumberAt: number;
 }
 
 /** Pooled enemy. Never destroyed during a run: spawn() reuses it, kill() returns it to the pool. */
