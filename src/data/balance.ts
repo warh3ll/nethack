@@ -137,7 +137,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
     hp: 8,
-    speed: 75,
+    speed: 70,
     contactDamage: 6,
     xp: 2,
     credits: 2,
@@ -165,7 +165,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
     hp: 150,
-    speed: 130,
+    speed: 120,
     contactDamage: 20,
     xp: 15,
     credits: 5,
@@ -200,7 +200,7 @@ export const SPAWNING = {
   /** The interval shrinks toward this over time. */
   minIntervalMs: 400,
   /** How much the interval shrinks every second of the run. */
-  intervalDecayPerSecond: 6,
+  intervalDecayPerSecond: 5,
   /** Enemies appear on a ring this far outside the screen edge. */
   spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
@@ -275,7 +275,7 @@ export const LEVELING = {
    * With 20 and 12: 20, 32, 44, ... 236 XP for level 19 to 20 (2432 XP in total to reach 20).
    * Formula: XP for level n -> n+1 = xpForLevel2 + xpIncreasePerLevel * (n - 1).
    */
-  xpIncreasePerLevel: 15,
+  xpIncreasePerLevel: 10,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**
