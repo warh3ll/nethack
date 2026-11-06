@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { ENEMIES } from '../data/balance';
-import { STEAL_SECRETS, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
+import { CAMERA_POLE, STEAL_SECRETS, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
 import { CableServers } from '../entities/CableServers';
+import { CameraPole } from '../entities/CameraPole';
 import { Dossier } from '../entities/Dossier';
 import type { Enemy } from '../entities/Enemy';
 import { ExtractionPoint } from '../entities/ExtractionPoint';
 import { HackServer } from '../entities/HackServer';
 import type { Player } from '../entities/Player';
+import { CameraHack, pickPolePosition } from './CameraHack';
 import { Connect } from './Connect';
 import { Hack } from './Hack';
 import { generateRunObjectives } from './RunObjectives';
@@ -67,6 +69,10 @@ export class Objectives {
   /** Once the log-out text is complete: ms left on the countdown. */
   private countdownMs = 0;
   private counting = false;
+  /** The optional camera pole hack: not an objective, but it shares the keys and the hack rules. */
+  private cameraHack = new CameraHack();
+  private pole: CameraPole;
+  private mapRevealed = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -74,6 +80,9 @@ export class Objectives {
     /** Keys are ignored while this returns false (paused, level-up picker, game over). */
     private acceptingInput: () => boolean,
     private onExtracted: () => void,
+    private onMapRevealed: () => void,
+    /** Spots the camera pole keeps clear of, besides the objectives. */
+    caches: { x: number; y: number }[],
     private spawnEnemy: EnemySpawner,
   ) {
     this.scene = scene;
@@ -93,6 +102,8 @@ export class Objectives {
         e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
       }
     }
+    const pole = pickPolePosition([...this.mapPoints, ...caches]);
+    this.pole = new CameraPole(scene, pole.x, pole.y);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => {
       scene.input.keyboard?.off('keydown', this.onKey, this);
@@ -170,19 +181,39 @@ export class Objectives {
     return { x: best.def.x, y: best.def.y };
   }
 
+  /** Where the unfinished objectives are, for the minimap. Connect servers counts as both of its servers. */
+  get mapPoints() {
+    const points: { x: number; y: number }[] = [];
+    for (const e of this.entries) {
+      if (e.done) continue;
+      if (e.cable) points.push(e.cable.a, e.cable.b);
+      else points.push({ x: e.def.x, y: e.def.y });
+    }
+    return points;
+  }
+
   /** The objective being hacked right now, or null. */
   get current() {
     return this.engaged;
   }
 
-  /** True while the player is hacking: in range of a server with the hack still running. */
+  /** True while the player is hacking: in range of a server, or working on the camera pole. */
   get hacking() {
-    return this.engaged !== null;
+    return this.engaged !== null || (this.cameraHack.started && this.inCameraRange);
+  }
+
+  private get inCameraRange() {
+    return this.playerWithin(this.pole, CAMERA_POLE.range);
+  }
+
+  /** True while typed letters belong to the camera pole. */
+  private get cameraTyping() {
+    return this.cameraHack.typing && this.inCameraRange;
   }
 
   /** True while typed letters belong to a prompt (so P must not pause, WASD must not move). */
   get typing() {
-    return (this.engaged !== null && !!this.engaged.hack?.typing) || this.loggingOut;
+    return (this.engaged !== null && !!this.engaged.hack?.typing) || this.cameraTyping || this.loggingOut;
   }
 
   /** True while the player stands on the extraction point and still has to type the log-out text. */
@@ -197,6 +228,7 @@ export class Objectives {
   /** Call when the player took damage. */
   onPlayerHit() {
     this.engaged?.hack?.halt(HACK.damageHaltMs);
+    this.cameraHack.resetHold();
     for (const e of this.entries) if (!e.done) e.connect?.reset();
   }
 
@@ -236,6 +268,7 @@ export class Objectives {
       e.server.render(e.hack, inRange);
       if (e.hack.complete) this.finish(e);
     }
+    this.updateCameraPole(deltaMs, eHeld);
     this.player.typingLock = this.typing;
 
     if (this.extraction) {
@@ -250,6 +283,19 @@ export class Objectives {
       }
       this.extraction.render(EXTRACTION.logoutText, this.logoutTyped, this.counting ? Math.ceil(this.countdownMs / 1000) : 0);
     }
+  }
+
+  private updateCameraPole(deltaMs: number, eHeld: boolean) {
+    if (this.mapRevealed) return;
+    if (this.cameraHack.done) {
+      this.mapRevealed = true;
+      this.pole.playRevealed();
+      this.onMapRevealed();
+      return;
+    }
+    const inRange = this.inCameraRange;
+    this.cameraHack.update(deltaMs, eHeld, inRange);
+    this.pole.render(this.cameraHack, inRange);
   }
 
   /** Holds the player inside the cable's reach: pulled back onto the circle, outward movement cancelled so they slide along it. */
@@ -307,6 +353,10 @@ export class Objectives {
   }
 
   private onKey(ev: KeyboardEvent) {
+    if (this.cameraTyping && !ev.repeat && this.acceptingInput()) {
+      if (this.cameraHack.onKey(ev.key) === 'wrong') this.pole.flashError();
+      return;
+    }
     if (this.loggingOut && !ev.repeat && this.acceptingInput()) {
       if (ev.key.length !== 1) return;
       if (ev.key !== EXTRACTION.logoutText[this.logoutTyped]) return this.extraction!.flashError();

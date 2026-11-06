@@ -25,7 +25,7 @@ Rules to check every feature against. Edit these first.
 
 1. Move around the map while skills fire automatically at enemies _(in game: arena only)_.
 2. Enemies spawn outside the screen and walk straight at the player; the spawn rate ramps up over the run _(in game)_.
-3. Explore the map to find the objectives. A compass always points to the closest unfinished objective (section 7).
+3. Explore the map to find the objectives. A compass always points to the closest unfinished objective (section 7). Somewhere out there is a camera pole that can be hacked for a minimap.
 4. Along the way, find data caches scattered randomly on the map and open them for passive upgrades or damage skills (player can choose to not take the skill). Even permanent upgrades (very rare) or items.
 5. Players gain XP by killing enemies, leveling up provides upgrade choices (3 to begin, could possibly be raised by some upgrade). Player level has no cap.
 6. Complete the objectives (often by hacking, section 8). They can be done in any order.
@@ -114,6 +114,12 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - A run is one attempt made of **3-5 objectives**, drawn at random per run; the same objective type can occur at most twice. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another. There has to be at least one hacking objective, since it's kind of the point of the game.
 - The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
+- **Camera pole (decided):** a pole with a small computer wired into the city's surveillance cameras. There is one per run, at a random spot at least 2000 px from the start. It is optional and not an objective: it isn't in the objective list, the compass ignores it, and players find it by exploring, like a data cache. It is a short three-step hack done within range of the pole:
+  1. **Insert worm:** hold E for 2 seconds. Letting go, leaving range or taking damage restarts the hold.
+  2. **Enter PIN:** four random digits, as in a server hack.
+  3. **Type "reveal":** case-sensitive; a wrong key is just retyped.
+
+  Walking away only pauses the hack, and the player continues from the same step on returning. Like a server hack, the world slows while typing and enemies spawn faster during the hack (section 8). When it is done, a **minimap** appears in the bottom right corner and stays until the run ends. It shows the whole map, with small dots for unfinished objectives, unopened caches and the extraction point (only once it has been revealed), and the player as an arrow pointing the way they are moving. The minimap is never there from the start of a run, though a future item might change that.
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
 - **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes. **Leaving the extraction radius cancels the attempt** (typing and countdown reset); the player can move freely inside it and retry after re-entering. Taking damage does not cancel it.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
@@ -164,7 +170,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 - **Setting:** cyberpunk.
 - **Art direction:** TBD. Textures are generated or loaded in `BootScene.ts`; new assets can replace them under the same texture keys.
 - **Audio:** TBD.
-- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
+- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The minimap appears only after the camera pole is hacked (section 7). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
 
 ## 11. Scope
 

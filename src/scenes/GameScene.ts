@@ -29,6 +29,7 @@ import { LevelUpPicker } from '../ui/LevelUpPicker';
 import { ObjectiveMarker } from '../ui/ObjectiveMarker';
 import { ObjectivePanel } from '../ui/ObjectivePanel';
 import { ResultsScreen } from '../ui/ResultsScreen';
+import { Minimap } from '../ui/Minimap';
 import { SkillBar } from '../ui/SkillBar';
 import { TouchJoystick } from '../ui/TouchJoystick';
 
@@ -53,6 +54,8 @@ export class GameScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
   private xpBar!: Phaser.GameObjects.Graphics;
   private skillBar!: SkillBar;
+  /** Only exists once the camera pole has been hacked. */
+  private minimap: Minimap | null = null;
   private objectives!: Objectives;
   private objectivePanel!: ObjectivePanel;
   private objectiveMarker!: ObjectiveMarker;
@@ -92,6 +95,7 @@ export class GameScene extends Phaser.Scene {
     this.dying = false;
     this.levelingUp = false;
     this.pendingLevelUps = 0;
+    this.minimap = null;
     this.progression = new Progression(STARTING_SKILL);
 
     createParallax(this);
@@ -196,6 +200,10 @@ export class GameScene extends Phaser.Scene {
       this.player,
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
+      () => {
+        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, () => this.objectives.isComplete);
+      },
+      this.caches,
       (x, y, type, hp) => {
         const enemy = this.enemies.get() as Enemy | null;
         enemy?.spawn(x, y, type, hp);
@@ -259,6 +267,7 @@ export class GameScene extends Phaser.Scene {
     this.drawEnemyBars();
     this.updateChips(gameDelta / 1000);
     this.updateCachePrompts();
+    this.minimap?.update();
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.onPlayerDeath();

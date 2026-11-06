@@ -97,6 +97,22 @@ export const EXTRACTION = {
   countdownSeconds: 3,
 }
 
+/** Camera pole: an optional hack that unlocks the minimap for the rest of the run. One per run, found by exploring. */
+export const CAMERA_POLE = {
+  /** No pole this close to the start. */
+  minDistFromStart: 2000,
+  /** The pole stays at least this far from the map edge. */
+  edgeMargin: 300,
+  /** Keeps clear of objectives and caches, so E and typing can't mean two things at once. Has to stay above HACK.range + range. */
+  minSpacing: 500,
+  /** The player must be within this distance for the hack to run. Walking out pauses it. */
+  range: 120,
+  /** How long E must be held to insert the worm. Taking damage restarts it. */
+  holdMs: 2000,
+  /** What to type in the last step (case-sensitive, mistypes just get retyped). The PIN length is HACK.pinLength. */
+  revealText: 'reveal',
+}
+
 /** The server sprite (public/assets/server/server.png: 2 frames of 64x64), shared by Hack server and Connect servers. */
 export const SERVER = {
   spriteScale: 1,
