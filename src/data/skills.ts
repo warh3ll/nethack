@@ -204,7 +204,7 @@ export const SKILLS: Record<string, SkillData> = {
     levels: [
       {
         dps: 1,
-        cooldownMs: 2500,
+        cooldownMs: 3000,
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 1,
@@ -213,18 +213,18 @@ export const SKILLS: Record<string, SkillData> = {
       },
       {
         dps: 2,
-        cooldownMs: 2000,
+        cooldownMs: 2500,
         infectRange: 300,
-        spreadRange: 300,
+        spreadRange: 200,
         spreadCount: 2,
         tickMs: 350,
         maxDurationMs: 10000,
       },
       {
         dps: 3,
-        cooldownMs: 1500,
+        cooldownMs: 2000,
         infectRange: 300,
-        spreadRange: 400,
+        spreadRange: 200,
         spreadCount: 3,
         tickMs: 350,
         maxDurationMs: 10000,
