@@ -35,6 +35,8 @@ export interface VirusStats {
   spreadCount: number
   /** How often (ms) the damage over time is applied. */
   tickMs: number
+  /** Max lifetime (ms) of an infection, counted from the first infection and inherited by every spread, so the chain ends and the next one uses current stats. */
+  maxDurationMs: number
 }
 
 /** Stats for Synaptic Overload: hack a random nearby enemy, it dies and explodes. */
@@ -207,6 +209,7 @@ export const SKILLS: Record<string, SkillData> = {
         spreadRange: 200,
         spreadCount: 1,
         tickMs: 350,
+        maxDurationMs: 10000,
       },
       {
         dps: 2,
@@ -215,6 +218,7 @@ export const SKILLS: Record<string, SkillData> = {
         spreadRange: 300,
         spreadCount: 2,
         tickMs: 350,
+        maxDurationMs: 10000,
       },
       {
         dps: 3,
@@ -223,6 +227,7 @@ export const SKILLS: Record<string, SkillData> = {
         spreadRange: 400,
         spreadCount: 3,
         tickMs: 350,
+        maxDurationMs: 10000,
       },
     ],
   },

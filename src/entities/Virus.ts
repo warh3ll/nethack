@@ -24,6 +24,8 @@ export class Virus {
   level = 1;
   private nextInfectAt = 0;
   private nextTickAt = 0;
+  /** Game time of the latest update, for spreads that happen between updates. */
+  private now = 0;
   private fx: Phaser.GameObjects.Graphics;
   private jumpPool: Phaser.GameObjects.Arc[] = [];
   private pulsePool: Phaser.GameObjects.Arc[] = [];
@@ -50,11 +52,18 @@ export class Virus {
 
   update(time: number) {
     const s = this.stats;
+    this.now = time;
+
+    // Expired infections end here, every frame, so the ring and the damage stop on time.
+    for (const obj of this.enemies.getChildren()) {
+      const e = obj as Enemy;
+      if (e.active && e.infection && time >= e.infection.expiresAt) e.infection = null;
+    }
 
     if (time >= this.nextInfectAt) {
       const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
       if (target) {
-        this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount);
+        this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount, time + s.maxDurationMs);
         this.playJump(this.owner.x, this.owner.y, target);
         this.nextInfectAt = time + s.cooldownMs;
       }
@@ -73,17 +82,17 @@ export class Virus {
     this.drawInfected();
   }
 
-  private infect(e: Enemy, dps: number, spreadRange: number, spreadCount: number) {
-    e.infection = { dps, spreadRange, spreadCount };
+  private infect(e: Enemy, dps: number, spreadRange: number, spreadCount: number, expiresAt: number) {
+    e.infection = { dps, spreadRange, spreadCount, expiresAt };
   }
 
   private spreadFrom(dead: Enemy) {
     const inf = dead.infection;
-    if (!inf) return;
+    if (!inf || this.now >= inf.expiresAt) return;
     for (let i = 0; i < inf.spreadCount; i++) {
       const next = this.nearestUninfected(dead.x, dead.y, inf.spreadRange, dead);
       if (!next) return;
-      this.infect(next, inf.dps, inf.spreadRange, inf.spreadCount);
+      this.infect(next, inf.dps, inf.spreadRange, inf.spreadCount, inf.expiresAt);
       this.playJump(dead.x, dead.y, next);
     }
   }

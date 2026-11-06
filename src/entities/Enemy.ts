@@ -15,6 +15,8 @@ export interface Infection {
   dps: number;
   spreadRange: number;
   spreadCount: number;
+  /** Game time when the infection runs out. Spread copies it, so a whole chain ends together. */
+  expiresAt: number;
 }
 
 /** Pooled enemy. Never destroyed during a run: spawn() reuses it, kill() returns it to the pool. */
