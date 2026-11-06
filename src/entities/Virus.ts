@@ -18,6 +18,7 @@ const JUMP_FX = {
 /**
  * Hacking weapon: infects an enemy in range, which then takes damage over time.
  * When an infected enemy dies (from anything), the infection jumps to nearby enemies.
+ * Every infection runs on the current level and damage bonus, so an upgrade reaches running chains at once.
  * Stats come from data/skills.ts.
  */
 export class Virus {
@@ -63,36 +64,38 @@ export class Virus {
     if (time >= this.nextInfectAt) {
       const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
       if (target) {
-        this.infect(target, s.dps * this.playerStats.damageMult, s.spreadRange, s.spreadCount, time + s.maxDurationMs);
+        this.infect(target);
         this.playJump(this.owner.x, this.owner.y, target);
         this.nextInfectAt = time + s.cooldownMs;
       }
     }
 
     if (time >= this.nextTickAt) {
-      this.nextTickAt = time + s.tickMs;
+      // Stays on schedule instead of restarting from this frame, so ticks don't drift and an infection gets all of them.
+      this.nextTickAt = time - this.nextTickAt < s.tickMs ? this.nextTickAt + s.tickMs : time + s.tickMs;
+      const tickDamage = (s.dps * this.playerStats.damageMult * s.tickMs) / 1000;
       for (const obj of this.enemies.getChildren()) {
         const e = obj as Enemy;
         if (!e.active || !e.infection) continue;
         // Killing here fires ENEMY_KILLED, which spreads the infection.
-        if (e.takeDamage((e.infection.dps * s.tickMs) / 1000, false, this.skillId)) this.onKill(e);
+        if (e.takeDamage(tickDamage, false, this.skillId)) this.onKill(e);
       }
     }
 
     this.drawInfected();
   }
 
-  private infect(e: Enemy, dps: number, spreadRange: number, spreadCount: number, expiresAt: number) {
-    e.infection = { dps, spreadRange, spreadCount, expiresAt };
+  private infect(e: Enemy) {
+    e.infection = { expiresAt: this.now + this.stats.maxDurationMs };
   }
 
   private spreadFrom(dead: Enemy) {
-    const inf = dead.infection;
-    if (!inf || this.now >= inf.expiresAt) return;
-    for (let i = 0; i < inf.spreadCount; i++) {
-      const next = this.nearestUninfected(dead.x, dead.y, inf.spreadRange, dead);
+    if (!dead.infection) return;
+    const s = this.stats;
+    for (let i = 0; i < s.spreadCount; i++) {
+      const next = this.nearestUninfected(dead.x, dead.y, s.spreadRange, dead);
       if (!next) return;
-      this.infect(next, inf.dps, inf.spreadRange, inf.spreadCount, inf.expiresAt);
+      this.infect(next);
       this.playJump(dead.x, dead.y, next);
     }
   }

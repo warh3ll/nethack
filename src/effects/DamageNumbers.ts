@@ -64,7 +64,7 @@ export class DamageNumbers {
     });
   }
 
-  /** Whole numbers, but never "0" for a hit that did something (damage over time ticks are fractions). */
+  /** Whole numbers, but never "0" for a hit that did something. */
   private format(amount: number) {
     return String(Math.max(1, Math.round(amount)));
   }

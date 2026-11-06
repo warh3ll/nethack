@@ -35,7 +35,7 @@ export interface VirusStats {
   spreadCount: number
   /** How often (ms) the damage over time is applied. */
   tickMs: number
-  /** Max lifetime (ms) of an infection, counted from the first infection and inherited by every spread, so the chain ends and the next one uses current stats. */
+  /** How long (ms) an infection lasts on one enemy. Every new victim gets the full time. */
   maxDurationMs: number
 }
 
@@ -208,7 +208,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 1,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
       {
@@ -217,7 +217,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 2,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
       {
@@ -226,7 +226,7 @@ export const SKILLS: Record<string, SkillData> = {
         infectRange: 300,
         spreadRange: 200,
         spreadCount: 3,
-        tickMs: 350,
+        tickMs: 1000,
         maxDurationMs: 10000,
       },
     ],
