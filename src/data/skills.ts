@@ -452,7 +452,7 @@ export const FALLBACK_UPGRADES = {
   heal: { name: 'Patch Up', description: 'Restore HP.', fraction: 0.3 },
   credits: {
     name: 'Payday',
-    description: 'Take credits instead.',
+    description: 'Untraced credits, free to spend.',
     amount: 15,
   },
 }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
+import { CACHES, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
 import {
   FALLBACK_UPGRADES,
   SKILLS,
@@ -32,7 +32,7 @@ export type Upgrade =
   | { type: 'skill'; skillId: string; toLevel: number }
   /** Restores this fraction of max HP (fallback choice). */
   | { type: 'heal'; fraction: number }
-  /** Grants credits for the run (fallback choice). */
+  /** Grants credits for the run (fallback choice, or the contents of a data cache). */
   | { type: 'credits'; amount: number }
 
 /** XP needed to go from `level` to `level + 1`. */
@@ -144,13 +144,13 @@ export class Progression {
   }
 
   /**
-   * What a data cache holds: one random entry from the same pool as level-ups, so the slot rules apply.
-   * With nothing useful in the pool it holds credits instead.
+   * What a data cache holds: usually credits (CACHES.creditChance), otherwise one random entry from the
+   * same pool as level-ups, so the slot rules apply. With nothing useful in the pool it always holds credits.
    */
   rollCacheContents(): Upgrade {
     const options = this.offerPool()
-    if (options.length === 0)
-      return { type: 'credits', amount: FALLBACK_UPGRADES.credits.amount }
+    if (options.length === 0 || Math.random() < CACHES.creditChance)
+      return { type: 'credits', amount: CACHES.creditAmount }
     return Phaser.Utils.Array.GetRandom(options)
   }
 
