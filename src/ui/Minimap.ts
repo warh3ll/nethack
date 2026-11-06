@@ -21,6 +21,8 @@ export class Minimap {
     private skillBar: SkillBar,
     private objectives: () => Point[],
     private caches: () => Point[],
+    /** True once the extraction point is open; it stays off the map until then. */
+    private extractionOpen: () => boolean,
   ) {
     this.gfx = scene.add.graphics().setScrollFactor(0).setDepth(100).setAlpha(0);
     scene.tweens.add({ targets: this.gfx, alpha: 1, duration: MINIMAP.fadeInMs });
@@ -44,7 +46,7 @@ export class Minimap {
     };
     for (const c of this.caches()) dot(c, MINIMAP.cacheColor);
     for (const o of this.objectives()) dot(o, MINIMAP.objectiveColor);
-    dot(EXTRACTION, MINIMAP.extractionColor);
+    if (this.extractionOpen()) dot(EXTRACTION, MINIMAP.extractionColor);
 
     const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
     if (v.lengthSq() > 1) this.heading = Math.atan2(v.y, v.x);

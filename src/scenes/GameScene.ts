@@ -201,7 +201,7 @@ export class GameScene extends Phaser.Scene {
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
       () => {
-        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches);
+        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, () => this.objectives.isComplete);
       },
       this.caches,
       (x, y, type, hp) => {
