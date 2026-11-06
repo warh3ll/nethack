@@ -260,7 +260,7 @@ export const CACHES = {
   /** Chance (0-1) that a cache holds credits. The rest hold a skill upgrade; find-only items will come out of that share. */
   creditChance: 0.75,
   /** Credits in a cache that holds credits. */
-  creditAmount: 15,
+  creditAmount: 5,
 }
 
 export const STARTING_SKILL = 'autoPistol'
