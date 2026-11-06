@@ -110,7 +110,7 @@ export const CAMERA_POLE = {
   /** How long E must be held to insert the worm. Taking damage restarts it. */
   holdMs: 2000,
   /** What to type in the last step (case-sensitive, mistypes just get retyped). The PIN length is HACK.pinLength. */
-  revealText: 'Reveal',
+  revealText: 'reveal',
 }
 
 /** The server sprite (public/assets/server/server.png: 2 frames of 64x64), shared by Hack server and Connect servers. */
