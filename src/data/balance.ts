@@ -405,3 +405,23 @@ export const LIGHTING = {
   cache: { radius: 170, color: 0x2ef2ff, intensity: 1 },
   pole: { radius: 260, color: 0xff2e88, intensity: 1.2 },
 }
+
+/**
+ * Blob shadows under the player and every enemy. Phaser lights cast no shadows, so each shadow is a soft ellipse that
+ * slides away from the nearest light, and turns darker and longer the closer that light is. Needs lighting on.
+ */
+export const SHADOWS = {
+  enabled: true,
+  /** How dark the shadow is with no light near, and right next to a light (0 to 1). */
+  alpha: 0.3,
+  alphaLit: 0.6,
+  /** Width of the shadow as a multiple of the thing's hit radius, and its height as a fraction of that width. */
+  width: 2.6,
+  squash: 0.45,
+  /** How far below the thing's centre its feet are, as a multiple of its hit radius. The player's is in px. */
+  feet: 1.15,
+  playerFeet: 10,
+  /** How far (px) the shadow slides away from a light right next to it, and how much longer it gets (1 = no stretch). */
+  shift: 22,
+  stretch: 1.5,
+}

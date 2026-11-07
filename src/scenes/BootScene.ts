@@ -66,6 +66,18 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture(`bullet-${key}`, w, 4).clear();
     }
 
+    // Blob shadow: a soft black ellipse, faded to nothing at the edge.
+    const blob = this.textures.createCanvas('shadow-blob', 64, 32)!;
+    const ctx = blob.getContext();
+    ctx.scale(1, 0.5);
+    const fade = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    fade.addColorStop(0, 'rgba(0,0,0,1)');
+    fade.addColorStop(0.55, 'rgba(0,0,0,0.7)');
+    fade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, 0, 64, 64);
+    blob.refresh();
+
     // Enemy bullet: glowing orange ball.
     g.fillStyle(0xff8a2e).fillCircle(5, 5, 5);
     g.fillStyle(0xffffff).fillCircle(5, 5, 2);

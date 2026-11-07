@@ -22,6 +22,7 @@ import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
 import { createCityProps } from '../entities/CityProps';
 import { enableLighting } from '../systems/Lighting';
+import { Shadows } from '../systems/Shadows';
 import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
@@ -55,6 +56,7 @@ export class GameScene extends Phaser.Scene {
   private nav!: Navigation;
   private spawner!: Spawner;
   private factories!: Factories;
+  private shadows!: Shadows;
   private progression!: Progression;
   /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
   private citySeed = 0;
@@ -146,6 +148,7 @@ export class GameScene extends Phaser.Scene {
 
     const stats = this.progression.stats;
     this.player = new Player(this, city.start.x, city.start.y, stats);
+    this.shadows = new Shadows(this, this.player, this.enemies);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
     this.cameras.main.roundPixels = true;
@@ -313,6 +316,7 @@ export class GameScene extends Phaser.Scene {
     this.spawnEnemies(this.gameTime);
     this.spawner.update(this.gameTime);
     this.factories.update();
+    this.shadows.update();
     this.nav.trackPlayer(this.player.x, this.player.y);
 
     const recycle = SPAWN_POINTS.recycleDistance ** 2;
