@@ -93,7 +93,11 @@ export const GROUND_TILES = {
 export const BUILDING_TILES = {
   /** The 3x3 roof, top left to bottom right. The centre has to tile seamlessly. */
   roof: [0, 1, 2, 8, 9, 10, 16, 17, 18],
-  roofDetails: [3, 4, 5, 6],
+  /** Roof details that can repeat on one roof (vent, AC unit). */
+  roofDetails: [3, 4],
+  /** A roof gets at most one of each of these. */
+  roofAntenna: 5,
+  roofSkylight: 6,
   /** The 3x3 front: top row, window row (repeats on taller fronts), street level; each left end, middle, right end. */
   front: [11, 12, 13, 19, 20, 21, 27, 28, 29],
   /** Swapped in for street-level middle tiles. */

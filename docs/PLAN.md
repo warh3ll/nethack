@@ -102,7 +102,7 @@ All at the same scale as the floor, player and drones: 32x32 px tiles, shown at 
 **Building style sheet** (one per style, about 25 tiles, fits an 8x4 sheet of 256x128 px):
 
 - [ ] Roof, 9 pieces: 4 corners, 4 edges, and a centre that tiles seamlessly
-- [ ] Roof details, 3-4 pieces the game scatters around: vents, AC units, antennas, skylights and the like. Rule (Henrik): at most one skylight and one antenna per roof, any number of the other pieces
+- [ ] Roof details, 3-4 pieces the game scatters around: vents, AC units, antennas, skylights and the like. Rule (Henrik), in the game: at most one skylight (tile 6) and one antenna (tile 5) per roof, vents and AC units (3, 4) can repeat
 - [ ] Front, 3 rows x 3 columns: top row, repeatable window row and street level, each with left end, middle and right end. 3 tiles (96 px) tall in total
 - [ ] Front variants, 3-5 swappable street-level tiles: door (about 48 px tall, check against the player sprite), shopfront, neon sign
 - [ ] More building styles once the first one works in game

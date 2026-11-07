@@ -106,6 +106,18 @@ function buildingTiles(city: City): number[][] {
 function drawBuilding(tiles: number[][], r: Rect, random: () => number) {
   const roofRows = r.h - CITY.frontRows;
   const pick = (list: number[]) => list[Math.floor(random() * list.length)];
+  // A roof holds at most one antenna and one skylight; vents and AC units can repeat.
+  let antenna = false;
+  let skylight = false;
+  const roofDetail = () => {
+    const options = [...BUILDING_TILES.roofDetails];
+    if (!antenna) options.push(BUILDING_TILES.roofAntenna);
+    if (!skylight) options.push(BUILDING_TILES.roofSkylight);
+    const tile = pick(options);
+    if (tile === BUILDING_TILES.roofAntenna) antenna = true;
+    if (tile === BUILDING_TILES.roofSkylight) skylight = true;
+    return tile;
+  };
   for (let y = 0; y < r.h; y++) {
     for (let x = 0; x < r.w; x++) {
       const column = place(x, r.w);
@@ -113,7 +125,7 @@ function drawBuilding(tiles: number[][], r: Rect, random: () => number) {
       if (y < roofRows) {
         const row = place(y, roofRows);
         const centre = column === 1 && row === 1;
-        tile = centre && random() < CITY.roofDetailChance ? pick(BUILDING_TILES.roofDetails) : piece(BUILDING_TILES.roof, column, row);
+        tile = centre && random() < CITY.roofDetailChance ? roofDetail() : piece(BUILDING_TILES.roof, column, row);
       } else {
         const row = place(y - roofRows, CITY.frontRows);
         const street = column === 1 && row === 2;
