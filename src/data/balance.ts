@@ -264,9 +264,16 @@ export const SPAWNING = {
     {
       type: 'heavy',
       startChance: 0,
-      chanceStep: 0.075,
-      stepSeconds: 25,
+      chanceStep: 0.025,
+      stepSeconds: 30,
       maxChance: 0.25,
+    },
+    {
+      type: 'goon',
+      startChance: 0,
+      chanceStep: 0.025,
+      stepSeconds: 30,
+      maxChance: 0.05,
     },
   ],
 }
