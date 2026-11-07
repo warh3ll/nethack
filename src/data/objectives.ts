@@ -5,7 +5,7 @@
 
 export interface ObjectiveDef {
   id: string
-  type: 'hackServer' | 'encryptionKey' | 'connectServers' | 'stealSecrets'
+  type: 'hackServer' | 'encryptionKey' | 'connectServers' | 'stealSecrets' | 'destroyFactories'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
   /** World position. For connectServers this is the first server, for stealSecrets the middle of the compound. */
@@ -13,6 +13,8 @@ export interface ObjectiveDef {
   y: number
   /** The second server of connectServers. */
   partner?: { x: number; y: number }
+  /** Only for destroyFactories: how many factories have to go down. It has no spot of its own (x and y are unused). */
+  total?: number
 }
 
 /**
@@ -25,6 +27,7 @@ export const RUN_GENERATION = {
   maxPerType: 2,
   /** Types every run must contain at least once (hacking is the core of the game). */
   required: ['hackServer'] as ObjectiveDef['type'][],
+  /** Every run has exactly one Destroy factories objective, on top of the drawn ones (it counts towards the 4-5). */
   /** Types left out of the draw for now. Their code stays in the game; remove a type from this list to bring it back. */
   disabled: ['stealSecrets'] as ObjectiveDef['type'][],
   /** Name in the objective list; a " 1" / " 2" is added when a type occurs twice. */
@@ -33,6 +36,7 @@ export const RUN_GENERATION = {
     encryptionKey: 'Grab encryption key',
     connectServers: 'Connect servers',
     stealSecrets: 'Steal secrets',
+    destroyFactories: 'Destroy factories',
   } as Record<ObjectiveDef['type'], string>,
   /** No objective this close to the start (which is also the extraction point). */
   minDistFromStart: 900,
@@ -40,6 +44,12 @@ export const RUN_GENERATION = {
   firstObjectiveMaxDist: 2500,
   /** No two objectives closer than this. */
   minSpacing: 1300,
+}
+
+/** Destroy factories objective: any factories count, however the player gets to them. */
+export const DESTROY_FACTORIES = {
+  /** How many factories have to go down, picked at random per run. */
+  count: { min: 2, max: 3 },
 }
 
 /** Steal secrets objective: destroy every outpost (they spawn drones while the player is near), then pick up the secrets. */
@@ -82,18 +92,19 @@ export const ENCRYPTION_KEY = {
   goonOffset: { x: 70, y: 0 },
 }
 
-/** The extraction point (the player's own 127.0.0.1). Appears once the last objective is done. */
+/** The extraction point: the subway station on the exit plaza. Opens once the last objective is done. */
 export const EXTRACTION = {
-  /** The player must stay inside this radius to log out; leaving cancels the typing and the countdown. */
-  radius: 140,
-  /** What to type at the extraction point (case-sensitive, mistypes just get retyped). */
-  logoutText: 'exit',
-  /** Seconds of countdown after the text is typed, then the run is won. */
-  countdownSeconds: 3,
+  /** The player must stay inside this radius for the whole countdown; leaving cancels it and it starts over. */
+  radius: 100,
+  /** Seconds of countdown from stepping into the ring, then the run is won. */
+  countdownSeconds: 5,
 }
 
-/** Camera pole: an optional hack that unlocks the minimap for the rest of the run. One per run, found by exploring. */
+/** Camera poles: an optional hack that unlocks the minimap for the rest of the run. Hacking either one does it. Found by exploring. */
 export const CAMERA_POLE = {
+  /** Poles per run, at least `minSeparation` apart from each other, so one is never far off. */
+  count: 2,
+  minSeparation: 4000,
   /** No pole this close to the start. */
   minDistFromStart: 2000,
   /** Keeps clear of objectives and caches, so E and typing can't mean two things at once. Has to stay above HACK.range + range. */

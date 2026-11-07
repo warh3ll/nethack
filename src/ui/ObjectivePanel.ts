@@ -62,7 +62,7 @@ export class ObjectivePanel {
       const mark = state === 'done' ? '[x]' : state === 'active' ? '[>]' : '[ ]';
       // Show progress for anything started but unfinished (it decays when the player leaves).
       const p = entry.hack?.progress ?? 0;
-      const outposts = this.objectives.outpostCount(entry);
+      const outposts = this.objectives.progressCount(entry);
       const pct = outposts
         ? `${outposts.down}/${outposts.total}`
         : !entry.done && p > 0

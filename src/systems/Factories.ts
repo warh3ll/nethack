@@ -73,6 +73,11 @@ export class Factories {
     return this.sites.filter((s) => s.state === 'destroyed').length;
   }
 
+  /** The doors of the factories still standing (where the compass points for the Destroy factories objective). */
+  get standing() {
+    return this.sites.filter((s) => s.state !== 'destroyed').map((s) => ({ x: s.point.door.x, y: s.point.door.y }));
+  }
+
   /** For the minimap: every factory's building and whether it still runs. */
   get buildings() {
     return this.sites.map((s) => ({ rect: s.building, running: s.state !== 'destroyed' }));

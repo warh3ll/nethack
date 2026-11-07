@@ -5,10 +5,20 @@ import { makePin, type KeyResult } from './Hack';
 
 export type CameraStep = 'worm' | 'pin' | 'reveal' | 'done';
 
-/** Picks the camera pole's spot: on a sidewalk, far from the start and clear of everything in `avoid`. */
-export function pickPolePosition(city: City, avoid: Point[]): Point {
+/**
+ * Picks the camera poles' spots: on sidewalks, far from the start, clear of everything in `avoid` and at least
+ * CAMERA_POLE.minSeparation from each other (if a map has no room for that, the farthest spot there is).
+ */
+export function pickPolePositions(city: City, avoid: Point[]): Point[] {
   const spots = tileSpots(city, [CELL.sidewalk]).filter((s) => distance(s, city.start) >= CAMERA_POLE.minDistFromStart);
-  return pickApart(spots, avoid, CAMERA_POLE.minSpacing, city);
+  const poles: Point[] = [];
+  for (let i = 0; i < CAMERA_POLE.count; i++) {
+    const apart = poles.length === 0 ? spots : spots.filter((s) => poles.every((p) => distance(s, p) >= CAMERA_POLE.minSeparation));
+    // No room for the separation: take the spot farthest from the poles already placed.
+    const farthest = [...spots].sort((a, b) => Math.min(...poles.map((p) => distance(b, p))) - Math.min(...poles.map((p) => distance(a, p))))[0];
+    poles.push(apart.length > 0 ? pickApart(apart, [...avoid, ...poles], CAMERA_POLE.minSpacing, city) : farthest);
+  }
+  return poles;
 }
 
 /**

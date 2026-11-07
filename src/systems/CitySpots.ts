@@ -6,10 +6,10 @@ export const tileCentre = (x: number, y: number): Point => ({ x: tileToWorld(x +
 
 export const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 
-/** The middle of every plaza except the one at the start. */
+/** The middle of every plaza except the start plaza and the one with the exit station. */
 export function plazaSpots(city: City): Point[] {
   const plazas = city.blocks.filter((b) => b.plaza).map((b) => ({ x: tileToWorld(b.x + b.w / 2), y: tileToWorld(b.y + b.h / 2) }));
-  return plazas.filter((p) => distance(p, city.start) > 0);
+  return plazas.filter((p) => distance(p, city.start) > 0 && distance(p, city.exit) > 0);
 }
 
 /** The middle of every tile of the given kinds. A factory's front sidewalk is left out: its core and door are there. */

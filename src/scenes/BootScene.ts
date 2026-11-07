@@ -78,6 +78,17 @@ export class BootScene extends Phaser.Scene {
     ctx.fillRect(0, 0, 64, 64);
     blob.refresh();
 
+    // Subway entrance: stairs down into a dark opening, with a railing and a lit M sign. 128 x 96, drawn at 1x.
+    g.fillStyle(0x1a2140).fillRect(0, 20, 128, 76);
+    g.fillStyle(0x05060a).fillRect(14, 30, 100, 60);
+    for (let i = 0; i < 6; i++) g.fillStyle(0x2a3358 + i * 0x040404).fillRect(14 + i * 4, 34 + i * 9, 100 - i * 8, 6);
+    g.lineStyle(4, 0x6a7ba8).lineBetween(8, 24, 8, 92).lineBetween(120, 24, 120, 92);
+    g.fillStyle(0x6a7ba8).fillRect(4, 20, 8, 6).fillRect(116, 20, 8, 6);
+    g.fillStyle(0x0a2a3a).fillRect(40, 0, 48, 20);
+    g.lineStyle(2, 0x5fe08a).strokeRect(41, 1, 46, 18);
+    g.fillStyle(0x5fe08a).fillRect(52, 5, 4, 10).fillRect(72, 5, 4, 10).fillTriangle(52, 5, 64, 13, 56, 5).fillTriangle(76, 5, 64, 13, 72, 5);
+    g.generateTexture('subway', 128, 96).clear();
+
     // Enemy bullet: glowing orange ball.
     g.fillStyle(0xff8a2e).fillCircle(5, 5, 5);
     g.fillStyle(0xffffff).fillCircle(5, 5, 2);

@@ -74,13 +74,15 @@ export class CameraPole {
     this.typed.setPosition(left, top);
   }
 
-  /** Floating confirmation; the pole stays on the map, switched off. */
-  playRevealed() {
-    const label = this.scene.add
-      .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
-      .setOrigin(0.5)
-      .setDepth(21);
-    this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
+  /** Floating confirmation (only on the pole that was hacked); the pole stays on the map, switched off. */
+  playRevealed(announce = true) {
+    if (announce) {
+      const label = this.scene.add
+        .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+        .setOrigin(0.5)
+        .setDepth(21);
+      this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
+    }
     this.sprite.setAlpha(0.5);
     for (const o of [this.ring, this.bar, this.title, this.base, this.typed]) o.destroy();
   }

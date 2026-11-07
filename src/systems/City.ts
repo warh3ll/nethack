@@ -33,8 +33,10 @@ export interface City {
   /** One CELL per tile, row by row. */
   cells: Uint8Array;
   blocks: Block[];
-  /** The middle of the start plaza: where the player starts and extracts. */
+  /** The middle of the start plaza: where the player starts. */
   start: Point;
+  /** The middle of the plaza with the subway station the player extracts at. Never the start plaza. */
+  exit: Point;
   /** Same random stream as the layout, so the look of a map and what stands on it are part of its seed too. */
   random: () => number;
   /** A random whole number, both ends included. */
@@ -134,7 +136,13 @@ export function generateCity(seed: number): City {
   }
   for (const a of alleys) fill(a, CELL.alley);
 
-  return { seed, size, cells, blocks, start: { x: tileToWorld(centreX(start)), y: tileToWorld(centreY(start)) }, random, between, shuffled };
+  const middle = (b: Block): Point => ({ x: tileToWorld(centreX(b)), y: tileToWorld(centreY(b)) });
+  // The exit station: a random reserved plaza far enough from the start (or the farthest one on a map where none is).
+  const others = plazas.filter((p) => p !== start);
+  const far = others.filter((p) => Math.hypot(middle(p).x - middle(start).x, middle(p).y - middle(start).y) >= CITY.exitMinDistFromStart);
+  const exitBlock = far.length > 0 ? shuffled(far)[0] : [...others].sort((a, b) => apart(b, start) - apart(a, start))[0];
+
+  return { seed, size, cells, blocks, start: middle(start), exit: middle(exitBlock), random, between, shuffled };
 }
 
 /** Avenues cut the map into large rectangles, and side streets cut those down to block size. */

@@ -29,6 +29,8 @@ export const CITY = {
   plazaMinSize: 9,
   /** No two plazas closer than this, centre to centre. */
   plazaSpacing: 20,
+  /** The subway station you extract at is one of the other plazas, at least this far (px) from the start. If none is that far, the farthest one. */
+  exitMinDistFromStart: 3500,
 
   /** Alleys per map, picked at random. They are placed, not rolled, so every map has a few. */
   alleys: { min: 4, max: 7 },

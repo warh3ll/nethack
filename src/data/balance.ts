@@ -403,6 +403,8 @@ export const LIGHTING = {
   /** Hacked or connected servers. */
   serverDone: { radius: 300, color: 0x5fe08a, intensity: 1.4 },
   cache: { radius: 170, color: 0x2ef2ff, intensity: 1 },
+  /** The subway stations (start and exit). */
+  subway: { radius: 320, color: 0x5fe08a, intensity: 1.3 },
   pole: { radius: 260, color: 0xff2e88, intensity: 1.2 },
 }
 

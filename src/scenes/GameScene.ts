@@ -21,6 +21,7 @@ import { Enemy, ENEMY_KILLED, SHOT_RADIUS } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
 import { createCityProps } from '../entities/CityProps';
+import { createSubwayEntrance } from '../entities/SubwayEntrance';
 import { enableLighting } from '../systems/Lighting';
 import { Shadows } from '../systems/Shadows';
 import { createParallax } from '../entities/Parallax';
@@ -241,7 +242,7 @@ export class GameScene extends Phaser.Scene {
           this.skillBar,
           () => this.objectives.mapPoints,
           () => this.caches,
-          city.start,
+          city.exit,
           () => this.objectives.isComplete,
           city,
           () => this.factories.buildings,
@@ -256,7 +257,7 @@ export class GameScene extends Phaser.Scene {
         return enemy;
       },
     );
-    const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches]);
+    const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
     this.spawner = new Spawner(this, spawnPoints, (x, y, type) => (this.enemies.get() as Enemy | null)?.spawn(x, y, type));
     this.factories = new Factories(
       this,
@@ -267,10 +268,17 @@ export class GameScene extends Phaser.Scene {
         core?.spawn(x, y, 'factoryCore');
         return core;
       },
-      (point) => this.spawner.remove(point),
+      (point) => {
+        this.spawner.remove(point);
+        this.objectives.onFactoryDestroyed();
+      },
     );
+    this.objectives.setFactorySource(() => this.factories.standing);
+    // The subway stations: the start plaza and the exit plaza. The exit's ring only opens once every objective is done.
+    createSubwayEntrance(this, city.start.x, city.start.y);
+    createSubwayEntrance(this, city.exit.x, city.exit.y);
     // Last, since it uses the city's random stream after everything that stands on the map has been placed.
-    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, this.objectives.pole, city.start]);
+    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit]);
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
