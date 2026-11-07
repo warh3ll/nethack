@@ -17,7 +17,7 @@ import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
 import { DefensiveMatrixFx } from '../effects/DefensiveMatrixFx';
-import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
+import { Enemy, ENEMY_KILLED, SHOT_RADIUS } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
 import { createParallax } from '../entities/Parallax';
@@ -185,9 +185,12 @@ export class GameScene extends Phaser.Scene {
     // Keep the swarm from collapsing into a single blob. Factory cores stand on the sidewalk, so the swarm walks through them.
     this.physics.add.collider(this.enemies, this.enemies, undefined, (a, b) => !(a as Enemy).stats.passable && !(b as Enemy).stats.passable);
     // Buildings are solid for everyone who walks: after every physics step, anything overlapping one is pushed out.
+    // They stop bullets too, the player's and the enemies' alike.
     const solidBuildings = () => {
       this.nav.pushOut(this.player.body as Phaser.Physics.Arcade.Body);
       for (const e of this.enemies.getChildren() as Enemy[]) if (e.active && !e.stats.stationary) this.nav.pushOut(e.body as Phaser.Physics.Arcade.Body);
+      for (const b of this.bullets.getChildren() as Bullet[]) if (b.active && this.nav.solidAt(b.x, b.y)) b.kill();
+      for (const b of this.enemyBullets.getChildren() as EnemyBullet[]) if (b.active && this.nav.solidAt(b.x, b.y)) b.kill();
     };
     // The world is cleared on shutdown before scene listeners run, so the listener is removed from the one it was added to.
     const world = this.physics.world;
@@ -308,7 +311,7 @@ export class GameScene extends Phaser.Scene {
         continue;
       }
       e.act(this.player.x, this.player.y, this.gameTime, this.nav);
-      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y);
+      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
         (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range);
@@ -444,7 +447,7 @@ export class GameScene extends Phaser.Scene {
     if (behavior === 'synaptic') return new SynapticOverload(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'emp') return new EmpShock(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'rootkit') return new Rootkit(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
-    return new Weapon(skillId, this.player, this.enemies, this.bullets, stats);
+    return new Weapon(skillId, this.player, this.enemies, this.bullets, stats, (ax, ay, bx, by) => this.nav.clearLine(ax, ay, bx, by, SHOT_RADIUS));
   }
 
   /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Overload). */

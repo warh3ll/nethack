@@ -111,6 +111,11 @@ export class Navigation {
     return ty * this.size + tx;
   }
 
+  /** True if the point is inside a building. Shots die there. */
+  solidAt(x: number, y: number) {
+    return this.blocked[this.tileAt(x, y)] === 1;
+  }
+
   centreOf(tile: number): Point {
     const x = tile % this.size;
     const y = (tile - x) / this.size;

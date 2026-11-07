@@ -11,6 +11,9 @@ export const ENEMY_DAMAGED = 'enemy-damaged';
 
 const HIJACK_TINT = 0xff5a7a;
 
+/** Half the width of a bullet, for the clear-line check before shooting. */
+export const SHOT_RADIUS = 3;
+
 /** Set on an enemy infected by the Virus. Holds timers only: its strength always comes from the Virus's current level. */
 export interface Infection {
   /** Game time when the infection runs out. Every new victim gets a fresh one. */
@@ -122,8 +125,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /**
    * Angle to shoot at the player if this enemy is ranged, chasing, in range and off cooldown; otherwise null.
    * The first shot of a chase comes one full cooldown after it starts, so there's time to react.
+   * Buildings stop bullets, so it only fires with a clear line; otherwise it stays ready and fires as soon as it has one.
    */
-  shotAngle(time: number, playerX: number, playerY: number): number | null {
+  shotAngle(time: number, playerX: number, playerY: number, nav: Navigation): number | null {
     const ranged = this.stats.ranged;
     if (!ranged || this.hijacked) return null;
     if (time < this.stunnedUntil) {
@@ -138,6 +142,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.nextShotAt < 0) this.nextShotAt = time + ranged.cooldownMs;
     if (time < this.nextShotAt) return null;
     if (Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) > ranged.range) return null;
+    if (!nav.clearLine(this.x, this.y, playerX, playerY, SHOT_RADIUS)) return null;
     this.nextShotAt = time + ranged.cooldownMs;
     return Phaser.Math.Angle.Between(this.x, this.y, playerX, playerY);
   }

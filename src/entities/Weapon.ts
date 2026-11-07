@@ -15,6 +15,8 @@ export class Weapon {
     private enemies: Phaser.Physics.Arcade.Group,
     private bullets: Phaser.Physics.Arcade.Group,
     private playerStats: PlayerStats,
+    /** True if a shot from the first point to the second would get there without hitting a building. */
+    private canHit: (ax: number, ay: number, bx: number, by: number) => boolean,
   ) {}
 
   get stats() {
@@ -39,22 +41,18 @@ export class Weapon {
     }
   }
 
+  /** The best target in range that a shot can reach: buildings stop bullets, so a gun only fires with a clear line. */
   private findTarget(range: number, minRange: number, mode: 'nearest' | 'highestHp'): Enemy | null {
-    let best: Enemy | null = null;
-    let bestD = range * range;
-    let bestHp = -1;
-    const minD = minRange * minRange;
+    const { x, y } = this.owner;
+    const inRange: { e: Enemy; d: number }[] = [];
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active) continue;
-      const d = Phaser.Math.Distance.Squared(this.owner.x, this.owner.y, e.x, e.y);
-      if (d > range * range || d < minD) continue;
-      if (mode === 'highestHp' ? e.hp > bestHp : d < bestD) {
-        bestD = d;
-        bestHp = e.hp;
-        best = e;
-      }
+      const d = Phaser.Math.Distance.Squared(x, y, e.x, e.y);
+      if (d <= range * range && d >= minRange * minRange) inRange.push({ e, d });
     }
-    return best;
+    // Best first, so the (costlier) line check usually runs once or twice.
+    inRange.sort(mode === 'highestHp' ? (a, b) => b.e.hp - a.e.hp || a.d - b.d : (a, b) => a.d - b.d);
+    return inRange.find((c) => this.canHit(x, y, c.e.x, c.e.y))?.e ?? null;
   }
 }
