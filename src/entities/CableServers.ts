@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { CONNECT_SERVERS, SERVER } from '../data/objectives';
 import type { Connect } from '../systems/Connect';
+import { LIGHTING } from '../data/balance';
+import { addGlow, lit, setGlow } from '../systems/Lighting';
 
 const BAR_W = 100;
 const BAR_H = 8;
@@ -19,6 +21,7 @@ export class CableServers {
   private cable: Phaser.GameObjects.Graphics;
   private bar: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
+  private lights: (Phaser.GameObjects.Light | null)[] = [];
   private labelOffset = (SERVER.frameSize * SERVER.spriteScale) / 2 + 42;
 
   constructor(
@@ -28,7 +31,10 @@ export class CableServers {
   ) {
     this.rings = scene.add.graphics().setDepth(1);
     this.cable = scene.add.graphics().setDepth(3);
-    for (const p of [a, b]) scene.add.sprite(p.x, p.y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server');
+    for (const p of [a, b]) {
+      lit(scene.add.sprite(p.x, p.y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server'));
+      this.lights.push(addGlow(scene, p.x, p.y, LIGHTING.server));
+    }
     this.bar = scene.add.graphics().setDepth(20);
     this.label = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '13px', color: '#ffd23e' }).setOrigin(0.5).setDepth(21);
   }
@@ -93,6 +99,7 @@ export class CableServers {
     this.label.setText('');
     this.cable.clear();
     this.drawCable(this.a.x, this.a.y, this.b.x, this.b.y, GREEN);
+    for (const l of this.lights) setGlow(l, LIGHTING.serverDone);
     const mx = (this.a.x + this.b.x) / 2;
     const text = this.scene.add
       .text(mx, this.a.y - 40, 'CONNECTED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })

@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { HACK, SERVER } from '../data/objectives';
 import type { Hack, PromptKind } from '../systems/Hack';
+import { LIGHTING } from '../data/balance';
+import { addGlow, lit } from '../systems/Lighting';
 
 const BAR_W = 120;
 const BAR_H = 8;
@@ -29,6 +31,7 @@ export class HackServer {
   private base: Phaser.GameObjects.Text;
   private typed: Phaser.GameObjects.Text;
   private errorUntil = 0;
+  private light: Phaser.GameObjects.Light | null;
 
   constructor(
     private scene: Phaser.Scene,
@@ -36,7 +39,8 @@ export class HackServer {
     readonly y: number,
   ) {
     this.ring = scene.add.graphics().setDepth(1);
-    this.sprite = scene.add.sprite(x, y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server');
+    this.sprite = lit(scene.add.sprite(x, y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server'));
+    this.light = addGlow(scene, x, y, LIGHTING.server);
     this.bar = scene.add.graphics().setDepth(20);
     const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color }).setDepth(21);
     this.percent = text('14px', '#c8f7ff').setOrigin(0.5);
@@ -113,6 +117,7 @@ export class HackServer {
 
   destroy() {
     this.scene.tweens.killTweensOf(this.sprite);
+    if (this.light) this.scene.lights.removeLight(this.light);
     for (const o of [this.sprite, this.ring, this.bar, this.percent, this.title, this.base, this.typed]) o.destroy();
   }
 }

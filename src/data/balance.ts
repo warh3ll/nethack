@@ -9,7 +9,7 @@ export const PLAYER = {
   /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
   hpRegenPerSec: 0.15,
   moveSpeed: 200,
-  radius: 14,
+  radius: 18,
   /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
   spriteScale: 2,
   /** Time after taking a hit during which the player can't be hit again. */
@@ -72,6 +72,11 @@ export const MINIMAP = {
   fadeInMs: 400,
   backgroundColor: 0x05060a,
   backgroundAlpha: 0.75,
+  /** The street layout: roads are the background showing through. */
+  buildingColor: 0x2a3350,
+  plazaColor: 0x1a2038,
+  factoryColor: 0x8a5420,
+  factoryDownColor: 0x3a3a42,
   borderColor: 0x2ef2ff,
   objectiveColor: 0xffd23e,
   cacheColor: 0x2ef2ff,
@@ -79,13 +84,12 @@ export const MINIMAP = {
   playerColor: 0xffffff,
 }
 
-/** The map is a square centred on the player's start. Edge to edge takes size / PLAYER.moveSpeed seconds (50 s). */
+/** The map is a square centred on (0, 0). Straight edge to edge takes size / PLAYER.moveSpeed seconds (51 s); streets add about 30%. */
 export const MAP = {
-  size: 10000,
+  /** A multiple of CITY.tileSize, since the city is built from whole tiles. */
+  size: 10240,
   /** How thick the boundary wall is drawn. */
   wallThickness: 96,
-  /** The floor tile (public/assets/floor/floor.png, 32x32) is drawn at this scale. */
-  floorScale: 2,
 }
 
 /**
@@ -123,6 +127,8 @@ export interface EnemyType {
   healthBar?: boolean
   /** Never moves and can't be pushed (outposts). */
   stationary?: boolean
+  /** Other enemies walk through it instead of bumping into it (factory cores, which stand on the sidewalk). */
+  passable?: boolean
   /** Scales the length of any stun on this enemy (default 1; 0.5 = half as long, 0 = immune). */
   stunMultiplier?: number
   /**
@@ -213,6 +219,21 @@ export const ENEMIES: Record<string, EnemyType> = {
     stationary: true,
     stunMultiplier: 0,
   },
+  // The part of a factory that can be shot, by its door. Destroying it shuts the factory down (SPAWN_POINTS).
+  factoryCore: {
+    hp: 250,
+    speed: 0,
+    contactDamage: 0,
+    xp: 20,
+    credits: 10,
+    creditChance: 1,
+    radius: 30,
+    color: 0xffa02e,
+    healthBar: true,
+    stationary: true,
+    passable: true,
+    stunMultiplier: 0,
+  },
 }
 
 export const SPAWNING = {
@@ -222,8 +243,6 @@ export const SPAWNING = {
   minIntervalMs: 400,
   /** How much the interval shrinks every second of the run. */
   intervalDecayPerSecond: 5,
-  /** Enemies appear on a ring this far outside the screen edge. */
-  spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
@@ -252,6 +271,44 @@ export const SPAWNING = {
   ],
 }
 
+/**
+ * Where swarm enemies come from: factories and small exits (placed by the city generator, counts in city.ts).
+ * Which ones are active depends only on world distance to the player, never on the screen size.
+ * Every spawn from SPAWNING picks one active spawn point; with few of them around, some spawns are skipped (quiet zones).
+ */
+export const SPAWN_POINTS = {
+  /** A spawn point is active while the player is between `min` and `max` away from it. */
+  exitRange: { min: 500, max: 1400 },
+  factoryRange: { min: 300, max: 2000 },
+  /** How much more often a factory is picked than an exit. */
+  factoryWeight: 2,
+  /** A factory lets out a small group at once, this many enemies (both ends included). Each one rolls its own type. */
+  factoryGroup: { min: 3, max: 5 },
+  /** Every destroyed factory takes this share off the spawn rate of the whole map (0.08 = 8% fewer spawns per factory). */
+  rateCutPerFactory: 0.08,
+  /** A factory core below this share of its hp shows as damaged. */
+  factoryDamagedAt: 0.5,
+  /** Active spawn points (factories count `factoryWeight` each) needed for the full SPAWNING rate. Fewer means a share of spawns is skipped. */
+  fullRateAt: 5,
+  /** The spawn point flashes this long before its enemy steps out, so enemies never just appear. */
+  exitFlashMs: 500,
+  factoryFlashMs: 2000,
+  exitFlashColor: 0xff2e88,
+  factoryFlashColor: 0xffa02e,
+  /** Swarm enemies this far from the player are quietly removed, so stragglers can't fill `maxEnemies`. Keep it above both `max` ranges. */
+  recycleDistance: 2600,
+}
+
+/** How enemies find their way through the streets (one shared flow field of walking distance from the player). */
+export const NAVIGATION = {
+  /** Within this distance, an enemy with a clear line to the player walks straight at it instead of following the streets. */
+  directRange: 1200,
+  /** How often each enemy rethinks its route. Lower is smoother but costs more. */
+  rethinkMs: 150,
+  /** How many tiles ahead along its route an enemy looks for a point it can walk to in a straight line. */
+  lookahead: 4,
+}
+
 /** Credit chips dropped by enemies. How many credits each enemy type drops is `credits` in ENEMIES. */
 export const CREDITS = {
   /** Chips within this distance of the player start flying toward them. */
@@ -270,10 +327,10 @@ export const CACHES = {
   count: { min: 6, max: 10 },
   /** No cache this close to the start. */
   minDistFromStart: 600,
-  /** Caches stay at least this far from the map edge. */
-  edgeMargin: 300,
   /** No two caches closer than this. */
   minSpacing: 1000,
+  /** No cache this close to an objective, so E and typing can't mean two things at once. Has to stay above HACK.range + openRadius. */
+  objectiveSpacing: 400,
   /** Radius of the pulsing ring drawn around a cache. */
   ringRadius: 40,
   /** Press E (or tap the prompt) within this distance of a cache to open it. */
@@ -322,4 +379,44 @@ export const TOUCH_JOYSTICK = {
   analog: true,
   /** When the thumb drags past the radius, the base follows it so the stick never "runs out". */
   baseFollows: true,
+}
+
+/**
+ * Night-time lighting. Lit things (the city, props, servers, the player and enemies) are multiplied by `ambient`
+ * and brightened by the lights near them. Bullets, effects and the UI are not lit, so they always read clearly.
+ * Phaser lights have no normal maps here, so they just add a soft coloured pool of light.
+ */
+export const LIGHTING = {
+  enabled: true,
+  /** The light everything gets with no lamp nearby, as 0xRRGGBB. Brighter = easier to see, darker = lamps stand out more. */
+  ambient: 0x8a92b8,
+  /** Most lights drawn at once (the closest to the camera win). Each one costs a little per pixel, so keep it modest. */
+  maxLights: 24,
+  /** How far above the ground a light hangs, as a fraction of its radius. Higher = flatter, more even pool. */
+  height: 0.45,
+  /** The pools of light. Radius in px, colour 0xRRGGBB, intensity 1 = normal. */
+  lamp: { radius: 440, color: 0x7fe9ff, intensity: 1.7 },
+  factory: { radius: 460, color: 0xffa02e, intensity: 2 },
+  /** A factory whose core is badly hurt. A destroyed one has no light. */
+  factoryDamaged: { radius: 380, color: 0xff3a2a, intensity: 1.5 },
+  server: { radius: 300, color: 0x2ef2ff, intensity: 1.4 },
+  /** Hacked or connected servers. */
+  serverDone: { radius: 300, color: 0x5fe08a, intensity: 1.4 },
+  cache: { radius: 170, color: 0x2ef2ff, intensity: 1 },
+  /** The subway stations (start and exit). */
+  subway: { radius: 320, color: 0x5fe08a, intensity: 1.3 },
+  pole: { radius: 260, color: 0xff2e88, intensity: 1.2 },
+}
+
+/** Blob shadows: a soft dark ellipse under the player and every enemy. It stays put under the feet, whatever the lights do. */
+export const SHADOWS = {
+  enabled: true,
+  /** How dark the shadow is (0 to 1). */
+  alpha: 0.4,
+  /** Width of the shadow as a multiple of the thing's hit radius, and its height as a fraction of that width. */
+  width: 2.6,
+  squash: 0.45,
+  /** How far below the thing's centre its feet are, as a multiple of its hit radius. The player's is in px. */
+  feet: 1.15,
+  playerFeet: 6,
 }

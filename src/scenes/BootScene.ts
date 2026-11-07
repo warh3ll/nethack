@@ -20,8 +20,10 @@ export class BootScene extends Phaser.Scene {
     for (let i = 1; i <= 5; i++) this.load.image(`parallax-${i}`, `layer-${i}.png`);
     loadPlayerSheets(this);
     loadEnemySheets(this);
-    this.load.setPath('assets/floor/');
-    this.load.image('floor', 'floor.png');
+    this.load.setPath('assets/city/');
+    this.load.image('city-ground', 'ground.png');
+    this.load.image('city-building', 'building-1.png');
+    this.load.image('city-props', 'props.png');
     this.load.setPath('assets/server/');
     this.load.spritesheet('server', 'server.png', { frameWidth: 64, frameHeight: 64 });
   }
@@ -33,11 +35,24 @@ export class BootScene extends Phaser.Scene {
 
     // Pixel art sprites are scaled up, so sample them without smoothing (the default blurs them). Parallax and generated textures stay smooth.
     for (const key of this.textures.getTextureKeys()) {
-      if (key === 'server' || key === 'floor' || key.startsWith('enemy-') || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      if (key === 'server' || key.startsWith('city-') || key.startsWith('enemy-') || key.startsWith('player-')) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
 
     for (const [key, e] of Object.entries(ENEMIES)) {
       if (key in ENEMY_SPRITES) continue; // drawn from its sprite sheet instead
+      if (key === 'factoryCore') {
+        // Placeholder factory core: a glowing reactor, then a cracked, reddened one for when it's badly hurt.
+        const r = e.radius;
+        for (const damaged of [false, true]) {
+          g.fillStyle(0x1a1208).fillCircle(r, r, r);
+          g.lineStyle(4, damaged ? 0xff4a2e : e.color).strokeCircle(r, r, r - 3);
+          g.fillStyle(damaged ? 0x8a1a0a : e.color, 0.9).fillCircle(r, r, r * 0.5);
+          g.fillStyle(0xfff35c, damaged ? 0.4 : 0.9).fillCircle(r, r, r * 0.22);
+          if (damaged) g.lineStyle(3, 0x05060a).lineBetween(r * 0.3, r * 0.4, r * 1.1, r * 1.2).lineBetween(r * 1.2, r * 0.3, r * 0.9, r * 1.7);
+          g.generateTexture(damaged ? `enemy-${key}-damaged` : `enemy-${key}`, r * 2, r * 2).clear();
+        }
+        continue;
+      }
       g.fillStyle(e.color).fillRect(0, 0, e.radius * 2, e.radius * 2);
       g.fillStyle(0x05060a).fillRect(e.radius * 0.5, e.radius * 0.7, e.radius, e.radius * 0.35);
       g.generateTexture(`enemy-${key}`, e.radius * 2, e.radius * 2).clear();
@@ -50,6 +65,29 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(s.color).fillRect(0, 0, w, 4);
       g.generateTexture(`bullet-${key}`, w, 4).clear();
     }
+
+    // Blob shadow: a soft black ellipse, faded to nothing at the edge.
+    const blob = this.textures.createCanvas('shadow-blob', 64, 32)!;
+    const ctx = blob.getContext();
+    ctx.scale(1, 0.5);
+    const fade = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    fade.addColorStop(0, 'rgba(0,0,0,1)');
+    fade.addColorStop(0.55, 'rgba(0,0,0,0.7)');
+    fade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, 0, 64, 64);
+    blob.refresh();
+
+    // Subway entrance: stairs down into a dark opening, with a railing and a lit M sign. 128 x 96, drawn at 1x.
+    g.fillStyle(0x1a2140).fillRect(0, 20, 128, 76);
+    g.fillStyle(0x05060a).fillRect(14, 30, 100, 60);
+    for (let i = 0; i < 6; i++) g.fillStyle(0x2a3358 + i * 0x040404).fillRect(14 + i * 4, 34 + i * 9, 100 - i * 8, 6);
+    g.lineStyle(4, 0x6a7ba8).lineBetween(8, 24, 8, 92).lineBetween(120, 24, 120, 92);
+    g.fillStyle(0x6a7ba8).fillRect(4, 20, 8, 6).fillRect(116, 20, 8, 6);
+    g.fillStyle(0x0a2a3a).fillRect(40, 0, 48, 20);
+    g.lineStyle(2, 0x5fe08a).strokeRect(41, 1, 46, 18);
+    g.fillStyle(0x5fe08a).fillRect(52, 5, 4, 10).fillRect(72, 5, 4, 10).fillTriangle(52, 5, 64, 13, 56, 5).fillTriangle(76, 5, 64, 13, 72, 5);
+    g.generateTexture('subway', 128, 96).clear();
 
     // Enemy bullet: glowing orange ball.
     g.fillStyle(0xff8a2e).fillCircle(5, 5, 5);
@@ -114,7 +152,7 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x2ef2ff).fillRect(14, 38, 10, 5);
     g.generateTexture('camera-pole', 36, 72).clear();
 
-    // Tile size of the wall texture below (the floor is loaded from public/assets/floor/floor.png).
+    // Tile size of the wall texture below.
     const t = 64;
 
     // Boundary wall: hazard stripes that tile in every direction.

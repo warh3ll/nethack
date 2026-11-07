@@ -17,7 +17,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Parallax city backdrop behind the map, visible past the wall (s7)
 - [x] Compass to the closest unfinished objective; objectives in any order (s7)
 - [x] Random per-run objectives, 3-5, max two of a type, at least one hack, one near the start (s7)
-- [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7)
+- [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7). Steal secrets is switched off for now (`RUN_GENERATION.disabled` in `objectives.ts`), the code stays
 - [x] Extraction point, "log out" prompt, countdown, win (s7)
 - [x] Game over on HP 0, results screen on win and death (s7)
 - [x] Goon miniboss and Marksman ranged enemy with a shared, time-scaled spawn pool (s6)
@@ -81,6 +81,54 @@ Best done together, in this order:
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
 
 - [x] Camera pole: optional three-step hack (hold E, PIN, type "reveal") that unlocks a minimap for the rest of the run (s7). `systems/CameraHack.ts`, `entities/CameraPole.ts`, `ui/Minimap.ts`; numbers in `CAMERA_POLE` and `MINIMAP`. The pole texture is a generated placeholder (`camera-pole` in `BootScene.ts`)
+
+### H. Street-level city (s6, s7)
+
+Replaces the open map with a generated city. In this order, each step leaves the game playable. Prototype numbers so far: 64 px tiles, map 10240 px, avenues 576 px and streets 448 px between buildings, alleys 128 px.
+
+- [x] Generator and look: seeded city data, placeholder streets and buildings, no collision yet. `systems/City.ts`, `entities/CityView.ts`, numbers in `data/city.ts`. Reserved plazas and a fixed number of alleys are in the generator already. `?seed=123` in the URL replays a map, and the pause screen shows the seed
+- [x] Placement: player start and extraction in the middle of the start plaza, Grab encryption key and Steal secrets on the reserved plazas, servers on the sidewalk in front of a building (`systems/CitySpots.ts`), caches off the road, camera pole on a sidewalk. A seed now replays the whole layout, not just the streets
+- [x] Collision, flow field and spawn points together: solid buildings (anything overlapping one is pushed out after every physics step, `Navigation.pushOut`), enemies follow one shared flow field and walk straight at the player when they can see it (`systems/Navigation.ts`, `NAVIGATION` in `balance.ts`), 6 factories and about 100 small exits replace the spawn ring (`systems/SpawnPoints.ts`, `systems/Spawner.ts`, counts in `city.ts`). A spawn point is active by world distance only (`SPAWN_POINTS` in `balance.ts`), and fewer active points nearby means some spawns are skipped, so sparse areas are quieter. Every spawn point flashes before its enemy steps out (factories longer). Swarm enemies farther than 2600 px are recycled. A guard (the Goon) walks back to his post through the streets. Factories and exits are placeholder drawings until the art exists
+- [x] Destructible factories that release small groups after their flash; destroying one lowers the overall spawn rate. A factory flashes for 2 s and then lets out 3-5 enemies side by side, each rolling its own type. Its core stands on the sidewalk by the door and is shot like an outpost (`factoryCore` in `ENEMIES`); below half hp the factory shows cracks and a red core, and once destroyed it goes dark (OFFLINE), never spawns again and every factory down takes 8% off the spawn rate of the whole map (`SPAWN_POINTS` in `balance.ts`, `systems/Factories.ts`). Caches and the camera pole keep off factory fronts
+- [x] Shots: buildings stop bullets, guns need a clear line, Marksman and Goon too; hacking skills reach through walls. Any bullet inside a building dies after the physics step it got there (player and enemy bullets alike). Guns skip targets they can't hit and take the best one they can; the Marksman and Goon hold their shot until they see the player, then fire at once. Virus, Synaptic Overload, EMP Shock and Rootkit are unchanged
+- [x] Dressing: lane markings, crosswalks, non-solid props, street layout on the minimap. Lane dashes run down the middle of every road and a crosswalk crosses it where it meets a junction (worked out from the road layout in `CityView.ts`). Lamps line every sidewalk and plaza edge, with the odd bin, bench, hydrant and so on (`entities/CityProps.ts`, numbers and sheet positions in `city.ts`); props never block anything and keep clear of objectives, caches, spawn points and the pole. The minimap draws buildings, plazas and factories under the dots, and a factory greys out there once destroyed
+- [ ] Night lighting. First iteration is in: the city is dim and lit by Phaser lights from every street lamp, factory (orange, red when hurt, off when destroyed), server (cyan, green once hacked or connected), data cache and the camera pole. The city, props, servers, player and enemies are lit; bullets, effects and the UI are not. The player and every enemy get a still blob shadow under their feet (`SHADOWS` in `balance.ts`, `systems/Shadows.ts`; real light-blocking shadows are not planned) All the numbers (ambient darkness, light colours, radii, how many lights at once) are in `LIGHTING` in `balance.ts`; code in `systems/Lighting.ts`. Still to do: lit windows and neon signs once the building fronts are drawn (one light per lit window tile), objective pickups, muzzle flashes, and tuning the darkness by playtest
+- [x] Subway exit, two camera poles, Destroy factories objective. The run now starts at a subway station on the start plaza and ends at another on a different plaza at least 3500 px away (`city.exit`, `entities/SubwayEntrance.ts`, placeholder `subway` texture in `BootScene.ts`). Once every objective is done the exit station's ring opens: stepping in starts a 5 s countdown, leaving the ring cancels it, no typing (`EXTRACTION` in `objectives.ts`). There are two camera poles at least 4000 px apart and hacking either one reveals the map and switches the other off (`CAMERA_POLE`). Every run has exactly one Destroy factories objective (2-3 factories, any of them count, `DESTROY_FACTORIES`), the compass points at the closest standing factory; Steal secrets stays switched off
+- [ ] Districts for variety, and real building art (do together with "Real art and texture swap" in G)
+
+#### Art to make (Henrik)
+
+All at the same scale as the floor, player and drones: 32x32 px tiles, shown at 2x in game (64x64). Neighbouring tiles must line up at the edges. Placeholders are in `public/assets/city/` (`ground.png`, `building-1.png`, 256x128 px, and `props.png`): paint over them and keep the file names. `docs/art/` has the same sheets enlarged, with every tile labelled; those are only a guide, the game does not load them. Start with one building style and the ground sheet; the game runs on placeholders until then.
+
+**Building style sheet** (one per style, about 25 tiles, fits an 8x4 sheet of 256x128 px):
+
+- [ ] Roof, 9 pieces: 4 corners, 4 edges, and a centre that tiles seamlessly
+- [ ] Roof details, 3-4 pieces the game scatters around: vents, AC units, antennas, skylights and the like. Rule (Henrik), in the game: at most one skylight (tile 6) and one antenna (tile 5) per roof, vents and AC units (3, 4) can repeat
+- [ ] Front, 3 rows x 3 columns: top row, repeatable window row and street level, each with left end, middle and right end. 3 tiles (96 px) tall in total
+- [ ] Front variants, 3-5 swappable street-level tiles: door (about 48 px tall, check against the player sprite), shopfront, neon sign
+- [ ] More building styles once the first one works in game
+
+Only the south side gets a front. The north, east and west sides just show the roof edge.
+
+**Ground sheet:**
+
+- [ ] Road surface
+- [ ] Lane dashes, horizontal and vertical
+- [ ] Crosswalks, horizontal and vertical
+- [ ] Sidewalk, 9 pieces: 4 corners, 4 curb edges and a centre
+- [ ] Alley surface
+- [ ] Plaza surface
+
+**Props sheet** (`props.png`, 256x64 px, 8x2 tiles; the guide is `docs/art/city-props-template.png`):
+
+- [ ] Lamp, bin, hydrant, bench, planter, vending machine, bollard, cone (one tile each, the second row is spare for more)
+
+**Spawn points:**
+
+- [ ] Factory, one large whole image (for example 256x192 px); the generator fits it into a block and the leftover space becomes a yard
+- [ ] Factory core, the visible part to shoot, by its door
+- [ ] Factory damaged and destroyed versions
+- [ ] Small exits, a single 32x32 tile each, placed in the street-level row: hatch, loading bay, subway exit
 
 ### G. Polish and release
 

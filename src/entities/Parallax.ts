@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { MAP, PARALLAX } from '../data/balance';
 
 /**
- * Far-away city backdrop behind the map. The floor hides it, so it only shows past the wall.
+ * Far-away city backdrop behind the map. The city hides it, so it only shows past the wall.
  * Each layer is pinned to the screen (scrollFactor 0) and slid by hand: it is drawn a bit larger
  * than the screen, and the spare margin is used as travel room. The camera's position on the map
  * (-1 at one edge, +1 at the other) picks how far into that margin the layer sits, so a layer can

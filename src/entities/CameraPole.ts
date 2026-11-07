@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { LIGHTING } from '../data/balance';
 import { CAMERA_POLE } from '../data/objectives';
+import { addGlow, lit } from '../systems/Lighting';
 import type { CameraHack } from '../systems/CameraHack';
 
 const BAR_W = 100;
@@ -30,7 +32,8 @@ export class CameraPole {
     readonly y: number,
   ) {
     this.ring = scene.add.graphics().setDepth(1);
-    this.sprite = scene.add.image(x, y, 'camera-pole').setDepth(4);
+    this.sprite = lit(scene.add.image(x, y, 'camera-pole').setDepth(4));
+    addGlow(scene, x, y, LIGHTING.pole);
     this.bar = scene.add.graphics().setDepth(20);
     const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color, stroke: '#05060a', strokeThickness: 3 }).setDepth(21);
     this.title = text('13px', '#ffd23e').setOrigin(0.5);
@@ -71,13 +74,15 @@ export class CameraPole {
     this.typed.setPosition(left, top);
   }
 
-  /** Floating confirmation; the pole stays on the map, switched off. */
-  playRevealed() {
-    const label = this.scene.add
-      .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
-      .setOrigin(0.5)
-      .setDepth(21);
-    this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
+  /** Floating confirmation (only on the pole that was hacked); the pole stays on the map, switched off. */
+  playRevealed(announce = true) {
+    if (announce) {
+      const label = this.scene.add
+        .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+        .setOrigin(0.5)
+        .setDepth(21);
+      this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
+    }
     this.sprite.setAlpha(0.5);
     for (const o of [this.ring, this.bar, this.title, this.base, this.typed]) o.destroy();
   }

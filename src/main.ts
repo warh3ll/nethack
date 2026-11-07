@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { GameScene } from './scenes/GameScene';
 import { MenuScene } from './scenes/MenuScene';
+import { LIGHTING } from './data/balance';
 
 new Phaser.Game({
   type: Phaser.AUTO,
@@ -11,5 +12,6 @@ new Phaser.Game({
   disableContextMenu: true,
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
   physics: { default: 'arcade', arcade: { debug: false } },
+  render: { maxLights: LIGHTING.maxLights },
   scene: [BootScene, MenuScene, GameScene],
 });

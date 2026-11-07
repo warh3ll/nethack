@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
-import { ENEMIES, EnemyType } from '../data/balance';
+import { ENEMIES, EnemyType, NAVIGATION } from '../data/balance';
 import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
+import { lit } from '../systems/Lighting';
+import type { FlowField, Navigation } from '../systems/Navigation';
 
 /** Scene event fired when an enemy dies, with the enemy as argument. */
 export const ENEMY_KILLED = 'enemy-killed';
@@ -9,6 +11,9 @@ export const ENEMY_KILLED = 'enemy-killed';
 export const ENEMY_DAMAGED = 'enemy-damaged';
 
 const HIJACK_TINT = 0xff5a7a;
+
+/** Half the width of a bullet, for the clear-line check before shooting. */
+export const SHOT_RADIUS = 3;
 
 /** Set on an enemy infected by the Virus. Holds timers only: its strength always comes from the Virus's current level. */
 export interface Infection {
@@ -36,9 +41,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private provoked = false;
   /** Game time of the next shot; -1 = not armed yet (starts when a chase starts). */
   private nextShotAt = -1;
+  /** Route: rethought every NAVIGATION.rethinkMs. `direct` = clear line to the target, otherwise walk to the waypoint. */
+  private rethinkAt = 0;
+  private direct = true;
+  private waypointX = 0;
+  private waypointY = 0;
 
   spawn(x: number, y: number, typeKey: string, hp?: number) {
     this.stats = ENEMIES[typeKey];
+    lit(this);
     this.hp = this.maxHp = hp ?? this.stats.hp;
     this.infection = null;
     this.stunnedUntil = 0;
@@ -49,14 +60,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.chasing = false;
     this.provoked = false;
     this.nextShotAt = -1;
+    this.rethinkAt = 0;
+    this.direct = true;
     this.enableBody(true, x, y, true, true);
     const sprite = ENEMY_SPRITES[typeKey];
     if (sprite) {
-      // Animated sheet: the hit circle (world pixels) is centred on the frame, its offset is in unscaled frame pixels.
+      // Animated sheet: the hit circle is centred on the frame. Phaser reads radius and offset in unscaled frame pixels, so divide the world radius by the sprite scale.
       const key = enemyAnimKey(typeKey, MOVE_STATE);
       this.setTexture(key).setScale(sprite.scale).play(key);
       const k = this.stats.radius / sprite.scale;
-      this.body!.setCircle(this.stats.radius, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
+      this.body!.setCircle(k, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
     } else {
       // Pooled enemies are reused, so undo any sprite state left by a previous type.
       this.anims.stop();
@@ -71,8 +84,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.clearTint();
   }
 
-  /** Per-frame behaviour: swarm enemies head straight for the player, guards follow their aggro rules. */
-  act(playerX: number, playerY: number, time: number) {
+  /** Per-frame behaviour: swarm enemies come for the player through the streets, guards follow their aggro rules. */
+  act(playerX: number, playerY: number, time: number, nav: Navigation) {
     if (this.hijacked) return; // Rootkit steers it
     if (time < this.stunnedUntil) {
       if (!this.stunTinted) this.applyStunTint();
@@ -86,20 +99,26 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const guard = this.stats.guard;
     if (!guard) {
       this.chasing = true;
+      this.route(playerX, playerY, nav.toPlayer, time, nav);
+      // A marksman stops once in range, but only where it can see the player.
       const ranged = this.stats.ranged;
-      if (ranged?.holdAtRange && Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) <= ranged.range) {
+      if (ranged?.holdAtRange && this.direct && Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) <= ranged.range) {
         return this.setVelocity(0, 0);
       }
-      return this.chase(playerX, playerY);
+      return this.walk(playerX, playerY);
     }
 
     const d = Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY);
     // Two radii so a guard at the edge of its range doesn't flicker between chasing and returning.
     this.chasing = this.provoked || d <= guard.aggroRadius || (this.chasing && d <= guard.leashRadius);
-    if (this.chasing) return this.chase(playerX, playerY);
+    if (this.chasing) {
+      this.route(playerX, playerY, nav.toPlayer, time, nav);
+      return this.walk(playerX, playerY);
+    }
 
     if (Phaser.Math.Distance.Between(this.x, this.y, this.homeX, this.homeY) > 6) {
-      this.scene.physics.moveTo(this, this.homeX, this.homeY, this.stats.speed);
+      this.route(this.homeX, this.homeY, nav.towards({ x: this.homeX, y: this.homeY }), time, nav);
+      this.walk(this.homeX, this.homeY);
     } else {
       this.setVelocity(0, 0);
     }
@@ -108,8 +127,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /**
    * Angle to shoot at the player if this enemy is ranged, chasing, in range and off cooldown; otherwise null.
    * The first shot of a chase comes one full cooldown after it starts, so there's time to react.
+   * Buildings stop bullets, so it only fires with a clear line; otherwise it stays ready and fires as soon as it has one.
    */
-  shotAngle(time: number, playerX: number, playerY: number): number | null {
+  shotAngle(time: number, playerX: number, playerY: number, nav: Navigation): number | null {
     const ranged = this.stats.ranged;
     if (!ranged || this.hijacked) return null;
     if (time < this.stunnedUntil) {
@@ -124,6 +144,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (this.nextShotAt < 0) this.nextShotAt = time + ranged.cooldownMs;
     if (time < this.nextShotAt) return null;
     if (Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) > ranged.range) return null;
+    if (!nav.clearLine(this.x, this.y, playerX, playerY, SHOT_RADIUS)) return null;
     this.nextShotAt = time + ranged.cooldownMs;
     return Phaser.Math.Angle.Between(this.x, this.y, playerX, playerY);
   }
@@ -158,8 +179,37 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.provoked = true;
   }
 
-  private chase(targetX: number, targetY: number) {
-    this.scene.physics.moveTo(this, targetX, targetY, this.stats.speed);
+  /**
+   * Decides how to get to the target: straight at it when close with a clear line, otherwise along the flow field.
+   * Rethought every NAVIGATION.rethinkMs (a bit randomised so the swarm doesn't all think on the same frame),
+   * or as soon as the waypoint is reached.
+   */
+  private route(targetX: number, targetY: number, field: FlowField, time: number, nav: Navigation) {
+    // The hit circle (not the sprite) is what bumps into buildings, so the route is planned from it.
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    const { x, y } = body.center;
+    const atWaypoint = !this.direct && Phaser.Math.Distance.Between(x, y, this.waypointX, this.waypointY) < 8;
+    if (time < this.rethinkAt && !atWaypoint) return;
+    this.rethinkAt = time + NAVIGATION.rethinkMs * (0.75 + Math.random() * 0.5);
+    const r = body.halfWidth;
+    const close = Phaser.Math.Distance.Between(x, y, targetX, targetY) <= NAVIGATION.directRange;
+    this.direct = close && nav.clearLine(x, y, targetX, targetY, r);
+    if (this.direct) return;
+    const next = nav.waypoint(field, x, y, r, NAVIGATION.lookahead);
+    if (next) {
+      this.waypointX = next.x;
+      this.waypointY = next.y;
+    } else {
+      this.direct = true; // no route known (already on the target's tile): straight it is
+    }
+  }
+
+  /** Straight at the target (the sprite goes there, like the guard's post), or the hit circle along the route. */
+  private walk(targetX: number, targetY: number) {
+    if (this.direct) return this.scene.physics.moveTo(this, targetX, targetY, this.stats.speed);
+    const { x, y } = (this.body as Phaser.Physics.Arcade.Body).center;
+    const a = Math.atan2(this.waypointY - y, this.waypointX - x);
+    this.setVelocity(Math.cos(a) * this.stats.speed, Math.sin(a) * this.stats.speed);
   }
 
   /** Returns true if this hit killed the enemy. `flash: false` is for damage over time. */
@@ -182,6 +232,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       });
     }
     return false;
+  }
+
+  /** Quietly back to the pool: no death event, so no drop, no XP and no Virus spread. For stragglers left far behind. */
+  despawn() {
+    this.infection = null;
+    this.hijacked = false;
+    this.disableBody(true, true);
   }
 
   kill() {

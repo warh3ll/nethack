@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { CACHES } from '../data/balance';
+import { CACHES, LIGHTING } from '../data/balance';
+import { addGlow, lit } from '../systems/Lighting';
 
 const CYAN = 0x2ef2ff;
 
@@ -8,6 +9,7 @@ export class DataCache {
   private sprite: Phaser.GameObjects.Image;
   private ring: Phaser.GameObjects.Arc;
   private prompt: Phaser.GameObjects.Text;
+  private light: Phaser.GameObjects.Light | null;
 
   constructor(
     private scene: Phaser.Scene,
@@ -15,7 +17,8 @@ export class DataCache {
     readonly y: number,
   ) {
     this.ring = scene.add.circle(x, y, CACHES.ringRadius).setStrokeStyle(2, CYAN, 0.5).setDepth(1);
-    this.sprite = scene.add.image(x, y, 'data-cache').setDepth(3);
+    this.sprite = lit(scene.add.image(x, y, 'data-cache').setDepth(3));
+    this.light = addGlow(scene, x, y, LIGHTING.cache);
     this.prompt = scene.add
       .text(x, y - 40, '[E] open', { fontFamily: 'monospace', fontSize: '16px', color: '#2ef2ff', stroke: '#05060a', strokeThickness: 3 })
       .setOrigin(0.5)
@@ -40,6 +43,7 @@ export class DataCache {
     this.prompt.destroy();
     this.scene.tweens.killTweensOf(this.ring);
     this.sprite.destroy();
+    if (this.light) this.scene.lights.removeLight(this.light);
     this.ring.destroy();
   }
 }

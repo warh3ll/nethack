@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, ENEMIES, LEVELING, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
+import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -7,13 +7,23 @@ import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
 import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
+import { generateCity, pickSeed } from '../systems/City';
+import { Navigation } from '../systems/Navigation';
+import { pickSpawnPoints } from '../systems/SpawnPoints';
+import { Spawner } from '../systems/Spawner';
+import { Factories } from '../systems/Factories';
+import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
 import { DefensiveMatrixFx } from '../effects/DefensiveMatrixFx';
-import { Enemy, ENEMY_KILLED } from '../entities/Enemy';
+import { Enemy, ENEMY_KILLED, SHOT_RADIUS } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
+import { createCityProps } from '../entities/CityProps';
+import { createSubwayEntrance } from '../entities/SubwayEntrance';
+import { enableLighting } from '../systems/Lighting';
+import { Shadows } from '../systems/Shadows';
 import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
@@ -43,7 +53,14 @@ export class GameScene extends Phaser.Scene {
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private chips!: Phaser.GameObjects.Group;
+  /** The streets as enemies see them: blocked tiles and the flow field towards the player. */
+  private nav!: Navigation;
+  private spawner!: Spawner;
+  private factories!: Factories;
+  private shadows!: Shadows;
   private progression!: Progression;
+  /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
+  private citySeed = 0;
   private caches: DataCache[] = [];
   private weapons: (Weapon | Virus | SynapticOverload | EmpShock | Rootkit)[] = [];
   private hud!: Phaser.GameObjects.Text;
@@ -99,7 +116,12 @@ export class GameScene extends Phaser.Scene {
     this.progression = new Progression(STARTING_SKILL);
 
     createParallax(this);
-    createMap(this);
+    this.citySeed = pickSeed();
+    const city = generateCity(this.citySeed);
+    enableLighting(this);
+    createMap(this, city);
+    this.nav = new Navigation(city);
+    const objectiveDefs = generateRunObjectives(city);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
@@ -120,13 +142,14 @@ export class GameScene extends Phaser.Scene {
 
     // Data caches: scattered on the map. Not objectives, so the compass and marker ignore them.
     this.caches.forEach((c) => c.destroy());
-    this.caches = pickCachePositions().map((p) => new DataCache(this, p.x, p.y));
+    this.caches = pickCachePositions(city, objectivePoints(objectiveDefs)).map((p) => new DataCache(this, p.x, p.y));
 
     this.input.keyboard!.on('keydown-E', this.onOpenKey, this);
     this.events.once('shutdown', () => this.input.keyboard?.off('keydown-E', this.onOpenKey, this));
 
     const stats = this.progression.stats;
-    this.player = new Player(this, 0, 0, stats);
+    this.player = new Player(this, city.start.x, city.start.y, stats);
+    this.shadows = new Shadows(this, this.player, this.enemies);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
     this.cameras.main.roundPixels = true;
@@ -166,8 +189,20 @@ export class GameScene extends Phaser.Scene {
       if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.objectives.onPlayerHit();
     });
 
-    // Keep the swarm from collapsing into a single blob.
-    this.physics.add.collider(this.enemies, this.enemies);
+    // Keep the swarm from collapsing into a single blob. Factory cores stand on the sidewalk, so the swarm walks through them.
+    this.physics.add.collider(this.enemies, this.enemies, undefined, (a, b) => !(a as Enemy).stats.passable && !(b as Enemy).stats.passable);
+    // Buildings are solid for everyone who walks: after every physics step, anything overlapping one is pushed out.
+    // They stop bullets too, the player's and the enemies' alike.
+    const solidBuildings = () => {
+      this.nav.pushOut(this.player.body as Phaser.Physics.Arcade.Body);
+      for (const e of this.enemies.getChildren() as Enemy[]) if (e.active && !e.stats.stationary) this.nav.pushOut(e.body as Phaser.Physics.Arcade.Body);
+      for (const b of this.bullets.getChildren() as Bullet[]) if (b.active && this.nav.solidAt(b.x, b.y)) b.kill();
+      for (const b of this.enemyBullets.getChildren() as EnemyBullet[]) if (b.active && this.nav.solidAt(b.x, b.y)) b.kill();
+    };
+    // The world is cleared on shutdown before scene listeners run, so the listener is removed from the one it was added to.
+    const world = this.physics.world;
+    world.on('worldstep', solidBuildings);
+    this.events.once('shutdown', () => world.off('worldstep', solidBuildings));
 
     this.enemyBars = this.add.graphics().setDepth(6);
     new DamageNumbers(this);
@@ -201,8 +236,20 @@ export class GameScene extends Phaser.Scene {
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
       () => {
-        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, () => this.objectives.isComplete);
+        this.minimap = new Minimap(
+          this,
+          this.player,
+          this.skillBar,
+          () => this.objectives.mapPoints,
+          () => this.caches,
+          city.exit,
+          () => this.objectives.isComplete,
+          city,
+          () => this.factories.buildings,
+        );
       },
+      city,
+      objectiveDefs,
       this.caches,
       (x, y, type, hp) => {
         const enemy = this.enemies.get() as Enemy | null;
@@ -210,6 +257,28 @@ export class GameScene extends Phaser.Scene {
         return enemy;
       },
     );
+    const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
+    this.spawner = new Spawner(this, spawnPoints, (x, y, type) => (this.enemies.get() as Enemy | null)?.spawn(x, y, type));
+    this.factories = new Factories(
+      this,
+      city,
+      spawnPoints,
+      (x, y) => {
+        const core = this.enemies.get() as Enemy | null;
+        core?.spawn(x, y, 'factoryCore');
+        return core;
+      },
+      (point) => {
+        this.spawner.remove(point);
+        this.objectives.onFactoryDestroyed();
+      },
+    );
+    this.objectives.setFactorySource(() => this.factories.standing);
+    // The subway stations: the start plaza and the exit plaza. The exit's ring only opens once every objective is done.
+    createSubwayEntrance(this, city.start.x, city.start.y);
+    createSubwayEntrance(this, city.exit.x, city.exit.y);
+    // Last, since it uses the city's random stream after everything that stands on the map has been placed.
+    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit]);
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
@@ -253,12 +322,23 @@ export class GameScene extends Phaser.Scene {
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
     this.spawnEnemies(this.gameTime);
+    this.spawner.update(this.gameTime);
+    this.factories.update();
+    this.shadows.update();
+    this.nav.trackPlayer(this.player.x, this.player.y);
 
+    const recycle = SPAWN_POINTS.recycleDistance ** 2;
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active) continue;
-      e.act(this.player.x, this.player.y, this.gameTime);
-      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y);
+      // Swarm stragglers far behind go back to the pool. Guards, outposts and hijacked allies stay.
+      const far = (e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 > recycle;
+      if (far && !e.stats.guard && !e.stats.stationary && !e.hijacked) {
+        e.despawn();
+        continue;
+      }
+      e.act(this.player.x, this.player.y, this.gameTime, this.nav);
+      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
         (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range);
@@ -394,7 +474,7 @@ export class GameScene extends Phaser.Scene {
     if (behavior === 'synaptic') return new SynapticOverload(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'emp') return new EmpShock(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
     if (behavior === 'rootkit') return new Rootkit(skillId, this.player, this.enemies, stats, this, (e) => this.onSkillKill(e));
-    return new Weapon(skillId, this.player, this.enemies, this.bullets, stats);
+    return new Weapon(skillId, this.player, this.enemies, this.bullets, stats, (ax, ay, bx, by) => this.nav.clearLine(ax, ay, bx, by, SHOT_RADIUS));
   }
 
   /** An enemy was killed by a skill that doesn't go through the bullet overlap (Virus, Synaptic Overload). */
@@ -407,24 +487,13 @@ export class GameScene extends Phaser.Scene {
     if (time < this.nextSpawnAt) return;
     const seconds = this.elapsedMs / 1000;
     const interval = Math.max(SPAWNING.minIntervalMs, SPAWNING.startIntervalMs - seconds * SPAWNING.intervalDecayPerSecond);
-    // Hacking draws enemies in a bit faster.
-    this.nextSpawnAt = time + interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1);
+    // Hacking draws enemies in a bit faster; every factory destroyed slows the whole map down.
+    this.nextSpawnAt = time + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
 
-    const enemy = this.enemies.get() as Enemy | null;
-    if (!enemy) return; // at the cap
-
-    // Pick a point on a circle just outside the visible screen.
-    const cam = this.cameras.main;
-    const radius = Math.hypot(cam.width, cam.height) / 2 + SPAWNING.spawnMargin;
-    const angle = Math.random() * Math.PI * 2;
-    let dx = Math.cos(angle) * radius;
-    let dy = Math.sin(angle) * radius;
-    const type = this.rollEnemyType(seconds);
-    // A point past the wall is mirrored across the player: same distance, so still off screen, but on the map.
-    const limit = MAP.size / 2 - ENEMIES[type].radius;
-    if (Math.abs(this.player.x + dx) > limit) dx = -dx;
-    if (Math.abs(this.player.y + dy) > limit) dy = -dy;
-    enemy.spawn(this.player.x + dx, this.player.y + dy, type);
+    // Enemies behind a flashing door count towards the cap already.
+    if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
+    // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
+    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds));
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */
@@ -538,7 +607,7 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const quitting = this.confirmingQuit;
     const lost = `${this.credits} credit${this.credits === 1 ? '' : 's'}`;
-    const message = quitting ? `QUIT TO MENU?\n\nYou lose the ${lost}\nfrom this run.` : 'PAUSED\n\npress Esc or P\nor tap to resume';
+    const message = quitting ? `QUIT TO MENU?\n\nYou lose the ${lost}\nfrom this run.` : `PAUSED\n\npress Esc or P\nor tap to resume\n\nmap seed ${this.citySeed}`;
     const overlay = this.add
       .container(0, 0, [
         // Tap anywhere to resume (touch has no Esc key).

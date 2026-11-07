@@ -6,7 +6,7 @@ Living document. Henrik owns it and edits freely; Claude reads it before buildin
 
 ## 1. Pitch
 
-A cyberpunk survivors-like for the browser. Each game is a **run** made of 3-5 objectives. You roam the map hunting for objectives while auto-firing skills at hordes of enemies, picking up upgrades from data caches along the way, and hacking ICE-protected servers under fire.
+A cyberpunk survivors-like for the browser. Each game is a **run** made of 4-5 objectives. You roam the map hunting for objectives while auto-firing skills at hordes of enemies, picking up upgrades from data caches along the way, and hacking ICE-protected servers under fire.
 
 - **Working title:** Nethack
 - **One-line hook:** Corpos are ruining the life and livelihoods of regular people, make sure they suffer.
@@ -24,13 +24,13 @@ Rules to check every feature against. Edit these first.
 ## 3. Core loop
 
 1. Move around the map while skills fire automatically at enemies _(in game: arena only)_.
-2. Enemies spawn outside the screen and walk straight at the player; the spawn rate ramps up over the run _(in game)_.
-3. Explore the map to find the objectives. A compass always points to the closest unfinished objective (section 7). Somewhere out there is a camera pole that can be hacked for a minimap.
+2. Enemies come out of spawn points around the city (section 6) and head for the player along the streets; the spawn rate ramps up over the run _(in game)_.
+3. Explore the map to find the objectives. A compass always points to the closest unfinished objective (section 7). Somewhere out there are two camera poles; hacking either one gives a minimap.
 4. Along the way, find data caches scattered randomly on the map and open them for passive upgrades or damage skills (player can choose to not take the skill). Even permanent upgrades (very rare) or items.
 5. Players gain XP by killing enemies, leveling up provides upgrade choices (3 to begin, could possibly be raised by some upgrade). Player level has no cap.
 6. Complete the objectives (often by hacking, section 8). They can be done in any order.
 7. Finish all objectives to unlock extraction. The run clock is always visible.
-8. Extract: walk to the extraction point (the player's own 127.0.0.1 address) and type "log out" there.
+8. Extract: walk to the exit subway station (a different one from where the run started) and stay inside its ring for a 5 second countdown.
 9. In the main menu, players can buy items that make their next runs more fun or more badass.
 
 **Decided:** XP comes from kills, and level-ups offer upgrade choices. Caches are an additional source (section 5).
@@ -40,6 +40,7 @@ Rules to check every feature against. Edit these first.
 - One playable character in the prototype _(in game)_; more are TBD.
 - Movement: direct control.
 - Dash: A small dash can be performed with **Space**, items may upgrade cooldown, dash distance. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
+- **Hit area (decided):** the player's collision circle has an 18 px radius and enemies are circles sized to their sprites; both are centred on the sprite. Numbers in `balance.ts`.
 - Health with a brief invulnerability window after each hit, by default the player has a small health regen, this can be upgraded by passive skills and items.
 - Auto-firing skills can be gained through data caches or level up upgrades.
 - Pause with Escape or P _(in game)_.
@@ -95,15 +96,23 @@ Rules to check every feature against. Edit these first.
 
 - **Rootkit (decided):** a hijack picks a random enemy within range (never the Goon or outposts, anything with a health bar). The hijacked enemy turns reddish and stops hurting the player or being hit by the player's bullets. It chases the nearest other enemy and damages every enemy it touches (a tick every 0.3 s), then after its time runs out it dies and explodes, hurting everything around it. The next hijack starts one cooldown after the last hijacked enemy is gone, so at most one batch is active at a time. It never hurts the player. Damage is boosted by OverClock. A hijacked enemy is immune to stun. XP and kills from its hits and explosion go to the player. _(my call, change if you disagree; numbers are placeholders for Henrik's balancing)_
 
+- **Skills and buildings (decided):** buildings stop bullets, from the player and from enemies alike, and guns only fire with a clear line to the target. Hacking skills (Virus, Synaptic Overload, Rootkit, EMP Shock) reach through walls. This is meant to be a real build choice: bullets churn through a crowded street, while hacking clears the way from cover or while preparing a change of direction.
+
 TBD: level cap per skill (the player's own level is uncapped), evolutions/combinations.
 
 ## 6. Enemies
 
-- Move straight at the player; no pathfinding, by design.
+- **Movement (decided):** enemies follow one shared flow field, a map of walking distance from the player that every enemy reads. There is no per-enemy pathfinding, and with a clear line they head straight for the player (within 1200 px; further away they keep to the streets). Guards (the Goon) walk back to their post through the streets too. This replaces the earlier "no pathfinding" rule, which can't work with buildings. _(in game)_
+- **Spawn points (decided):** enemies come from two kinds of spawn point instead of a ring around the player. **Factories** are a few large landmark buildings that can be destroyed, so stronger players can thin out the spawning. **Small exits** (hatches, loading bays, subway exits and the like) are set into ordinary buildings and can't be destroyed. Factories flash a colour a couple of seconds beforehand, then release a small group. Small exits flash too, but more briefly, so enemies never just appear and players can read where they are coming from. Areas with few spawn points are natural quiet zones. Which spawn points are active depends on fixed distances in the world, never on the size of the player's screen, so a small window gets the same swarm as an ultrawide. A wider screen still shows more of the street, and that advantage stays: it isn't something to nerf (pillar 1). _(numbers are placeholders for Henrik's balancing)_
+  - **Active range (decided):** a small exit is active while the player is 500-1400 px away from it, a factory 300-2000 px. Nothing spawns right next to the player.
+  - **Flash (decided):** every spawn point flashes before its enemy steps out, factories for longer than small exits.
+  - **Quiet zones (decided):** the full spawn rate needs a few active spawn points nearby (factories count for more). With fewer, part of the spawns is skipped, so sparse parts of the city are calmer.
+  - **How many (decided):** 6 factories per map and about 100 small exits. Factories are never near the start, never cut by an alley, and no servers stand in front of them. Small exits keep clear of objectives and caches.
+  - **Stragglers (decided):** swarm enemies more than 2600 px from the player are quietly removed (no drop, no XP), so enemies left far behind can't use up the enemy cap. Guards, outposts and hijacked enemies stay.
 - Deal contact damage.
 - **Drone:** basic swarm enemy _(in game)_.
 - **Goon:** miniboss-like brute with more health and damage than normal mobs; guards a dossier in the Grab encryption key objective (section 7). Larger than other enemies, with a small health bar above him. Somewhat faster than a Drone, but clearly slower than the player. Once he is chasing he **shoots bullets towards the player** at intervals (the first shot comes one cooldown after the chase starts); his bullets hurt the player and are not blocked by other enemies. If the player takes the dossier while he is alive, he hunts the player regardless of distance until he is dead. Has an **aggro radius**: he stands guard until the player enters it, and returns to guarding if the player gets too far away. If the player shoots or damages him he chases regardless of distance.
-- **Marksman:** ranged swarm enemy _(in game)_. Walks toward the player only until it is within 350 px, then stops and shoots bullets that hurt the player. Has slightly less HP and damage than a Drone.
+- **Marksman:** ranged swarm enemy _(in game)_. Walks toward the player only until it is within 350 px and can see the player past the buildings, then stops and shoots bullets that hurt the player. Has slightly less HP and damage than a Drone.
 - **Spawn pool (decided):** all swarm enemies share one spawn pool. Each spawn rolls once, so a Marksman spawning means no Drone spawns in its place. Harder enemies have a chance that grows with the run clock. Marksman: 5% at the start, +1% every 30 seconds. Numbers live in `balance.ts` (`SPAWNING.specialEnemies`).
 - **Difficulty over time (decided):** more dangerous enemy types join as the run clock advances, using the spawn pool above. Only the Marksman is defined so far.
 - TBD: further enemy types, elites.
@@ -111,23 +120,36 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 
 ## 7. Run structure and objectives
 
-- A run is one attempt made of **3-5 objectives**, drawn at random per run; the same objective type can occur at most twice. They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another. There has to be at least one hacking objective, since it's kind of the point of the game.
-- The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
+- A run is one attempt made of **4-5 objectives**, drawn at random per run; the same objective type can occur at most twice (Destroy factories exactly once, see below). They are known and visible in the UI, and can be completed in **any order** (for now). All of them can be found from the start; none are locked behind another. There has to be at least one hacking objective, since it's kind of the point of the game.
+- The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The exit station's ring and countdown **open only once the final objective is done**; the compass and minimap then point to it. The station itself is a prop that is visible from the start, so a player can stumble on it early.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
-- **Camera pole (decided):** a pole with a small computer wired into the city's surveillance cameras. There is one per run, at a random spot at least 2000 px from the start. It is optional and not an objective: it isn't in the objective list, the compass ignores it, and players find it by exploring, like a data cache. It is a short three-step hack done within range of the pole:
+- **City (decided):** the map is a street-level city, randomly generated every run but always coherent. Wide avenues and streets divide it into rectangular blocks, each with a sidewalk and a building, or left open as a plaza. Streets always end on another street, so there are no dead ends. **Streets are wide**; alleys are rare, narrow cuts through a building that work as an escape and recuperation route. Buildings can't be entered. They are drawn as a flat roof with a south-facing front, and collision covers the whole drawn rectangle, so nothing can hide behind them.
+- **Camera poles (decided):** a pole with a small computer wired into the city's surveillance cameras. There are **two per run**, each at a random sidewalk spot at least 2000 px from the start and **at least 4000 px from each other**, so one is never far off. Hacking either one does it, and the other then switches off. They are optional and not objectives: they aren't in the objective list, the compass ignores them, and players find them by exploring, like a data cache. Each is a short three-step hack done within range of the pole:
   1. **Insert worm:** hold E for 2 seconds. Letting go, leaving range or taking damage restarts the hold.
   2. **Enter PIN:** four random digits, as in a server hack.
   3. **Type "reveal":** case-sensitive; a wrong key is just retyped.
 
-  Walking away only pauses the hack, and the player continues from the same step on returning. Like a server hack, the world slows while typing and enemies spawn faster during the hack (section 8). When it is done, a **minimap** appears in the bottom right corner and stays until the run ends. It shows the whole map, with small dots for unfinished objectives, unopened caches and the extraction point (only once it has been revealed), and the player as an arrow pointing the way they are moving. The minimap is never there from the start of a run, though a future item might change that.
+  Walking away only pauses the hack, and the player continues from the same step on returning. Like a server hack, the world slows while typing and enemies spawn faster during the hack (section 8). When it is done, a **minimap** appears in the bottom right corner and stays until the run ends. It shows the whole map, with small dots for unfinished objectives, unopened caches and the exit station (only once it has opened), and the player as an arrow pointing the way they are moving. The minimap is never there from the start of a run, though a future item might change that.
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
-- **Extraction (decided):** at the extraction point the player types "log out". When finished, a 3-2-1 countdown plays and then the run completes. **Leaving the extraction radius cancels the attempt** (typing and countdown reset); the player can move freely inside it and retry after re-entering. Taking damage does not cancel it.
+- **Extraction (decided):** the exit is a **subway station** on a different plaza from the start (a random plaza at least 3500 px from the start, or the farthest one if none is that far). There is no typing: once the last objective is done, the station's ring opens and **stepping into it starts a 5 second countdown**. The player must **stay inside the ring** for all of it; leaving cancels the countdown and it starts over on re-entering. Taking damage does not cancel it. The ring is small (100 px radius) so it takes a deliberate stand, often under fire.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
-- **Objective types:** the four below are defined so far. Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
+- **Objective types:** the five below are defined so far (Steal secrets is switched off for now). Other candidates still to decide: boss fight, defend a point, retrieve an item, eliminate a target.
   1. **Hack server:** the player approaches a server. A progress bar fills while the player performs the hack (see section 8). During that time the player is forced to interact 2-3 times by typing an IP address, a password, a very short code snippet or similar, to simulate hacking. Physically smacking the server might also be required.
   2. **Grab encryption key:** A Goon guards a dossier containing an encryption key (see Goon in section 6) _(in game)_. **Decided:** the player takes the key by walking onto the dossier; killing the Goon is not required, so luring him away works. If he is still alive when the dossier is taken, he hunts the player regardless of distance until he is dead.
-  3. **Steal secrets:** the player attacks a location with **2-4 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
-  4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **300-400px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
+  3. **Steal secrets (switched off for now):** the code stays in the game and can be brought back in `RUN_GENERATION.disabled`; Destroy factories took its place. The player attacks a location with **2-4 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
+  4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **500-800px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
+  5. **Destroy factories (decided):** every run has exactly one, and it counts towards the 4-5 objectives, so it is always required. The player has to destroy **2-3 factories** (picked at random per run), and **any** factories count, however the player gets to them. The objective list shows progress (e.g. 0/3). The compass points to the closest factory still standing. It has no spot of its own, since the factories (section 6) are already on the map, and it doesn't appear on the minimap.
+- **Servers stand against buildings (decided):** servers (Hack server and Connect servers) are placed next to a building, not out in the open street. The two servers in Connect servers stand along the same stretch of street, so the cable never crosses a building.
+- **Placement in the city (decided):** where everything in a run stands.
+  - **Start and extraction:** the player starts at a subway station in the middle of the start plaza. The extraction point is a second station on a different plaza (see Extraction above). Both show the same subway prop.
+  - **Servers:** on the sidewalk directly in front of a building's south front, never on a front facing an alley (alleys are for escaping). Both Connect servers stand in front of the same building, 500-800 px apart.
+  - **Grab encryption key and Steal secrets:** in the middle of a plaza (not the start plaza), since they need open ground and plazas have no buildings to put servers against.
+  - **First objective:** one objective is always close to the start. There isn't always a plaza that close, so it is whichever type has a spot within reach.
+  - **Spacing:** objectives keep their minimum distance from each other and from the start, Connect's second server included. If a map has no clear spot left, the run gets one objective fewer rather than two on top of each other. A map with no building front long enough simply gets no Connect servers.
+  - **Data caches:** anywhere off the road (sidewalk, plaza or alley), kept at least 400 px from objectives so E and typing never mean two things at once.
+  - **Camera poles:** on sidewalks, each at least 2000 px from the start and the two at least 4000 px apart.
+  - **Map edge:** the ring road along the wall keeps everything away from the edge, so there are no separate edge margins.
+  - **Seeds:** a seed (`?seed=` in the URL, shown on the pause screen) replays the whole run layout: streets, objectives, factories to destroy, the exit station, caches and the camera poles.
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
 - **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
@@ -168,9 +190,9 @@ Some objectives require hacking the ICE protecting a server or objective.
 ## 10. Setting, art and audio
 
 - **Setting:** cyberpunk.
-- **Art direction:** TBD. Textures are generated or loaded in `BootScene.ts`; new assets can replace them under the same texture keys.
+- **Art direction:** TBD. The city is shown at night _(in game, first iteration)_: a dim ambient colour over everything, with coloured lights that stand out (street lamps, servers, factories, camera poles, subway stations; a damaged factory turns red, a hacked server green). It must never get dark enough to hide enemies (pillar 1). Colour, radius and intensity of every light type, and the overall brightness, live in `balance.ts` (`LIGHTING`). The player and every enemy cast a still blob shadow (`SHADOWS`). Roofs have at most one antenna and one skylight each. Textures are generated or loaded in `BootScene.ts`; new assets can replace them under the same texture keys.
 - **Audio:** TBD.
-- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The minimap appears only after the camera pole is hacked (section 7). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
+- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The minimap appears only after a camera pole is hacked (section 7). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
 
 ## 11. Scope
 
@@ -193,11 +215,26 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 **Objectives and run**
 
-- Does the compass show distance as well as direction? The answer reads "No, just distance", which is ambiguous: should it show only the distance (no arrow), or only the arrow (no distance)? Today it shows both. Keep as today.
+- Should the Destroy factories objective also show on the minimap (e.g. dots for the factories still standing)? Today the minimap skips it.
+- Should the exit station stay visible from the start, or only appear once it opens? Today the prop is always there and only the ring, compass and minimap wait.
+- Players have trouble finding camera poles (nothing points to them and each is 2000 px or more from the start). Should they get a hint, e.g. a faint marker on the compass, a glow visible from far away, or nothing?
+- Steal secrets is switched off. Bring it back as a later objective, rework it, or drop it?
+- Other objective candidates still open: boss fight, defend a point, retrieve an item, eliminate a target.
+- Should difficulty also scale with objectives completed (section 7, TBD)?
+
+**Balance**
+
+- The game feels a bit easier since the hit circles were halved to match the sprites (the old ones were twice as large). Is that wanted, or should enemy damage, speed or counts go up to compensate?
+
+**Art and feel**
+
+- Real subway station art (the current prop is generated placeholder art in `BootScene.ts`).
+- Lighting, next steps: lit windows and neon signs, lights on pickups, muzzle flashes, and tuning the darkness. How dark is too dark?
+- Districts and real building art, which wait on the art.
 
 **Economy and meta**
 
-- Extraction bonus: how many credits? Fine to leave until the shop prices exist; It lives in `balance.ts` and you tune it. 15 credits for successful extraction for now.
+- Extraction bonus (decided): 15 credits for now, in `balance.ts` (`extractionBonus`); revisit once shop prices exist.
 
 ## 14. Difficulty settings
 

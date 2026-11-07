@@ -20,7 +20,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Skills are data: per-level stat rows read via `getSkillStats(id, level)`.
 - Passive stat bonuses are re-summed from scratch on every change, never adjusted incrementally.
 - Object pooling from day one: enemies and bullets come from Phaser groups (`group.get()`), and are disabled, not destroyed.
-- Enemies move straight at the player; no pathfinding by design.
+- Enemies navigate with one shared flow field (walking distance from the player); no per-enemy pathfinding.
 - Prototype scope: one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills total (7 damage skills, 5 passives).
 
 ## Working style
