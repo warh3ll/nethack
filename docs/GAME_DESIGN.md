@@ -118,7 +118,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 - The map is explored freely; the player must find where the objectives are. A **compass** always points to the closest unfinished objective. The extraction point is **revealed only once the final objective is done**; the compass then points to it.
 - **Map (decided, tentative):** one large map of about 10000x10000 px, to be tuned once we can feel the walk time. Target is roughly 60-90 s edge to edge at normal player speed. The edge is a **visible wall**; textures to make it clearer come later.
 - **City (decided):** the map is a street-level city, randomly generated every run but always coherent. Wide avenues and streets divide it into rectangular blocks, each with a sidewalk and a building, or left open as a plaza. Streets always end on another street, so there are no dead ends. **Streets are wide**; alleys are rare, narrow cuts through a building that work as an escape and recuperation route. Buildings can't be entered. They are drawn as a flat roof with a south-facing front, and collision covers the whole drawn rectangle, so nothing can hide behind them.
-- **Camera pole (decided):** a pole with a small computer wired into the city's surveillance cameras. There is one per run, at a random spot at least 2000 px from the start. It is optional and not an objective: it isn't in the objective list, the compass ignores it, and players find it by exploring, like a data cache. It is a short three-step hack done within range of the pole:
+- **Camera pole (decided):** a pole with a small computer wired into the city's surveillance cameras. There is one per run, at a random sidewalk spot at least 2000 px from the start. It is optional and not an objective: it isn't in the objective list, the compass ignores it, and players find it by exploring, like a data cache. It is a short three-step hack done within range of the pole:
   1. **Insert worm:** hold E for 2 seconds. Letting go, leaving range or taking damage restarts the hold.
   2. **Enter PIN:** four random digits, as in a server hack.
   3. **Type "reveal":** case-sensitive; a wrong key is just retyped.
@@ -133,6 +133,16 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
   3. **Steal secrets:** the player attacks a location with **2-4 outposts** (destructible structures). The more outposts, the less HP each has, but not by much. The outposts also spawn normal drones when the player is close (they do not shoot, for now). Once all of them are down, the player can steal company secrets from within (an object the player picks up).
   4. **Connect servers (decided):** the player connects two servers with a cable. Press **E** at the first server to grab the cable, then walk to another server **500-800px** away. A line (ideally a physical, cable-like one) is drawn between the player and the server the cable is attached to. At the second server, **hold E for 2.5 seconds** to attach it. **Any damage taken resets the attach action.**
 - **Servers stand against buildings (decided):** servers (Hack server and Connect servers) are placed next to a building, not out in the open street. The two servers in Connect servers stand along the same stretch of street, so the cable never crosses a building.
+- **Placement in the city (decided):** where everything in a run stands.
+  - **Start and extraction:** the player starts in the middle of the start plaza, and the extraction point is in the same spot.
+  - **Servers:** on the sidewalk directly in front of a building's south front, never on a front facing an alley (alleys are for escaping). Both Connect servers stand in front of the same building, 500-800 px apart.
+  - **Grab encryption key and Steal secrets:** in the middle of a plaza (not the start plaza), since they need open ground and plazas have no buildings to put servers against.
+  - **First objective:** one objective is always close to the start. There isn't always a plaza that close, so it is whichever type has a spot within reach.
+  - **Spacing:** objectives keep their minimum distance from each other and from the start, Connect's second server included. If a map has no clear spot left, the run gets one objective fewer rather than two on top of each other. A map with no building front long enough simply gets no Connect servers.
+  - **Data caches:** anywhere off the road (sidewalk, plaza or alley), kept at least 400 px from objectives so E and typing never mean two things at once.
+  - **Camera pole:** on a sidewalk, at least 2000 px from the start.
+  - **Map edge:** the ring road along the wall keeps everything away from the edge, so there are no separate edge margins.
+  - **Seeds:** a seed (`?seed=` in the URL, shown on the pause screen) replays the whole run layout: streets, objectives, caches and the camera pole.
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
 - **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
