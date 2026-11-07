@@ -20,6 +20,7 @@ import { DefensiveMatrixFx } from '../effects/DefensiveMatrixFx';
 import { Enemy, ENEMY_KILLED, SHOT_RADIUS } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
+import { createCityProps } from '../entities/CityProps';
 import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
@@ -229,7 +230,17 @@ export class GameScene extends Phaser.Scene {
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
       () => {
-        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, city.start, () => this.objectives.isComplete);
+        this.minimap = new Minimap(
+          this,
+          this.player,
+          this.skillBar,
+          () => this.objectives.mapPoints,
+          () => this.caches,
+          city.start,
+          () => this.objectives.isComplete,
+          city,
+          () => this.factories.buildings,
+        );
       },
       city,
       objectiveDefs,
@@ -253,6 +264,8 @@ export class GameScene extends Phaser.Scene {
       },
       (point) => this.spawner.remove(point),
     );
+    // Last, since it uses the city's random stream after everything that stands on the map has been placed.
+    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, this.objectives.pole, city.start]);
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 

@@ -61,7 +61,7 @@ export class Objectives {
   private counting = false;
   /** The optional camera pole hack: not an objective, but it shares the keys and the hack rules. */
   private cameraHack = new CameraHack();
-  private pole: CameraPole;
+  readonly pole: CameraPole;
   private mapRevealed = false;
   /** Where the extraction point opens. */
   private start: Point;

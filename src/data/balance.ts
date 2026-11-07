@@ -72,6 +72,11 @@ export const MINIMAP = {
   fadeInMs: 400,
   backgroundColor: 0x05060a,
   backgroundAlpha: 0.75,
+  /** The street layout: roads are the background showing through. */
+  buildingColor: 0x2a3350,
+  plazaColor: 0x1a2038,
+  factoryColor: 0x8a5420,
+  factoryDownColor: 0x3a3a42,
   borderColor: 0x2ef2ff,
   objectiveColor: 0xffd23e,
   cacheColor: 0x2ef2ff,

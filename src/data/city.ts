@@ -59,6 +59,22 @@ export const CITY = {
   roofDetailChance: 0.05,
   /** Chance that a street-level front tile is a variant (door, shopfront, sign...). */
   frontVariantChance: 0.25,
+
+  /** A street lamp every this many tiles along a block's sidewalk. Props are only for looks: nothing bumps into them. */
+  lampSpacing: 7,
+  /** Chance that any other sidewalk or plaza tile holds a prop (bin, bench, hydrant...). */
+  propChance: 0.04,
+  /** No prop this close to an objective, a cache, the camera pole, a spawn point or the start, in px, so they stay easy to see. */
+  propClearance: 120,
+}
+
+/** Where each prop sits in the props sheet (public/assets/city/props.png), as a tile index: row * 8 + column. */
+export const PROP_TILES = {
+  lamp: 0,
+  /** Scattered on sidewalks. */
+  sidewalk: [1, 2, 3, 5, 6, 7],
+  /** Scattered on plazas. */
+  plaza: [1, 3, 4],
 }
 
 /** Where each piece sits in the sheet, as a tile index: row * 8 + column. Sheets are 8 tiles wide and 4 tall. */

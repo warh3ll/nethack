@@ -23,6 +23,7 @@ export class BootScene extends Phaser.Scene {
     this.load.setPath('assets/city/');
     this.load.image('city-ground', 'ground.png');
     this.load.image('city-building', 'building-1.png');
+    this.load.image('city-props', 'props.png');
     this.load.setPath('assets/server/');
     this.load.spritesheet('server', 'server.png', { frameWidth: 64, frameHeight: 64 });
   }

@@ -34,6 +34,7 @@ function groundTiles(city: City): number[][] {
       return cell === CELL.plaza ? GROUND_TILES.plaza : GROUND_TILES.road;
     }),
   );
+  markRoads(city, tiles);
   // Every block has a kerb, plazas included. A wider sidewalk only needs the extra rows filled in.
   for (const b of city.blocks) {
     for (let y = 0; y < b.h; y++) {
@@ -44,6 +45,53 @@ function groundTiles(city: City): number[][] {
     }
   }
   return tiles;
+}
+
+/**
+ * Lane dashes down the middle of every road, and a crosswalk across it where it meets a junction.
+ * A road tile belongs to a horizontal road when the road is narrow across it (up and down) and long along it.
+ * Where both directions run long, two roads cross: the junction itself stays plain.
+ */
+function markRoads(city: City, tiles: number[][]) {
+  const n = city.size;
+  const road = (x: number, y: number) => x >= 0 && y >= 0 && x < n && y < n && city.cells[y * n + x] === CELL.road;
+  // Length of the road run through every tile, and where in that run the tile sits, per direction.
+  const runH = new Int16Array(n * n);
+  const atH = new Int16Array(n * n);
+  const runV = new Int16Array(n * n);
+  const atV = new Int16Array(n * n);
+  const measure = (index: (along: number, across: number) => number, run: Int16Array, at: Int16Array) => {
+    for (let across = 0; across < n; across++) {
+      let start = 0;
+      for (let along = 0; along <= n; along++) {
+        const i = along < n ? index(along, across) : -1;
+        if (i >= 0 && city.cells[i] === CELL.road) continue;
+        for (let k = start; k < along; k++) {
+          run[index(k, across)] = along - start;
+          at[index(k, across)] = k - start;
+        }
+        start = along + 1;
+      }
+    }
+  };
+  measure((x, y) => y * n + x, runH, atH);
+  measure((y, x) => y * n + x, runV, atV);
+  const widest = Math.max(CITY.avenueWidth, CITY.streetWidth);
+  const horizontal = (x: number, y: number) => road(x, y) && runV[y * n + x] <= widest && runH[y * n + x] > widest;
+  const vertical = (x: number, y: number) => road(x, y) && runH[y * n + x] <= widest && runV[y * n + x] > widest;
+  const junction = (x: number, y: number) => road(x, y) && runH[y * n + x] > widest && runV[y * n + x] > widest;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const i = y * n + x;
+      if (horizontal(x, y)) {
+        if (junction(x - 1, y) || junction(x + 1, y)) tiles[y][x] = GROUND_TILES.crosswalkV;
+        else if (atV[i] === Math.floor(runV[i] / 2)) tiles[y][x] = GROUND_TILES.laneH;
+      } else if (vertical(x, y)) {
+        if (junction(x, y - 1) || junction(x, y + 1)) tiles[y][x] = GROUND_TILES.crosswalkH;
+        else if (atH[i] === Math.floor(runH[i] / 2)) tiles[y][x] = GROUND_TILES.laneV;
+      }
+    }
+  }
 }
 
 function buildingTiles(city: City): number[][] {

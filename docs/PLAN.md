@@ -91,12 +91,12 @@ Replaces the open map with a generated city. In this order, each step leaves the
 - [x] Collision, flow field and spawn points together: solid buildings (anything overlapping one is pushed out after every physics step, `Navigation.pushOut`), enemies follow one shared flow field and walk straight at the player when they can see it (`systems/Navigation.ts`, `NAVIGATION` in `balance.ts`), 6 factories and about 100 small exits replace the spawn ring (`systems/SpawnPoints.ts`, `systems/Spawner.ts`, counts in `city.ts`). A spawn point is active by world distance only (`SPAWN_POINTS` in `balance.ts`), and fewer active points nearby means some spawns are skipped, so sparse areas are quieter. Every spawn point flashes before its enemy steps out (factories longer). Swarm enemies farther than 2600 px are recycled. A guard (the Goon) walks back to his post through the streets. Factories and exits are placeholder drawings until the art exists
 - [x] Destructible factories that release small groups after their flash; destroying one lowers the overall spawn rate. A factory flashes for 2 s and then lets out 3-5 enemies side by side, each rolling its own type. Its core stands on the sidewalk by the door and is shot like an outpost (`factoryCore` in `ENEMIES`); below half hp the factory shows cracks and a red core, and once destroyed it goes dark (OFFLINE), never spawns again and every factory down takes 8% off the spawn rate of the whole map (`SPAWN_POINTS` in `balance.ts`, `systems/Factories.ts`). Caches and the camera pole keep off factory fronts
 - [x] Shots: buildings stop bullets, guns need a clear line, Marksman and Goon too; hacking skills reach through walls. Any bullet inside a building dies after the physics step it got there (player and enemy bullets alike). Guns skip targets they can't hit and take the best one they can; the Marksman and Goon hold their shot until they see the player, then fire at once. Virus, Synaptic Overload, EMP Shock and Rootkit are unchanged
-- [ ] Dressing: lane markings, crosswalks, non-solid props, street layout on the minimap
+- [x] Dressing: lane markings, crosswalks, non-solid props, street layout on the minimap. Lane dashes run down the middle of every road and a crosswalk crosses it where it meets a junction (worked out from the road layout in `CityView.ts`). Lamps line every sidewalk and plaza edge, with the odd bin, bench, hydrant and so on (`entities/CityProps.ts`, numbers and sheet positions in `city.ts`); props never block anything and keep clear of objectives, caches, spawn points and the pole. The minimap draws buildings, plazas and factories under the dots, and a factory greys out there once destroyed
 - [ ] Districts for variety, and real building art (do together with "Real art and texture swap" in G)
 
 #### Art to make (Henrik)
 
-All at the same scale as the floor, player and drones: 32x32 px tiles, shown at 2x in game (64x64). Neighbouring tiles must line up at the edges. Placeholders are in `public/assets/city/` (`ground.png`, `building-1.png`, 256x128 px): paint over them and keep the file names. `docs/art/` has the same sheets enlarged, with every tile labelled; those are only a guide, the game does not load them. Start with one building style and the ground sheet; the game runs on placeholders until then.
+All at the same scale as the floor, player and drones: 32x32 px tiles, shown at 2x in game (64x64). Neighbouring tiles must line up at the edges. Placeholders are in `public/assets/city/` (`ground.png`, `building-1.png`, 256x128 px, and `props.png`): paint over them and keep the file names. `docs/art/` has the same sheets enlarged, with every tile labelled; those are only a guide, the game does not load them. Start with one building style and the ground sheet; the game runs on placeholders until then.
 
 **Building style sheet** (one per style, about 25 tiles, fits an 8x4 sheet of 256x128 px):
 
@@ -116,6 +116,10 @@ Only the south side gets a front. The north, east and west sides just show the r
 - [ ] Sidewalk, 9 pieces: 4 corners, 4 curb edges and a centre
 - [ ] Alley surface
 - [ ] Plaza surface
+
+**Props sheet** (`props.png`, 256x64 px, 8x2 tiles; the guide is `docs/art/city-props-template.png`):
+
+- [ ] Lamp, bin, hydrant, bench, planter, vending machine, bollard, cone (one tile each, the second row is spare for more)
 
 **Spawn points:**
 
