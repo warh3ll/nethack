@@ -13,8 +13,12 @@ export class ExtractionPoint {
   private countdown: Phaser.GameObjects.Text;
   private errorUntil = 0;
 
-  constructor(private scene: Phaser.Scene) {
-    const { x, y, radius } = EXTRACTION;
+  constructor(
+    private scene: Phaser.Scene,
+    private x: number,
+    private y: number,
+  ) {
+    const { radius } = EXTRACTION;
     const ring = scene.add.graphics().setDepth(1);
     ring.fillStyle(GREEN, 0.07).fillCircle(x, y, radius);
     ring.lineStyle(3, GREEN, 0.8).strokeCircle(x, y, radius);
@@ -44,8 +48,8 @@ export class ExtractionPoint {
 
   /** `seconds` is the countdown left (0 = not counting). The text prompt shows only while not counting. */
   render(logoutText: string, typedCount: number, seconds: number) {
-    const { x, y, radius } = EXTRACTION;
-    const py = y - radius - 20;
+    const { x, y } = this;
+    const py = y - EXTRACTION.radius - 20;
     if (seconds > 0) {
       this.title.setText('');
       this.base.setText('');

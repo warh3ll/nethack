@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { MAP, MINIMAP } from '../data/balance';
-import { EXTRACTION } from '../data/objectives';
 import type { Player } from '../entities/Player';
 import type { SkillBar } from './SkillBar';
 
@@ -21,6 +20,7 @@ export class Minimap {
     private skillBar: SkillBar,
     private objectives: () => Point[],
     private caches: () => Point[],
+    private extraction: Point,
     /** True once the extraction point is open; it stays off the map until then. */
     private extractionOpen: () => boolean,
   ) {
@@ -46,7 +46,7 @@ export class Minimap {
     };
     for (const c of this.caches()) dot(c, MINIMAP.cacheColor);
     for (const o of this.objectives()) dot(o, MINIMAP.objectiveColor);
-    if (this.extractionOpen()) dot(EXTRACTION, MINIMAP.extractionColor);
+    if (this.extractionOpen()) dot(this.extraction, MINIMAP.extractionColor);
 
     const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
     if (v.lengthSq() > 1) this.heading = Math.atan2(v.y, v.x);

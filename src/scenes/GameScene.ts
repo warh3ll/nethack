@@ -8,6 +8,7 @@ import { DataCache } from '../entities/DataCache';
 import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
 import { generateCity, pickSeed } from '../systems/City';
+import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
 import { DamageNumbers } from '../effects/DamageNumbers';
@@ -103,7 +104,9 @@ export class GameScene extends Phaser.Scene {
 
     createParallax(this);
     this.citySeed = pickSeed();
-    createMap(this, generateCity(this.citySeed));
+    const city = generateCity(this.citySeed);
+    createMap(this, city);
+    const objectiveDefs = generateRunObjectives(city);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
     this.enemies = this.physics.add.group({ classType: Enemy, maxSize: SPAWNING.maxEnemies });
@@ -124,13 +127,13 @@ export class GameScene extends Phaser.Scene {
 
     // Data caches: scattered on the map. Not objectives, so the compass and marker ignore them.
     this.caches.forEach((c) => c.destroy());
-    this.caches = pickCachePositions().map((p) => new DataCache(this, p.x, p.y));
+    this.caches = pickCachePositions(city, objectivePoints(objectiveDefs)).map((p) => new DataCache(this, p.x, p.y));
 
     this.input.keyboard!.on('keydown-E', this.onOpenKey, this);
     this.events.once('shutdown', () => this.input.keyboard?.off('keydown-E', this.onOpenKey, this));
 
     const stats = this.progression.stats;
-    this.player = new Player(this, 0, 0, stats);
+    this.player = new Player(this, city.start.x, city.start.y, stats);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
     this.cameras.main.roundPixels = true;
@@ -205,8 +208,10 @@ export class GameScene extends Phaser.Scene {
       () => !this.gameOver && !this.paused && !this.levelingUp,
       () => this.endRun(true),
       () => {
-        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, () => this.objectives.isComplete);
+        this.minimap = new Minimap(this, this.player, this.skillBar, () => this.objectives.mapPoints, () => this.caches, city.start, () => this.objectives.isComplete);
       },
+      city,
+      objectiveDefs,
       this.caches,
       (x, y, type, hp) => {
         const enemy = this.enemies.get() as Enemy | null;

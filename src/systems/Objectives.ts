@@ -9,9 +9,9 @@ import { ExtractionPoint } from '../entities/ExtractionPoint';
 import { HackServer } from '../entities/HackServer';
 import type { Player } from '../entities/Player';
 import { CameraHack, pickPolePosition } from './CameraHack';
+import type { City, Point } from './City';
 import { Connect } from './Connect';
 import { Hack } from './Hack';
-import { generateRunObjectives } from './RunObjectives';
 
 export interface ObjectiveEntry {
   def: ObjectiveDef;
@@ -46,17 +46,7 @@ export type EnemySpawner = (x: number, y: number, type: string, hp?: number) => 
  * and "connect servers" (carry a cable from one server to another, hold E to attach).
  */
 export class Objectives {
-  readonly entries: ObjectiveEntry[] = generateRunObjectives().map((def) => ({
-    def,
-    hack: def.type === 'hackServer' ? new Hack() : null,
-    server: null,
-    dossier: null,
-    goon: null,
-    connect: def.type === 'connectServers' ? new Connect() : null,
-    cable: null,
-    outposts: null,
-    done: false,
-  }));
+  readonly entries: ObjectiveEntry[];
   /** E key for the cable. Not captured, so the browser keeps its shortcuts. */
   private eKey: Phaser.Input.Keyboard.Key;
   /** The server the player is currently hacking, or null. */
@@ -73,6 +63,8 @@ export class Objectives {
   private cameraHack = new CameraHack();
   private pole: CameraPole;
   private mapRevealed = false;
+  /** Where the extraction point opens. */
+  private start: Point;
 
   constructor(
     scene: Phaser.Scene,
@@ -81,20 +73,32 @@ export class Objectives {
     private acceptingInput: () => boolean,
     private onExtracted: () => void,
     private onMapRevealed: () => void,
+    city: City,
+    defs: ObjectiveDef[],
     /** Spots the camera pole keeps clear of, besides the objectives. */
-    caches: { x: number; y: number }[],
+    caches: Point[],
     private spawnEnemy: EnemySpawner,
   ) {
     this.scene = scene;
+    this.start = city.start;
+    this.entries = defs.map((def) => ({
+      def,
+      hack: def.type === 'hackServer' ? new Hack() : null,
+      server: null,
+      dossier: null,
+      goon: null,
+      connect: def.type === 'connectServers' ? new Connect() : null,
+      cable: null,
+      outposts: null,
+      done: false,
+    }));
     this.eKey = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E, false);
     for (const e of this.entries) {
       const { x, y } = e.def;
       if (e.def.type === 'hackServer') {
         e.server = new HackServer(scene, x, y);
       } else if (e.def.type === 'connectServers') {
-        const gap = Phaser.Math.FloatBetween(CONNECT_SERVERS.gap.min, CONNECT_SERVERS.gap.max);
-        const angle = Math.random() * Math.PI * 2;
-        e.cable = new CableServers(scene, { x, y }, { x: x + Math.cos(angle) * gap, y: y + Math.sin(angle) * gap });
+        e.cable = new CableServers(scene, { x, y }, e.def.partner!);
       } else if (e.def.type === 'stealSecrets') {
         e.outposts = this.spawnOutposts(x, y);
       } else {
@@ -102,7 +106,7 @@ export class Objectives {
         e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
       }
     }
-    const pole = pickPolePosition([...this.mapPoints, ...caches]);
+    const pole = pickPolePosition(city, [...this.mapPoints, ...caches]);
     this.pole = new CameraPole(scene, pole.x, pole.y);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => {
@@ -164,7 +168,7 @@ export class Objectives {
 
   /** World position the compass points at: the closest unfinished objective, or the extraction point once all are done. */
   get target() {
-    if (this.isComplete) return { x: EXTRACTION.x, y: EXTRACTION.y };
+    if (this.isComplete) return this.start;
     let best: ObjectiveEntry | null = null;
     let bestDist = Infinity;
     for (const e of this.entries) {
@@ -222,7 +226,7 @@ export class Objectives {
   }
 
   private onExtraction() {
-    return Phaser.Math.Distance.Between(this.player.x, this.player.y, EXTRACTION.x, EXTRACTION.y) <= EXTRACTION.radius;
+    return Phaser.Math.Distance.Between(this.player.x, this.player.y, this.start.x, this.start.y) <= EXTRACTION.radius;
   }
 
   /** Call when the player took damage. */
@@ -349,7 +353,7 @@ export class Objectives {
       this.engaged = null;
       this.player.typingLock = false;
     }
-    if (this.isComplete) this.extraction = new ExtractionPoint(this.scene);
+    if (this.isComplete) this.extraction = new ExtractionPoint(this.scene, this.start.x, this.start.y);
   }
 
   private onKey(ev: KeyboardEvent) {

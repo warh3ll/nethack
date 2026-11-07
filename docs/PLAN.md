@@ -87,7 +87,7 @@ Candidates from the design doc: boss fight, defend a point, retrieve an item, el
 Replaces the open map with a generated city. In this order, each step leaves the game playable. Prototype numbers so far: 64 px tiles, map 10240 px, avenues 576 px and streets 448 px between buildings, alleys 128 px.
 
 - [x] Generator and look: seeded city data, placeholder streets and buildings, no collision yet. `systems/City.ts`, `entities/CityView.ts`, numbers in `data/city.ts`. Reserved plazas and a fixed number of alleys are in the generator already. `?seed=123` in the URL replays a map, and the pause screen shows the seed
-- [ ] Placement: player start and extraction on the start plaza, objectives on the reserved plazas, caches and camera pole on valid spots, servers against buildings
+- [x] Placement: player start and extraction in the middle of the start plaza, Grab encryption key and Steal secrets on the reserved plazas, servers on the sidewalk in front of a building (`systems/CitySpots.ts`), caches off the road, camera pole on a sidewalk. A seed now replays the whole layout, not just the streets
 - [ ] Collision, flow field and spawn points together: solid buildings, enemies navigate by flow field, factories and small exits replace the spawn ring, spawn distances are fixed world distances that don't depend on screen size, far-behind enemies are recycled so stragglers can't fill the enemy cap
 - [ ] Destructible factories that release small groups after a colour flash; destroying one lowers the overall spawn rate. Small exits get a shorter flash
 - [ ] Shots: buildings stop bullets, guns need a clear line, Marksman and Goon too; hacking skills reach through walls

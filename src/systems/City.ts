@@ -4,6 +4,12 @@ import { CITY } from '../data/city';
 /** What a tile of the city is. */
 export const CELL = { road: 0, sidewalk: 1, alley: 2, plaza: 3, building: 4 } as const;
 
+/** A position in the world, in pixels. The middle of the map is (0, 0). */
+export interface Point {
+  x: number;
+  y: number;
+}
+
 /** A rectangle in tiles. Tile (0, 0) is the top left corner of the map. */
 export interface Rect {
   x: number;
@@ -25,9 +31,17 @@ export interface City {
   /** One CELL per tile, row by row. */
   cells: Uint8Array;
   blocks: Block[];
-  /** Same random stream as the layout, so the look of a map is part of its seed too. */
+  /** The middle of the start plaza: where the player starts and extracts. */
+  start: Point;
+  /** Same random stream as the layout, so the look of a map and what stands on it are part of its seed too. */
   random: () => number;
+  /** A random whole number, both ends included. */
+  between: (min: number, max: number) => number;
+  shuffled: <T>(list: T[]) => T[];
 }
+
+/** Where a tile's top left corner is in the world. Takes fractions too, so x + 0.5 is the middle of a tile. */
+export const tileToWorld = (tile: number) => tile * CITY.tileSize - MAP.size / 2;
 
 /** A seed for a new run: `?seed=123` in the URL replays a map, otherwise a random one. */
 export function pickSeed(): number {
@@ -107,7 +121,7 @@ export function generateCity(seed: number): City {
   }
   for (const a of alleys) fill(a, CELL.alley);
 
-  return { seed, size, cells, blocks, random };
+  return { seed, size, cells, blocks, start: { x: tileToWorld(centreX(start)), y: tileToWorld(centreY(start)) }, random, between, shuffled };
 }
 
 /** Avenues cut the map into large rectangles, and side streets cut those down to block size. */

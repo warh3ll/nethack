@@ -5,7 +5,7 @@ import { createCityView } from './CityView';
 
 const HALF = MAP.size / 2;
 
-/** True if the point is on the playable map. The map is centred on the player's start at (0, 0). */
+/** True if the point is on the playable map. The map is centred on (0, 0). */
 export function insideMap(x: number, y: number) {
   return Math.abs(x) <= HALF && Math.abs(y) <= HALF;
 }

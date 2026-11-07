@@ -79,7 +79,7 @@ export const MINIMAP = {
   playerColor: 0xffffff,
 }
 
-/** The map is a square centred on the player's start. Straight edge to edge takes size / PLAYER.moveSpeed seconds (51 s); streets add about 30%. */
+/** The map is a square centred on (0, 0). Straight edge to edge takes size / PLAYER.moveSpeed seconds (51 s); streets add about 30%. */
 export const MAP = {
   /** A multiple of CITY.tileSize, since the city is built from whole tiles. */
   size: 10240,
@@ -269,10 +269,10 @@ export const CACHES = {
   count: { min: 6, max: 10 },
   /** No cache this close to the start. */
   minDistFromStart: 600,
-  /** Caches stay at least this far from the map edge. */
-  edgeMargin: 300,
   /** No two caches closer than this. */
   minSpacing: 1000,
+  /** No cache this close to an objective, so E and typing can't mean two things at once. Has to stay above HACK.range + openRadius. */
+  objectiveSpacing: 400,
   /** Radius of the pulsing ring drawn around a cache. */
   ringRadius: 40,
   /** Press E (or tap the prompt) within this distance of a cache to open it. */

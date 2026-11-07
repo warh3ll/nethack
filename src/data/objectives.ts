@@ -8,15 +8,16 @@ export interface ObjectiveDef {
   type: 'hackServer' | 'encryptionKey' | 'connectServers' | 'stealSecrets'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
-  /** World position, relative to the player's start (0, 0). */
+  /** World position. For connectServers this is the first server, for stealSecrets the middle of the compound. */
   x: number
   y: number
+  /** The second server of connectServers. */
+  partner?: { x: number; y: number }
 }
 
 /**
  * Which objectives a run gets: 3-5 drawn at random, completable in any order.
- * (For connectServers, x, y is the first server and the second is placed nearby. For stealSecrets,
- * x, y is the middle of the compound.)
+ * Servers (hackServer, connectServers) stand on the sidewalk in front of a building. The rest go on plazas.
  */
 export const RUN_GENERATION = {
   count: { min: 4, max: 5 },
@@ -31,11 +32,6 @@ export const RUN_GENERATION = {
     connectServers: 'Connect servers',
     stealSecrets: 'Steal secrets',
   } as Record<ObjectiveDef['type'], string>,
-  /**
-   * Objectives stay at least this far from the map edge. Has to fit everything built around the
-   * objective position, the largest being the second server of Connect servers (CONNECT_SERVERS.gap).
-   */
-  edgeMargin: 700,
   /** No objective this close to the start (which is also the extraction point). */
   minDistFromStart: 900,
   /** One objective per run is placed within this distance of the start, so the first walk stays short. */
@@ -62,7 +58,7 @@ export const STEAL_SECRETS = {
 
 /** Connect servers objective: grab a cable (E) at the first server, hold E at the other to attach it (start at either). */
 export const CONNECT_SERVERS = {
-  /** The second server is placed this far from the first, in a random direction. */
+  /** The two servers stand this far apart, along the same building front. */
   gap: { min: 500, max: 800 },
   /** Press E within this distance of either server to grab the cable. */
   grabRadius: 60,
@@ -86,9 +82,6 @@ export const ENCRYPTION_KEY = {
 
 /** The extraction point (the player's own 127.0.0.1). Appears once the last objective is done. */
 export const EXTRACTION = {
-  /** World position, relative to the player's start (0, 0). */
-  x: 0,
-  y: 0,
   /** The player must stay inside this radius to log out; leaving cancels the typing and the countdown. */
   radius: 140,
   /** What to type at the extraction point (case-sensitive, mistypes just get retyped). */
@@ -101,8 +94,6 @@ export const EXTRACTION = {
 export const CAMERA_POLE = {
   /** No pole this close to the start. */
   minDistFromStart: 2000,
-  /** The pole stays at least this far from the map edge. */
-  edgeMargin: 300,
   /** Keeps clear of objectives and caches, so E and typing can't mean two things at once. Has to stay above HACK.range + range. */
   minSpacing: 500,
   /** The player must be within this distance for the hack to run. Walking out pauses it. */

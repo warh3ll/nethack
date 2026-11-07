@@ -1,28 +1,14 @@
-import { MAP } from '../data/balance';
 import { CAMERA_POLE } from '../data/objectives';
+import { CELL, type City, type Point } from './City';
+import { distance, pickApart, tileSpots } from './CitySpots';
 import { makePin, type KeyResult } from './Hack';
 
 export type CameraStep = 'worm' | 'pin' | 'reveal' | 'done';
 
-/** Picks the camera pole's spot: far from the start, inside the edge margin, and clear of everything in `avoid`. */
-export function pickPolePosition(avoid: { x: number; y: number }[]): { x: number; y: number } {
-  const limit = MAP.size / 2 - CAMERA_POLE.edgeMargin;
-  // Corner fallback: only used if no try lands far enough from the start, which a map this size won't do.
-  let best = { x: limit, y: limit };
-  let bestGap = -1;
-  // Retry until the spacing rule holds; if the map is too crowded, keep the roomiest try.
-  for (let tries = 0; tries < 200; tries++) {
-    const x = (Math.random() * 2 - 1) * limit;
-    const y = (Math.random() * 2 - 1) * limit;
-    if (Math.hypot(x, y) < CAMERA_POLE.minDistFromStart) continue;
-    const gap = Math.min(...avoid.map((p) => Math.hypot(x - p.x, y - p.y)));
-    if (gap > bestGap) {
-      best = { x, y };
-      bestGap = gap;
-    }
-    if (gap >= CAMERA_POLE.minSpacing) break;
-  }
-  return best;
+/** Picks the camera pole's spot: on a sidewalk, far from the start and clear of everything in `avoid`. */
+export function pickPolePosition(city: City, avoid: Point[]): Point {
+  const spots = tileSpots(city, [CELL.sidewalk]).filter((s) => distance(s, city.start) >= CAMERA_POLE.minDistFromStart);
+  return pickApart(spots, avoid, CAMERA_POLE.minSpacing, city);
 }
 
 /**
