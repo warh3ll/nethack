@@ -20,6 +20,8 @@ export interface Rect {
 
 export interface Block extends Rect {
   plaza: boolean;
+  /** A factory takes the whole block, and enemies come out of its door. Never cut by an alley. */
+  factory: boolean;
   /** Empty for a plaza; two for a block cut by an alley. */
   buildings: Rect[];
 }
@@ -97,6 +99,17 @@ export function generateCity(seed: number): City {
     plazas.push(b);
   }
 
+  // Factories: big blocks away from the start, spread over the map. Picked before the alleys, so none gets cut.
+  const factories: Block[] = [];
+  const apart = (a: Block, b: Block) => Math.hypot(centreX(a) - centreX(b), centreY(a) - centreY(b));
+  for (const b of order) {
+    if (factories.length >= CITY.factories) break;
+    if (b.plaza || Math.min(b.w, b.h) < CITY.factoryMinSize || apart(b, start) < CITY.factoryMinDistFromStart) continue;
+    if (factories.some((f) => apart(f, b) < CITY.factorySpacing)) continue;
+    b.factory = true;
+    factories.push(b);
+  }
+
   for (const b of blocks) {
     if (b.plaza) continue;
     const s = CITY.sidewalk;
@@ -107,7 +120,7 @@ export function generateCity(seed: number): City {
   const wanted = between(CITY.alleys.min, CITY.alleys.max);
   for (const b of order) {
     if (alleys.length >= wanted) break;
-    if (b.plaza || Math.max(b.buildings[0].w, b.buildings[0].h) < CITY.alleyMinBuilding) continue;
+    if (b.plaza || b.factory || Math.max(b.buildings[0].w, b.buildings[0].h) < CITY.alleyMinBuilding) continue;
     alleys.push(cutAlley(b, between));
   }
 
@@ -148,7 +161,7 @@ function splitIntoBlocks(size: number, between: (min: number, max: number) => nu
     const vertical = w === h ? random() < 0.5 : w > h;
     const span = vertical ? w : h;
     if (Math.max(w, h) <= maxBlock || span < minBlock * 2 + street) {
-      blocks.push({ x, y, w, h, plaza: false, buildings: [] });
+      blocks.push({ x, y, w, h, plaza: false, factory: false, buildings: [] });
       return;
     }
     const at = between(minBlock, span - minBlock - street);

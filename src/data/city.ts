@@ -37,6 +37,22 @@ export const CITY = {
   /** Each half of a building cut by an alley is at least this long. */
   alleyMinPiece: 5,
 
+  /** Factories per map: large landmark buildings that enemies pour out of. They are placed, not rolled, so a map never runs short. */
+  factories: 6,
+  /** A block smaller than this on either side can't hold a factory. */
+  factoryMinSize: 11,
+  /** No factory this close to the start, centre to centre. */
+  factoryMinDistFromStart: 25,
+  /** No two factories closer than this, centre to centre. */
+  factorySpacing: 28,
+
+  /** Most small exits per map (hatches, loading bays, subway exits), set into the street level of ordinary building fronts. The spacing below usually stops it at about 100. */
+  exits: 150,
+  /** No two exits closer than this, in px. */
+  exitSpacing: 256,
+  /** No exit this close to an objective or a cache, in px, so enemies don't pop out on top of one. */
+  exitClearance: 300,
+
   /** How many tiles tall a building's south front is. The rest of the building is roof. */
   frontRows: 3,
   /** Chance that a roof centre tile holds a detail (vent, AC unit...). */

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, ENEMIES, LEVELING, MAP, SPAWNING, STARTING_SKILL } from '../data/balance';
+import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -8,6 +8,9 @@ import { DataCache } from '../entities/DataCache';
 import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
 import { generateCity, pickSeed } from '../systems/City';
+import { Navigation } from '../systems/Navigation';
+import { pickSpawnPoints } from '../systems/SpawnPoints';
+import { Spawner } from '../systems/Spawner';
 import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
@@ -45,6 +48,9 @@ export class GameScene extends Phaser.Scene {
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private chips!: Phaser.GameObjects.Group;
+  /** The streets as enemies see them: blocked tiles and the flow field towards the player. */
+  private nav!: Navigation;
+  private spawner!: Spawner;
   private progression!: Progression;
   /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
   private citySeed = 0;
@@ -106,6 +112,7 @@ export class GameScene extends Phaser.Scene {
     this.citySeed = pickSeed();
     const city = generateCity(this.citySeed);
     createMap(this, city);
+    this.nav = new Navigation(city);
     const objectiveDefs = generateRunObjectives(city);
 
     // Object pools: everything is created up front-ish and reused, never destroyed mid-run.
@@ -175,6 +182,15 @@ export class GameScene extends Phaser.Scene {
 
     // Keep the swarm from collapsing into a single blob.
     this.physics.add.collider(this.enemies, this.enemies);
+    // Buildings are solid for everyone who walks: after every physics step, anything overlapping one is pushed out.
+    const solidBuildings = () => {
+      this.nav.pushOut(this.player.body as Phaser.Physics.Arcade.Body);
+      for (const e of this.enemies.getChildren() as Enemy[]) if (e.active && !e.stats.stationary) this.nav.pushOut(e.body as Phaser.Physics.Arcade.Body);
+    };
+    // The world is cleared on shutdown before scene listeners run, so the listener is removed from the one it was added to.
+    const world = this.physics.world;
+    world.on('worldstep', solidBuildings);
+    this.events.once('shutdown', () => world.off('worldstep', solidBuildings));
 
     this.enemyBars = this.add.graphics().setDepth(6);
     new DamageNumbers(this);
@@ -219,6 +235,8 @@ export class GameScene extends Phaser.Scene {
         return enemy;
       },
     );
+    const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches]);
+    this.spawner = new Spawner(this, spawnPoints, (x, y, type) => (this.enemies.get() as Enemy | null)?.spawn(x, y, type));
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
@@ -262,11 +280,20 @@ export class GameScene extends Phaser.Scene {
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
     this.spawnEnemies(this.gameTime);
+    this.spawner.update(this.gameTime);
+    this.nav.trackPlayer(this.player.x, this.player.y);
 
+    const recycle = SPAWN_POINTS.recycleDistance ** 2;
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
       if (!e.active) continue;
-      e.act(this.player.x, this.player.y, this.gameTime);
+      // Swarm stragglers far behind go back to the pool. Guards, outposts and hijacked allies stay.
+      const far = (e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 > recycle;
+      if (far && !e.stats.guard && !e.stats.stationary && !e.hijacked) {
+        e.despawn();
+        continue;
+      }
+      e.act(this.player.x, this.player.y, this.gameTime, this.nav);
       const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
@@ -419,21 +446,10 @@ export class GameScene extends Phaser.Scene {
     // Hacking draws enemies in a bit faster.
     this.nextSpawnAt = time + interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1);
 
-    const enemy = this.enemies.get() as Enemy | null;
-    if (!enemy) return; // at the cap
-
-    // Pick a point on a circle just outside the visible screen.
-    const cam = this.cameras.main;
-    const radius = Math.hypot(cam.width, cam.height) / 2 + SPAWNING.spawnMargin;
-    const angle = Math.random() * Math.PI * 2;
-    let dx = Math.cos(angle) * radius;
-    let dy = Math.sin(angle) * radius;
-    const type = this.rollEnemyType(seconds);
-    // A point past the wall is mirrored across the player: same distance, so still off screen, but on the map.
-    const limit = MAP.size / 2 - ENEMIES[type].radius;
-    if (Math.abs(this.player.x + dx) > limit) dx = -dx;
-    if (Math.abs(this.player.y + dy) > limit) dy = -dy;
-    enemy.spawn(this.player.x + dx, this.player.y + dy, type);
+    // Enemies behind a flashing door count towards the cap already.
+    if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
+    // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
+    this.spawner.request(time, this.player.x, this.player.y, this.rollEnemyType(seconds));
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */

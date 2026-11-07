@@ -221,8 +221,6 @@ export const SPAWNING = {
   minIntervalMs: 400,
   /** How much the interval shrinks every second of the run. */
   intervalDecayPerSecond: 5,
-  /** Enemies appear on a ring this far outside the screen edge. */
-  spawnMargin: 200,
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
@@ -249,6 +247,38 @@ export const SPAWNING = {
       maxChance: 0.25,
     },
   ],
+}
+
+/**
+ * Where swarm enemies come from: factories and small exits (placed by the city generator, counts in city.ts).
+ * Which ones are active depends only on world distance to the player, never on the screen size.
+ * Every spawn from SPAWNING picks one active spawn point; with few of them around, some spawns are skipped (quiet zones).
+ */
+export const SPAWN_POINTS = {
+  /** A spawn point is active while the player is between `min` and `max` away from it. */
+  exitRange: { min: 500, max: 1400 },
+  factoryRange: { min: 300, max: 2000 },
+  /** How much more often a factory is picked than an exit. */
+  factoryWeight: 3,
+  /** Active spawn points (factories count `factoryWeight` each) needed for the full SPAWNING rate. Fewer means a share of spawns is skipped. */
+  fullRateAt: 5,
+  /** The spawn point flashes this long before its enemy steps out, so enemies never just appear. */
+  exitFlashMs: 500,
+  factoryFlashMs: 900,
+  exitFlashColor: 0xff2e88,
+  factoryFlashColor: 0xffa02e,
+  /** Swarm enemies this far from the player are quietly removed, so stragglers can't fill `maxEnemies`. Keep it above both `max` ranges. */
+  recycleDistance: 2600,
+}
+
+/** How enemies find their way through the streets (one shared flow field of walking distance from the player). */
+export const NAVIGATION = {
+  /** Within this distance, an enemy with a clear line to the player walks straight at it instead of following the streets. */
+  directRange: 1200,
+  /** How often each enemy rethinks its route. Lower is smoother but costs more. */
+  rethinkMs: 150,
+  /** How many tiles ahead along its route an enemy looks for a point it can walk to in a straight line. */
+  lookahead: 4,
 }
 
 /** Credit chips dropped by enemies. How many credits each enemy type drops is `credits` in ENEMIES. */

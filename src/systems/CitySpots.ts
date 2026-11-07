@@ -2,7 +2,7 @@ import { CITY } from '../data/city';
 import { CONNECT_SERVERS } from '../data/objectives';
 import { CELL, tileToWorld, type City, type Point, type Rect } from './City';
 
-const tileCentre = (x: number, y: number): Point => ({ x: tileToWorld(x + 0.5), y: tileToWorld(y + 0.5) });
+export const tileCentre = (x: number, y: number): Point => ({ x: tileToWorld(x + 0.5), y: tileToWorld(y + 0.5) });
 
 export const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -28,7 +28,12 @@ function frontRow(city: City, r: Rect): Point[] {
   return Array.from({ length: r.w }, (_, i) => tileCentre(r.x + i, y));
 }
 
-const frontRows = (city: City) => city.blocks.flatMap((b) => b.buildings).map((r) => frontRow(city, r));
+/** Fronts of ordinary buildings. A factory's front is its own: its door is a spawn point, so no servers there. */
+const frontRows = (city: City) =>
+  city.blocks
+    .filter((b) => !b.factory)
+    .flatMap((b) => b.buildings)
+    .map((r) => frontRow(city, r));
 
 /** Every spot where a server stands against a building. */
 export function serverSpots(city: City): Point[] {
