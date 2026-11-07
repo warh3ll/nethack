@@ -43,9 +43,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setScale(PLAYER.spriteScale);
-    // Hit circle (world pixels) centred on the frame; the offset is in unscaled frame pixels.
+    // Hit circle centred on the frame. Phaser reads radius and offset in unscaled frame pixels, so divide the world radius by the sprite scale.
     const k = PLAYER.radius / PLAYER.spriteScale;
-    this.body!.setCircle(PLAYER.radius, FRAME.width / 2 - k, FRAME.height / 2 - k);
+    this.body!.setCircle(k, FRAME.width / 2 - k, FRAME.height / 2 - k);
     this.setCollideWorldBounds(true);
     this.setDepth(10);
     this.trailGfx = scene.add.graphics().setDepth(9);

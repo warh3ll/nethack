@@ -63,11 +63,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.enableBody(true, x, y, true, true);
     const sprite = ENEMY_SPRITES[typeKey];
     if (sprite) {
-      // Animated sheet: the hit circle (world pixels) is centred on the frame, its offset is in unscaled frame pixels.
+      // Animated sheet: the hit circle is centred on the frame. Phaser reads radius and offset in unscaled frame pixels, so divide the world radius by the sprite scale.
       const key = enemyAnimKey(typeKey, MOVE_STATE);
       this.setTexture(key).setScale(sprite.scale).play(key);
       const k = this.stats.radius / sprite.scale;
-      this.body!.setCircle(this.stats.radius, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
+      this.body!.setCircle(k, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
     } else {
       // Pooled enemies are reused, so undo any sprite state left by a previous type.
       this.anims.stop();
