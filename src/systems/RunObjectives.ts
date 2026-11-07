@@ -2,7 +2,7 @@ import { RUN_GENERATION, type ObjectiveDef } from '../data/objectives';
 import type { City, Point } from './City';
 import { distance, plazaSpots, serverPairs, serverSpots } from './CitySpots';
 
-const TYPES = Object.keys(RUN_GENERATION.names) as ObjectiveDef['type'][];
+const TYPES = (Object.keys(RUN_GENERATION.names) as ObjectiveDef['type'][]).filter((t) => !RUN_GENERATION.disabled.includes(t));
 
 /** Where an objective can stand. Connect servers also needs a spot for its second server. */
 type Site = Point & { partner?: Point };

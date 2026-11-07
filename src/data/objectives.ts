@@ -25,6 +25,8 @@ export const RUN_GENERATION = {
   maxPerType: 2,
   /** Types every run must contain at least once (hacking is the core of the game). */
   required: ['hackServer'] as ObjectiveDef['type'][],
+  /** Types left out of the draw for now. Their code stays in the game; remove a type from this list to bring it back. */
+  disabled: ['stealSecrets'] as ObjectiveDef['type'][],
   /** Name in the objective list; a " 1" / " 2" is added when a type occurs twice. */
   names: {
     hackServer: 'Hack server',

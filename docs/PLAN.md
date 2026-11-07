@@ -17,7 +17,7 @@ Legend: `[x]` done, `[ ]` to do. Section numbers refer to the design doc.
 - [x] Parallax city backdrop behind the map, visible past the wall (s7)
 - [x] Compass to the closest unfinished objective; objectives in any order (s7)
 - [x] Random per-run objectives, 3-5, max two of a type, at least one hack, one near the start (s7)
-- [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7)
+- [x] All four objective types: Hack server, Grab encryption key (Goon), Steal secrets (outposts), Connect servers (s7). Steal secrets is switched off for now (`RUN_GENERATION.disabled` in `objectives.ts`), the code stays
 - [x] Extraction point, "log out" prompt, countdown, win (s7)
 - [x] Game over on HP 0, results screen on win and death (s7)
 - [x] Goon miniboss and Marksman ranged enemy with a shared, time-scaled spawn pool (s6)
