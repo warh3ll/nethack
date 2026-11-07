@@ -12,11 +12,17 @@ export function plazaSpots(city: City): Point[] {
   return plazas.filter((p) => distance(p, city.start) > 0);
 }
 
-/** The middle of every tile of the given kinds. */
+/** The middle of every tile of the given kinds. A factory's front sidewalk is left out: its core and door are there. */
 export function tileSpots(city: City, cells: number[]): Point[] {
+  const factoryFront = new Set<number>();
+  for (const b of city.blocks) {
+    if (!b.factory) continue;
+    const y = b.y + b.h - 1;
+    for (let x = b.x; x < b.x + b.w; x++) factoryFront.add(y * city.size + x);
+  }
   const spots: Point[] = [];
   city.cells.forEach((cell, i) => {
-    if (cells.includes(cell)) spots.push(tileCentre(i % city.size, Math.floor(i / city.size)));
+    if (cells.includes(cell) && !factoryFront.has(i)) spots.push(tileCentre(i % city.size, Math.floor(i / city.size)));
   });
   return spots;
 }

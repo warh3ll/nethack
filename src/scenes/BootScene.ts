@@ -39,6 +39,19 @@ export class BootScene extends Phaser.Scene {
 
     for (const [key, e] of Object.entries(ENEMIES)) {
       if (key in ENEMY_SPRITES) continue; // drawn from its sprite sheet instead
+      if (key === 'factoryCore') {
+        // Placeholder factory core: a glowing reactor, then a cracked, reddened one for when it's badly hurt.
+        const r = e.radius;
+        for (const damaged of [false, true]) {
+          g.fillStyle(0x1a1208).fillCircle(r, r, r);
+          g.lineStyle(4, damaged ? 0xff4a2e : e.color).strokeCircle(r, r, r - 3);
+          g.fillStyle(damaged ? 0x8a1a0a : e.color, 0.9).fillCircle(r, r, r * 0.5);
+          g.fillStyle(0xfff35c, damaged ? 0.4 : 0.9).fillCircle(r, r, r * 0.22);
+          if (damaged) g.lineStyle(3, 0x05060a).lineBetween(r * 0.3, r * 0.4, r * 1.1, r * 1.2).lineBetween(r * 1.2, r * 0.3, r * 0.9, r * 1.7);
+          g.generateTexture(damaged ? `enemy-${key}-damaged` : `enemy-${key}`, r * 2, r * 2).clear();
+        }
+        continue;
+      }
       g.fillStyle(e.color).fillRect(0, 0, e.radius * 2, e.radius * 2);
       g.fillStyle(0x05060a).fillRect(e.radius * 0.5, e.radius * 0.7, e.radius, e.radius * 0.35);
       g.generateTexture(`enemy-${key}`, e.radius * 2, e.radius * 2).clear();

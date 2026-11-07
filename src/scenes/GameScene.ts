@@ -11,6 +11,7 @@ import { generateCity, pickSeed } from '../systems/City';
 import { Navigation } from '../systems/Navigation';
 import { pickSpawnPoints } from '../systems/SpawnPoints';
 import { Spawner } from '../systems/Spawner';
+import { Factories } from '../systems/Factories';
 import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
 import { PATCH_UP, RunStats } from '../systems/RunStats';
@@ -51,6 +52,7 @@ export class GameScene extends Phaser.Scene {
   /** The streets as enemies see them: blocked tiles and the flow field towards the player. */
   private nav!: Navigation;
   private spawner!: Spawner;
+  private factories!: Factories;
   private progression!: Progression;
   /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
   private citySeed = 0;
@@ -180,8 +182,8 @@ export class GameScene extends Phaser.Scene {
       if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.objectives.onPlayerHit();
     });
 
-    // Keep the swarm from collapsing into a single blob.
-    this.physics.add.collider(this.enemies, this.enemies);
+    // Keep the swarm from collapsing into a single blob. Factory cores stand on the sidewalk, so the swarm walks through them.
+    this.physics.add.collider(this.enemies, this.enemies, undefined, (a, b) => !(a as Enemy).stats.passable && !(b as Enemy).stats.passable);
     // Buildings are solid for everyone who walks: after every physics step, anything overlapping one is pushed out.
     const solidBuildings = () => {
       this.nav.pushOut(this.player.body as Phaser.Physics.Arcade.Body);
@@ -237,6 +239,17 @@ export class GameScene extends Phaser.Scene {
     );
     const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches]);
     this.spawner = new Spawner(this, spawnPoints, (x, y, type) => (this.enemies.get() as Enemy | null)?.spawn(x, y, type));
+    this.factories = new Factories(
+      this,
+      city,
+      spawnPoints,
+      (x, y) => {
+        const core = this.enemies.get() as Enemy | null;
+        core?.spawn(x, y, 'factoryCore');
+        return core;
+      },
+      (point) => this.spawner.remove(point),
+    );
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
@@ -281,6 +294,7 @@ export class GameScene extends Phaser.Scene {
     this.objectives.update(delta);
     this.spawnEnemies(this.gameTime);
     this.spawner.update(this.gameTime);
+    this.factories.update();
     this.nav.trackPlayer(this.player.x, this.player.y);
 
     const recycle = SPAWN_POINTS.recycleDistance ** 2;
@@ -443,13 +457,13 @@ export class GameScene extends Phaser.Scene {
     if (time < this.nextSpawnAt) return;
     const seconds = this.elapsedMs / 1000;
     const interval = Math.max(SPAWNING.minIntervalMs, SPAWNING.startIntervalMs - seconds * SPAWNING.intervalDecayPerSecond);
-    // Hacking draws enemies in a bit faster.
-    this.nextSpawnAt = time + interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1);
+    // Hacking draws enemies in a bit faster; every factory destroyed slows the whole map down.
+    this.nextSpawnAt = time + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
 
     // Enemies behind a flashing door count towards the cap already.
     if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
     // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
-    this.spawner.request(time, this.player.x, this.player.y, this.rollEnemyType(seconds));
+    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds));
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */

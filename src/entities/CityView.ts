@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { MAP } from '../data/balance';
 import { BUILDING_TILES, CITY, GROUND_TILES } from '../data/city';
-import { CELL, tileToWorld, type City, type Rect } from '../systems/City';
+import { CELL, type City, type Rect } from '../systems/City';
 
 /** Below everything that stands in the city. */
 const DEPTH = -10;
@@ -24,28 +24,6 @@ export function createCityView(scene: Phaser.Scene, city: City) {
   };
   layer('ground', map.addTilesetImage('city-ground')!, groundTiles(city));
   layer('buildings', map.addTilesetImage('city-building')!, buildingTiles(city));
-  drawFactories(scene, city);
-}
-
-/** Placeholder until the factory art exists: a warning-coloured roof with hazard stripes and a name. */
-function drawFactories(scene: Phaser.Scene, city: City) {
-  const g = scene.add.graphics().setDepth(DEPTH + 1);
-  for (const b of city.blocks) {
-    if (!b.factory) continue;
-    const r = b.buildings[0];
-    const x = tileToWorld(r.x);
-    const y = tileToWorld(r.y);
-    const w = r.w * CITY.tileSize;
-    const roof = (r.h - CITY.frontRows) * CITY.tileSize;
-    g.fillStyle(0x3a2410, 0.75).fillRect(x, y, w, r.h * CITY.tileSize);
-    g.lineStyle(6, 0xffa02e, 0.9).strokeRect(x + 8, y + 8, w - 16, roof - 16);
-    for (let sx = x + 24; sx < x + w - 40; sx += 48) g.fillStyle(0xffa02e, 0.35).fillRect(sx, y + roof - 30, 24, 14);
-    scene.add
-      .text(x + w / 2, y + roof / 2, 'FACTORY', { fontFamily: 'monospace', fontSize: '28px', color: '#ffa02e' })
-      .setOrigin(0.5)
-      .setAlpha(0.8)
-      .setDepth(DEPTH + 1);
-  }
 }
 
 function groundTiles(city: City): number[][] {

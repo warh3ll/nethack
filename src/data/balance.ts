@@ -122,6 +122,8 @@ export interface EnemyType {
   healthBar?: boolean
   /** Never moves and can't be pushed (outposts). */
   stationary?: boolean
+  /** Other enemies walk through it instead of bumping into it (factory cores, which stand on the sidewalk). */
+  passable?: boolean
   /** Scales the length of any stun on this enemy (default 1; 0.5 = half as long, 0 = immune). */
   stunMultiplier?: number
   /**
@@ -212,6 +214,21 @@ export const ENEMIES: Record<string, EnemyType> = {
     stationary: true,
     stunMultiplier: 0,
   },
+  // The part of a factory that can be shot, by its door. Destroying it shuts the factory down (SPAWN_POINTS).
+  factoryCore: {
+    hp: 250,
+    speed: 0,
+    contactDamage: 0,
+    xp: 20,
+    credits: 10,
+    creditChance: 1,
+    radius: 30,
+    color: 0xffa02e,
+    healthBar: true,
+    stationary: true,
+    passable: true,
+    stunMultiplier: 0,
+  },
 }
 
 export const SPAWNING = {
@@ -259,12 +276,18 @@ export const SPAWN_POINTS = {
   exitRange: { min: 500, max: 1400 },
   factoryRange: { min: 300, max: 2000 },
   /** How much more often a factory is picked than an exit. */
-  factoryWeight: 3,
+  factoryWeight: 2,
+  /** A factory lets out a small group at once, this many enemies (both ends included). Each one rolls its own type. */
+  factoryGroup: { min: 3, max: 5 },
+  /** Every destroyed factory takes this share off the spawn rate of the whole map (0.08 = 8% fewer spawns per factory). */
+  rateCutPerFactory: 0.08,
+  /** A factory core below this share of its hp shows as damaged. */
+  factoryDamagedAt: 0.5,
   /** Active spawn points (factories count `factoryWeight` each) needed for the full SPAWNING rate. Fewer means a share of spawns is skipped. */
   fullRateAt: 5,
   /** The spawn point flashes this long before its enemy steps out, so enemies never just appear. */
   exitFlashMs: 500,
-  factoryFlashMs: 900,
+  factoryFlashMs: 2000,
   exitFlashColor: 0xff2e88,
   factoryFlashColor: 0xffa02e,
   /** Swarm enemies this far from the player are quietly removed, so stragglers can't fill `maxEnemies`. Keep it above both `max` ranges. */
