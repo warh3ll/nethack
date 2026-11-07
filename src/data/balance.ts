@@ -348,6 +348,32 @@ export const CACHES = {
   creditAmount: 5,
 }
 
+/**
+ * ATMs: an optional find, like caches. Hold E in the ring to decrypt, then stay in the ring to channel credits
+ * while goons come hunting. Leaving the ring while channeling (or running out the clock) switches that ATM off for the run.
+ */
+export const ATMS = {
+  /** ATMs per run, picked at random. They stand on the sidewalk against a building's south wall. */
+  count: { min: 4, max: 6 },
+  /** No ATM this close to the start. */
+  minDistFromStart: 800,
+  /** No two ATMs closer than this. */
+  minSpacing: 1500,
+  /** No ATM this close to an objective, cache, camera pole, or the start and exit stations (E must never mean two things). */
+  clearance: 450,
+  /** No ATM this close to a spawn door, so it never blocks one. There are about a hundred, so this has to stay small. */
+  doorClearance: 130,
+  /** The ring: hold E inside it to decrypt, stay inside it to channel. Keep it small. */
+  radius: 70,
+  /** How long E must be held to decrypt. Letting go, leaving the ring or taking damage restarts it. */
+  decryptMs: 5000,
+  /** Longest a channel can run. When it is up, the ATM is switched off. */
+  channelMs: 20000,
+  creditsPerSecond: 1,
+  /** A goon comes out of the spawn point closest to the ATM this often while channeling, and hunts the player until dead. */
+  goonIntervalMs: 4000,
+}
+
 export const STARTING_SKILL = 'autoPistol'
 
 /** Skill slots: weapons (and other active skills) and passives each have their own group. */
@@ -413,6 +439,8 @@ export const LIGHTING = {
   /** The subway stations (start and exit). */
   subway: { radius: 320, color: 0x5fe08a, intensity: 1.3 },
   pole: { radius: 260, color: 0xff2e88, intensity: 1.2 },
+  /** ATMs: a faint gold glow. Goes out when the ATM is switched off. */
+  atm: { radius: 220, color: 0xffc83a, intensity: 1 },
 }
 
 /** Blob shadows: a soft dark ellipse under the player and every enemy. It stays put under the feet, whatever the lights do. */

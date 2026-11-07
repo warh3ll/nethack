@@ -133,6 +133,11 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
 
   Walking away only pauses the hack, and the player continues from the same step on returning. Like a server hack, the world slows while typing and enemies spawn faster during the hack (section 8). When it is done, a **minimap** appears in the bottom right corner and stays until the run ends. It shows the whole map, with small dots for unfinished objectives, unopened caches and the exit station (only once it has opened), and the player as an arrow pointing the way they are moving. The minimap is never there from the start of a run, though a future item might change that.
 
+- **ATMs (decided):** an optional find like a data cache, not an objective (no compass, not in the objective list). **4-6 per run**, each on the sidewalk against a building's south wall, at least 800 px from the start and 1500 px from each other, and clear of objectives, caches, poles and spawn doors. Each has a small faint gold ring (70 px radius).
+  1. **Decrypt:** hold E inside the ring for 5 seconds. Letting go, leaving the ring or taking damage restarts it.
+  2. **Channel:** once decrypted, the player earns **1 credit per second** for up to **20 seconds** (so 20 credits at most per ATM) just by staying in the ring. No key needs to be held.
+  3. **Goons:** while channeling, **a Goon comes out of the spawn point (door or factory) closest to the ATM every 4 seconds** and hunts the player regardless of distance until dead. A full 20 second channel therefore brings 4 Goons. Damage doesn't stop the channel.
+  4. **Done:** leaving the ring while channeling, or running out the 20 seconds, switches that ATM off for the rest of the run. Credits earned until then are kept.
 - A **run clock is always visible in the UI**. For now it only shows elapsed time and has no gameplay function (enemy difficulty scaling is the one planned use, section 6).
 - **Extraction (decided):** the exit is a **subway station** on a different plaza from the start (a random plaza at least 3500 px from the start, or the farthest one if none is that far). There is no typing: once the last objective is done, the station's ring opens and **stepping into it starts a 5 second countdown**. The player must **stay inside the ring** for all of it; leaving cancels the countdown and it starts over on re-entering. Taking damage does not cancel it. The ring is small (100 px radius) so it takes a deliberate stand, often under fire.
 - **Timed objectives (decided):** dropped. They conflict with pillar 1. Objectives are not timed.
@@ -224,6 +229,8 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 **Balance**
 
 - The game feels less crowded than before. Henrik's read is that it is the enemy spawning, not the halved hit circles. To tune in `balance.ts` (`SPAWNING`); needs a look at spawn rate, the enemy cap and the active ranges of spawn points (section 6).
+
+- ATMs on the minimap (like caches)? They are not shown there yet.
 
 **Art and feel**
 

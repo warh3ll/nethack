@@ -7,6 +7,7 @@ import { Bullet } from '../entities/Bullet';
 import { DataCache } from '../entities/DataCache';
 import { account } from '../systems/Account';
 import { pickCachePositions } from '../systems/Caches';
+import { Atms, pickAtmPositions } from '../systems/Atms';
 import { generateCity, pickSeed } from '../systems/City';
 import { Navigation } from '../systems/Navigation';
 import { pickSpawnPoints } from '../systems/SpawnPoints';
@@ -62,6 +63,7 @@ export class GameScene extends Phaser.Scene {
   /** Shown on the pause screen, so a map can be replayed with ?seed= in the URL. */
   private citySeed = 0;
   private caches: DataCache[] = [];
+  private atms!: Atms;
   private weapons: (Weapon | Virus | SynapticOverload | EmpShock | Rootkit)[] = [];
   private hud!: Phaser.GameObjects.Text;
   private clockText!: Phaser.GameObjects.Text;
@@ -171,7 +173,7 @@ export class GameScene extends Phaser.Scene {
       if (enemy.stats.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
       const hit = this.player.takeDamage(enemy.stats.contactDamage, this.gameTime);
       if (!hit) return;
-      if (hit === 'damaged') this.objectives.onPlayerHit();
+      if (hit === 'damaged') this.onPlayerHurt();
       // Defensive Matrix: the enemy whose touch landed takes damage back, blocked or not.
       const back = this.progression.stats.retaliationDamage;
       if (back <= 0) return;
@@ -186,7 +188,7 @@ export class GameScene extends Phaser.Scene {
       const bullet = b as EnemyBullet;
       if (!bullet.active) return;
       bullet.kill();
-      if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.objectives.onPlayerHit();
+      if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.onPlayerHurt();
     });
 
     // Keep the swarm from collapsing into a single blob. Factory cores stand on the sidewalk, so the swarm walks through them.
@@ -258,7 +260,11 @@ export class GameScene extends Phaser.Scene {
       },
     );
     const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
-    this.spawner = new Spawner(this, spawnPoints, (x, y, type) => (this.enemies.get() as Enemy | null)?.spawn(x, y, type));
+    this.spawner = new Spawner(this, spawnPoints, (x, y, type) => {
+      const enemy = this.enemies.get() as Enemy | null;
+      enemy?.spawn(x, y, type);
+      return enemy;
+    });
     this.factories = new Factories(
       this,
       city,
@@ -274,11 +280,23 @@ export class GameScene extends Phaser.Scene {
       },
     );
     this.objectives.setFactorySource(() => this.factories.standing);
+    // ATMs: an optional find like the caches. Placed after the spawn points so earlier seeds keep their layouts.
+    this.atms = new Atms(
+      this,
+      this.player,
+      pickAtmPositions(city, [...objectivePoints(objectiveDefs), ...this.caches, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit], spawnPoints),
+      () => !this.gameOver && !this.paused && !this.levelingUp && !this.player.isDead && !this.objectives.typing,
+      (amount) => (this.credits += amount),
+      (x, y) => {
+        const point = this.spawner.nearest(x, y);
+        if (point) this.spawner.summonHunter(this.gameTime, point, 'goon');
+      },
+    );
     // The subway stations: the start plaza and the exit plaza. The exit's ring only opens once every objective is done.
     createSubwayEntrance(this, city.start.x, city.start.y);
     createSubwayEntrance(this, city.exit.x, city.exit.y);
     // Last, since it uses the city's random stream after everything that stands on the map has been placed.
-    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit]);
+    createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, ...this.atms.positions, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit]);
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
     this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
 
@@ -321,6 +339,7 @@ export class GameScene extends Phaser.Scene {
     this.runStats.trackPosition(this.player.x, this.player.y);
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
+    this.atms.update(gameDelta);
     this.spawnEnemies(this.gameTime);
     this.spawner.update(this.gameTime);
     this.factories.update();
@@ -351,6 +370,12 @@ export class GameScene extends Phaser.Scene {
 
     this.drawHud();
     if (this.player.isDead && !this.gameOver) this.onPlayerDeath();
+  }
+
+  /** Real damage (not a blocked hit) interrupts whatever the player is doing with E. */
+  private onPlayerHurt() {
+    this.objectives.onPlayerHit();
+    this.atms.onPlayerHit();
   }
 
   /** Freezes the world, lets the death animation play out, then shows the results. */
