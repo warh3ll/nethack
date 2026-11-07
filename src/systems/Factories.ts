@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { SPAWN_POINTS } from '../data/balance';
+import { LIGHTING, SPAWN_POINTS } from '../data/balance';
+import { addGlow, setGlow } from './Lighting';
 import { CITY } from '../data/city';
 import { ENEMY_KILLED, type Enemy } from '../entities/Enemy';
 import { tileToWorld, type City, type Rect } from './City';
@@ -17,6 +18,8 @@ interface Site {
   state: State;
   gfx: Phaser.GameObjects.Graphics;
   label: Phaser.GameObjects.Text;
+  /** One light by the door and one at the core. */
+  lights: (Phaser.GameObjects.Light | null)[];
 }
 
 /**
@@ -51,7 +54,8 @@ export class Factories {
         .text(x + (building.w * t) / 2, tileToWorld(building.y) + roof / 2, '', { fontFamily: 'monospace', fontSize: '28px' })
         .setOrigin(0.5)
         .setDepth(DEPTH);
-      const site: Site = { building, point, core, state: 'intact', gfx: scene.add.graphics().setDepth(DEPTH), label };
+      const lights = [addGlow(scene, point.door.x, point.door.y, LIGHTING.factory), addGlow(scene, point.door.x - t * 3, front + 20, LIGHTING.factory)];
+      const site: Site = { building, point, core, state: 'intact', gfx: scene.add.graphics().setDepth(DEPTH), label, lights };
       this.sites.push(site);
       this.draw(site);
     }
@@ -86,6 +90,7 @@ export class Factories {
       if (s.core.hp >= s.core.maxHp * SPAWN_POINTS.factoryDamagedAt) continue;
       s.state = 'damaged';
       s.core.setTexture('enemy-factoryCore-damaged');
+      for (const l of s.lights) setGlow(l, LIGHTING.factoryDamaged);
       this.draw(s);
     }
   }
@@ -93,6 +98,7 @@ export class Factories {
   private destroy(site: Site) {
     site.state = 'destroyed';
     site.core = null; // the enemy goes back to the pool and may come back as something else
+    for (const l of site.lights) setGlow(l, null);
     this.draw(site);
     this.onDestroyed(site.point);
     this.explode(site.point.door.x - CITY.tileSize * 3, tileToWorld(site.building.y + site.building.h));

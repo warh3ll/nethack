@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ENEMIES, EnemyType, NAVIGATION } from '../data/balance';
 import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
+import { lit } from '../systems/Lighting';
 import type { FlowField, Navigation } from '../systems/Navigation';
 
 /** Scene event fired when an enemy dies, with the enemy as argument. */
@@ -48,6 +49,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   spawn(x: number, y: number, typeKey: string, hp?: number) {
     this.stats = ENEMIES[typeKey];
+    lit(this);
     this.hp = this.maxHp = hp ?? this.stats.hp;
     this.infection = null;
     this.stunnedUntil = 0;

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { MAP } from '../data/balance';
 import { BUILDING_TILES, CITY, GROUND_TILES } from '../data/city';
 import { CELL, type City, type Rect } from '../systems/City';
+import { lit } from '../systems/Lighting';
 
 /** Below everything that stands in the city. */
 const DEPTH = -10;
@@ -20,6 +21,7 @@ export function createCityView(scene: Phaser.Scene, city: City) {
   const layer = (name: string, tileset: Phaser.Tilemaps.Tileset, tiles: number[][]) => {
     const l = map.createBlankLayer(name, tileset, -half, -half, city.size, city.size, art, art)!;
     l.putTilesAt(tiles, 0, 0).setScale(tileSize / art).setDepth(DEPTH);
+    lit(l);
     return l;
   };
   layer('ground', map.addTilesetImage('city-ground')!, groundTiles(city));

@@ -3,6 +3,8 @@ import { MAP } from '../data/balance';
 import { CITY, PROP_TILES } from '../data/city';
 import { CELL, type City, type Point } from '../systems/City';
 import { distance, tileCentre } from '../systems/CitySpots';
+import { addGlow, lit } from '../systems/Lighting';
+import { LIGHTING } from '../data/balance';
 
 /** Above the ground, the buildings and the factories; below the spawn doors and everything standing in the street. */
 const DEPTH = -8;
@@ -50,4 +52,14 @@ export function createCityProps(scene: Phaser.Scene, city: City, avoid: Point[])
   const map = scene.make.tilemap({ width: n, height: n, tileWidth: art, tileHeight: art });
   const layer = map.createBlankLayer('props', map.addTilesetImage('city-props')!, -MAP.size / 2, -MAP.size / 2, n, n, art, art)!;
   layer.putTilesAt(tiles, 0, 0).setScale(CITY.tileSize / art).setDepth(DEPTH);
+  lit(layer);
+
+  // Every lamp lights up its patch of street (Phaser draws only the closest few to the camera).
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (tiles[y][x] !== PROP_TILES.lamp) continue;
+      const at = tileCentre(x, y);
+      addGlow(scene, at.x, at.y, LIGHTING.lamp);
+    }
+  }
 }

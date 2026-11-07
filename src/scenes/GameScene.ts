@@ -21,6 +21,7 @@ import { Enemy, ENEMY_KILLED, SHOT_RADIUS } from '../entities/Enemy';
 import { EnemyBullet } from '../entities/EnemyBullet';
 import { createMap } from '../entities/MapWall';
 import { createCityProps } from '../entities/CityProps';
+import { enableLighting } from '../systems/Lighting';
 import { createParallax } from '../entities/Parallax';
 import { Player } from '../entities/Player';
 import { Virus } from '../entities/Virus';
@@ -114,6 +115,7 @@ export class GameScene extends Phaser.Scene {
     createParallax(this);
     this.citySeed = pickSeed();
     const city = generateCity(this.citySeed);
+    enableLighting(this);
     createMap(this, city);
     this.nav = new Navigation(city);
     const objectiveDefs = generateRunObjectives(city);

@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { LIGHTING } from '../data/balance';
 import { CAMERA_POLE } from '../data/objectives';
+import { addGlow, lit } from '../systems/Lighting';
 import type { CameraHack } from '../systems/CameraHack';
 
 const BAR_W = 100;
@@ -30,7 +32,8 @@ export class CameraPole {
     readonly y: number,
   ) {
     this.ring = scene.add.graphics().setDepth(1);
-    this.sprite = scene.add.image(x, y, 'camera-pole').setDepth(4);
+    this.sprite = lit(scene.add.image(x, y, 'camera-pole').setDepth(4));
+    addGlow(scene, x, y, LIGHTING.pole);
     this.bar = scene.add.graphics().setDepth(20);
     const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color, stroke: '#05060a', strokeThickness: 3 }).setDepth(21);
     this.title = text('13px', '#ffd23e').setOrigin(0.5);

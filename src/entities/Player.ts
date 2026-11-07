@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DASH, PLAYER } from '../data/balance';
 import { FRAME, dirFromAngle, playerAnimKey, type Dir8, type PlayerState } from '../data/playerAnims';
+import { lit } from '../systems/Lighting';
 import type { PlayerStats } from '../systems/Progression';
 
 /** Scene event fired when the player actually gains HP: (amount, sourceId). */
@@ -43,6 +44,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setScale(PLAYER.spriteScale);
+    lit(this);
     // Hit circle centred on the frame. Phaser reads radius and offset in unscaled frame pixels, so divide the world radius by the sprite scale.
     const k = PLAYER.radius / PLAYER.spriteScale;
     this.body!.setCircle(k, FRAME.width / 2 - k, FRAME.height / 2 - k);

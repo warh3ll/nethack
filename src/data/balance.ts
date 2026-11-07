@@ -380,3 +380,28 @@ export const TOUCH_JOYSTICK = {
   /** When the thumb drags past the radius, the base follows it so the stick never "runs out". */
   baseFollows: true,
 }
+
+/**
+ * Night-time lighting. Lit things (the city, props, servers, the player and enemies) are multiplied by `ambient`
+ * and brightened by the lights near them. Bullets, effects and the UI are not lit, so they always read clearly.
+ * Phaser lights have no normal maps here, so they just add a soft coloured pool of light.
+ */
+export const LIGHTING = {
+  enabled: true,
+  /** The light everything gets with no lamp nearby, as 0xRRGGBB. Brighter = easier to see, darker = lamps stand out more. */
+  ambient: 0x8a92b8,
+  /** Most lights drawn at once (the closest to the camera win). Each one costs a little per pixel, so keep it modest. */
+  maxLights: 24,
+  /** How far above the ground a light hangs, as a fraction of its radius. Higher = flatter, more even pool. */
+  height: 0.45,
+  /** The pools of light. Radius in px, colour 0xRRGGBB, intensity 1 = normal. */
+  lamp: { radius: 440, color: 0x7fe9ff, intensity: 1.7 },
+  factory: { radius: 460, color: 0xffa02e, intensity: 2 },
+  /** A factory whose core is badly hurt. A destroyed one has no light. */
+  factoryDamaged: { radius: 380, color: 0xff3a2a, intensity: 1.5 },
+  server: { radius: 300, color: 0x2ef2ff, intensity: 1.4 },
+  /** Hacked or connected servers. */
+  serverDone: { radius: 300, color: 0x5fe08a, intensity: 1.4 },
+  cache: { radius: 170, color: 0x2ef2ff, intensity: 1 },
+  pole: { radius: 260, color: 0xff2e88, intensity: 1.2 },
+}
