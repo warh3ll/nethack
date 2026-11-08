@@ -37,7 +37,7 @@ export type Upgrade =
 
 /** XP needed to go from `level` to `level + 1`. */
 export function xpToNextLevel(level: number): number {
-  return LEVELING.xpForLevel2 + LEVELING.xpIncreasePerLevel * (level - 1)
+  return Math.round(LEVELING.xpForLevel2 * LEVELING.xpGrowth ** (level - 1))
 }
 
 /** Player level, XP, owned skills and the stats derived from them. */

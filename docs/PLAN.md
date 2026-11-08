@@ -45,7 +45,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Remaining damage skills: all 7 damage skills exist (Auto-Pistol, Virus, Railgun, Scatter Gun, Synaptic Overload, EMP Shock, Rootkit; the roster was raised from 6 to 7) (s5)
 - [x] Black ICE became Defensive Matrix: a shield that absorbs a hit and recharges, plus retaliation on every touch, with shield and spike animations (s5)
 - [x] Both weapon skills and passive skills should only have 3 levels. Old levels 1, 3 and 5 kept; Virus spread and Rootkit hijack stay at 1 at every level, and Synaptic Overload hack time is 500/400/300 ms
-- [ ] Uncapped player level with a gently rising XP curve: check the curve in `balance.ts` holds up past level 20 (s5)
+- [x] Uncapped player level with a rising XP curve: x1.15 per level (`LEVELING.xpGrowth`), level 30 is about where every skill is maxed (s5)
 
 ### C. Data caches
 
