@@ -57,7 +57,7 @@ export class CameraPole {
     this.typed.setText('');
 
     if (hack.step === 'worm') {
-      this.title.setPosition(x, top).setText(inRange ? '1/3 HOLD [E] TO INSERT WORM' : '');
+      this.title.setPosition(x, top).setText(inRange ? '1/3 HOLD [E] TO INSERT WORM' : CAMERA_POLE.hintText);
       if (hack.holdMs > 0) {
         this.bar.fillStyle(0x1a2140).fillRect(x - BAR_W / 2, top + 12, BAR_W, BAR_H);
         this.bar.fillStyle(GREEN).fillRect(x - BAR_W / 2, top + 12, BAR_W * hack.holdProgress, BAR_H);

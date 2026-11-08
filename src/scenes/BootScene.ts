@@ -141,6 +141,19 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff).fillRect(14, 10, 4, 4);
     g.generateTexture('data-cache', 32, 28).clear();
 
+    // ATM: a steel cabinet with a gold screen, a keypad and a card slot. 32 x 44.
+    g.fillStyle(0x2a3358).fillRect(0, 0, 32, 44);
+    g.lineStyle(2, 0x6a7ba8).strokeRect(1, 1, 30, 42);
+    g.fillStyle(0x05060a).fillRect(5, 5, 22, 14);
+    g.fillStyle(0xffc83a).fillRect(7, 7, 18, 10);
+    g.fillStyle(0x05060a).fillRect(11, 9, 3, 6).fillRect(17, 9, 3, 6);
+    g.fillStyle(0x6a7ba8).fillRect(5, 23, 10, 10);
+    g.fillStyle(0x05060a).fillRect(7, 25, 2, 2).fillRect(11, 25, 2, 2).fillRect(7, 29, 2, 2).fillRect(11, 29, 2, 2);
+    g.fillStyle(0x05060a).fillRect(19, 24, 8, 3);
+    g.fillStyle(0xffc83a).fillRect(19, 24, 8, 1);
+    g.fillStyle(0x05060a).fillRect(18, 33, 10, 6);
+    g.generateTexture('atm', 32, 44).clear();
+
     // Camera pole: a pole with a camera on top and a small computer box on it.
     g.fillStyle(0x4a5578).fillRect(16, 10, 5, 60);
     g.fillStyle(0x2a3358).fillRect(8, 68, 21, 4);

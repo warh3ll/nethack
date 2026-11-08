@@ -12,7 +12,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 
 ## Roles
 
-- Henrik: game design, assets, balancing, items. Claude writes most of the code.
+- Henrik (game designer, director): game design, assets, balancing, items. Claude writes most of the code.
 - Keep tuning numbers in `src/data/` (`balance.ts`, `skills.ts`) so Henrik can balance without touching logic. Never hard-code a balance value in game code.
 
 ## Architecture rules (carried over from the Godot version)
@@ -30,6 +30,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Playtest features that come from `docs/PLAN.md` (they are usually larger) before calling them done: run the dev server and drive the game in a real browser, and check that the feature actually shows up and works, not just that it typechecks. Say plainly what was and wasn't exercised.
 - Textures are generated or loaded in `src/scenes/BootScene.ts`; swapping in new art there under the same texture keys is enough.
 - Item designs are detailed in `docs/ITEMS.md`, always check this when handling skills or other player, enemy, world interaction since equipped items may affect them.
+- Always ask the director (multi-choice) for anything that needs clarification
 
 ## Commands
 

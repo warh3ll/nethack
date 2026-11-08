@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SPAWN_POINTS } from '../data/balance';
 import { CITY } from '../data/city';
+import type { Enemy } from '../entities/Enemy';
 import type { SpawnPoint } from './SpawnPoints';
 
 /** Below the objectives and the player, above the city's tile layers and the factories. */
@@ -12,6 +13,8 @@ interface Pending {
   types: string[];
   startedAt: number;
   spawnAt: number;
+  /** Set when the enemy comes out already hunting the player, whatever the distance. */
+  hunt?: boolean;
 }
 
 /**
@@ -26,7 +29,7 @@ export class Spawner {
   constructor(
     scene: Phaser.Scene,
     private points: SpawnPoint[],
-    private spawn: (x: number, y: number, type: string) => void,
+    private spawn: (x: number, y: number, type: string) => Enemy | null | undefined,
   ) {
     // Placeholder art: a dark hatch with a faint outline, so players learn where enemies come from.
     const t = CITY.tileSize;
@@ -50,6 +53,26 @@ export class Spawner {
   remove(point: SpawnPoint) {
     this.points = this.points.filter((p) => p !== point);
     this.pending = this.pending.filter((q) => q.point !== point);
+  }
+
+  /** The spawn point closest to a spot, or null if none is left. */
+  nearest(x: number, y: number): SpawnPoint | null {
+    let best: SpawnPoint | null = null;
+    let bestDist = Infinity;
+    for (const p of this.points) {
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < bestDist) {
+        best = p;
+        bestDist = d;
+      }
+    }
+    return best;
+  }
+
+  /** Sends a group out of `point` (flash first, as always) that hunts the player from the moment it appears. */
+  summonHunters(now: number, point: SpawnPoint, types: string[]) {
+    const flash = point.kind === 'factory' ? SPAWN_POINTS.factoryFlashMs : SPAWN_POINTS.exitFlashMs;
+    this.pending.push({ point, types, startedAt: now, spawnAt: now + flash, hunt: true });
   }
 
   /**
@@ -87,7 +110,8 @@ export class Spawner {
         // A group steps out side by side across the factory door, then the swarm shoves itself apart.
         q.types.forEach((type, i) => {
           const spread = q.types.length > 1 ? (i / (q.types.length - 1) - 0.5) * t * 2 : 0;
-          this.spawn(q.point.x + spread, q.point.y, type);
+          const enemy = this.spawn(q.point.x + spread, q.point.y, type);
+          if (q.hunt) enemy?.provoke();
         });
         return false;
       }

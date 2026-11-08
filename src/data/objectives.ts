@@ -115,6 +115,8 @@ export const CAMERA_POLE = {
   holdMs: 2000,
   /** What to type in the last step (case-sensitive, mistypes just get retyped). The PIN length is HACK.pinLength. */
   revealText: 'reveal',
+  /** Shown above a pole that hasn't been touched yet, so it reads as something to do. */
+  hintText: 'HACK TO REVEAL MAP',
 }
 
 /** The server sprite (public/assets/server/server.png: 2 frames of 64x64), shared by Hack server and Connect servers. */
