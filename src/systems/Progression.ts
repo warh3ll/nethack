@@ -37,7 +37,7 @@ export type Upgrade =
 
 /** XP needed to go from `level` to `level + 1`. */
 export function xpToNextLevel(level: number): number {
-  return LEVELING.xpForLevel2 + LEVELING.xpIncreasePerLevel * (level - 1)
+  return Math.round(LEVELING.xpForLevel2 * LEVELING.xpGrowth ** (level - 1))
 }
 
 /** Player level, XP, owned skills and the stats derived from them. */
@@ -65,25 +65,19 @@ export class Progression {
     this.recomputeStats()
   }
 
-  get isMaxLevel() {
-    return this.level >= LEVELING.maxLevel
-  }
-
   get xpNeeded() {
     return xpToNextLevel(this.level)
   }
 
   /** Adds XP and returns how many levels were gained (can be more than one). */
   addXp(amount: number): number {
-    if (this.isMaxLevel) return 0
     this.xp += amount
     let gained = 0
-    while (!this.isMaxLevel && this.xp >= this.xpNeeded) {
+    while (this.xp >= this.xpNeeded) {
       this.xp -= this.xpNeeded
       this.level++
       gained++
     }
-    if (this.isMaxLevel) this.xp = 0
     return gained
   }
 

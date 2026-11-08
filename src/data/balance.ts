@@ -388,16 +388,15 @@ export const WEAPON_SLOTS = 5
 export const PASSIVE_SLOTS = 5
 
 export const LEVELING = {
-  /** Highest player level. Reaching it stops XP gain and level-ups. */
-  maxLevel: 20,
   /** XP needed to go from level 1 to level 2. A drone gives 1 XP, so this is roughly "kills per level". */
-  xpForLevel2: 5,
+  xpForLevel2: 9,
   /**
-   * Each level after that needs this much more XP than the previous one.
-   * With 20 and 12: 20, 32, 44, ... 236 XP for level 19 to 20 (2432 XP in total to reach 20).
-   * Formula: XP for level n -> n+1 = xpForLevel2 + xpIncreasePerLevel * (n - 1).
+   * Each level needs this many times the XP of the previous one (1.2 = 20% more).
+   * Formula: XP for level n -> n+1 = xpForLevel2 * xpGrowth ^ (n - 1). Total XP to reach level 10 / 20 / 30 / 40 / 50:
+   * about 188 / 1,394 / 8,858 / 55,072 / 341,221. Maxing every skill takes roughly 29 level-ups (level 30).
+   * There is no level cap (GAME_DESIGN section 3): the curve getting steeper is what slows levelling down late.
    */
-  xpIncreasePerLevel: 10,
+  xpGrowth: 1.2,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**
