@@ -555,7 +555,7 @@ export class GameScene extends Phaser.Scene {
     this.hpText.setText(`${Math.ceil(this.player.hp)}/${this.player.maxHp}`);
 
     const p = this.progression;
-    const xpFrac = p.isMaxLevel ? 1 : p.xp / p.xpNeeded;
+    const xpFrac = p.xp / p.xpNeeded;
     this.xpBar.clear();
     this.xpBar.fillStyle(0x1a2140).fillRect(16, 30, w, 5);
     this.xpBar.fillStyle(0xffd23e).fillRect(16, 30, w * xpFrac, 5);
@@ -564,9 +564,8 @@ export class GameScene extends Phaser.Scene {
 
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
-    const lv = this.progression.isMaxLevel ? 'MAX' : this.progression.level;
     this.clockText.setText(time);
-    this.hud.setText(`lv ${lv}   kills ${this.kills}   credits ${this.credits}`);
+    this.hud.setText(`lv ${this.progression.level}   kills ${this.kills}   credits ${this.credits}`);
     this.objectivePanel.update();
     this.objectiveMarker.update();
   }

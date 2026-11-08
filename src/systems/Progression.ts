@@ -65,25 +65,19 @@ export class Progression {
     this.recomputeStats()
   }
 
-  get isMaxLevel() {
-    return this.level >= LEVELING.maxLevel
-  }
-
   get xpNeeded() {
     return xpToNextLevel(this.level)
   }
 
   /** Adds XP and returns how many levels were gained (can be more than one). */
   addXp(amount: number): number {
-    if (this.isMaxLevel) return 0
     this.xp += amount
     let gained = 0
-    while (!this.isMaxLevel && this.xp >= this.xpNeeded) {
+    while (this.xp >= this.xpNeeded) {
       this.xp -= this.xpNeeded
       this.level++
       gained++
     }
-    if (this.isMaxLevel) this.xp = 0
     return gained
   }
 

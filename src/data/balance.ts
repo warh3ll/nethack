@@ -388,13 +388,11 @@ export const WEAPON_SLOTS = 5
 export const PASSIVE_SLOTS = 5
 
 export const LEVELING = {
-  /** Highest player level. Reaching it stops XP gain and level-ups. */
-  maxLevel: 20,
   /** XP needed to go from level 1 to level 2. A drone gives 1 XP, so this is roughly "kills per level". */
   xpForLevel2: 5,
   /**
    * Each level after that needs this much more XP than the previous one.
-   * With 20 and 12: 20, 32, 44, ... 236 XP for level 19 to 20 (2432 XP in total to reach 20).
+   * There is no level cap (GAME_DESIGN section 3): the player keeps levelling for as long as the run lasts.
    * Formula: XP for level n -> n+1 = xpForLevel2 + xpIncreasePerLevel * (n - 1).
    */
   xpIncreasePerLevel: 10,
