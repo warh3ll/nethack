@@ -73,7 +73,7 @@ export class SynapticOverload {
   private pickTarget(minRange: number, maxRange: number): Enemy | null {
     const candidates = this.enemies.getChildren().filter((obj) => {
       const e = obj as Enemy;
-      return !e.stats.healthBar && this.validTarget(e, minRange, maxRange);
+      return !e.stats.healthBar && !e.hijacked && this.validTarget(e, minRange, maxRange);
     });
     return candidates.length ? (Phaser.Utils.Array.GetRandom(candidates) as Enemy) : null;
   }
