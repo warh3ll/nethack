@@ -67,7 +67,7 @@ Rules to check every feature against. Edit these first.
 - Passive bonuses are always re-summed from scratch, never adjusted incrementally.
 - One starting skill: Auto-Pistol _(in game)_.
 - **Nothing useful to offer (decided):** when a level-up has nothing useful (all slots full and skills maxed), the player chooses between a heal (30% of max HP) or credits (amount TBD until the economy is set).
-- **XP curve (decided):** each level needs **1.2x the XP of the previous one**, starting at 5 XP for level 2. No level cap; the steepening curve is what slows levelling late. Total XP to reach level 10 / 20 / 30 / 40 / 50 is about 104 / 774 / 4,920 / 30,595 / 189,567. Maxing every skill takes about 29 level-ups, so roughly level 30 (which now needs a long run or a lot of XP; this is tunable). Numbers in `balance.ts` (`xpForLevel2`, `xpGrowth`).
+- **XP curve (decided):** each level needs **1.2x the XP of the previous one**, starting at 9 XP for level 2. No level cap; the steepening curve is what slows levelling late. Total XP to reach level 10 / 20 / 30 / 40 / 50 is about 188 / 1,394 / 8,858 / 55,072 / 341,221. Maxing every skill takes about 29 level-ups, so roughly level 30 (which now needs a long run or a lot of XP; this is tunable). Numbers in `balance.ts` (`xpForLevel2`, `xpGrowth`).
 - **Reroll and skip (decided):** one reroll of the 3 choices per level-up. The player may also skip, but then gets no reward for that level-up.
 - Both weapon skills and passive skills should only have 3 levels (currently weapons have 5, remove level 2 and 4.)
 
