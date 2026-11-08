@@ -287,9 +287,9 @@ export class GameScene extends Phaser.Scene {
       pickAtmPositions(city, [...objectivePoints(objectiveDefs), ...this.caches, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit], spawnPoints),
       () => !this.gameOver && !this.paused && !this.levelingUp && !this.player.isDead && !this.objectives.typing,
       (amount) => (this.credits += amount),
-      (x, y) => {
+      (x, y, enemies) => {
         const point = this.spawner.nearest(x, y);
-        if (point) this.spawner.summonHunter(this.gameTime, point, 'goon');
+        if (point) this.spawner.summonHunters(this.gameTime, point, enemies);
       },
     );
     // The subway stations: the start plaza and the exit plaza. The exit's ring only opens once every objective is done.

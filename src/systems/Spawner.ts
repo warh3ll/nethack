@@ -69,10 +69,10 @@ export class Spawner {
     return best;
   }
 
-  /** Sends one enemy of `type` out of `point` (flash first, as always) that hunts the player from the moment it appears. */
-  summonHunter(now: number, point: SpawnPoint, type: string) {
+  /** Sends a group out of `point` (flash first, as always) that hunts the player from the moment it appears. */
+  summonHunters(now: number, point: SpawnPoint, types: string[]) {
     const flash = point.kind === 'factory' ? SPAWN_POINTS.factoryFlashMs : SPAWN_POINTS.exitFlashMs;
-    this.pending.push({ point, types: [type], startedAt: now, spawnAt: now + flash, hunt: true });
+    this.pending.push({ point, types, startedAt: now, spawnAt: now + flash, hunt: true });
   }
 
   /**

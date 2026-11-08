@@ -21,10 +21,10 @@ interface AtmState {
   phase: AtmPhase;
   /** Decryption: how long E has been held (ms). */
   holdMs: number;
-  /** Channeling: time spent so far, time since the last credit, time since the last goon (ms). */
+  /** Channeling: time spent so far and time since the last credit (ms), and how many waves have been sent. */
   channelMs: number;
   creditMs: number;
-  goonMs: number;
+  wavesSent: number;
 }
 
 /**
@@ -43,11 +43,11 @@ export class Atms {
     /** Asked each frame: false while the game is paused, a hack prompt takes the keys, and so on. */
     private canInteract: () => boolean,
     private addCredits: (amount: number) => void,
-    /** Sends a hunting goon out of the spawn point closest to the ATM. */
-    private summonGoon: (x: number, y: number) => void,
+    /** Sends a wave of hunters out of the spawn point closest to the ATM. */
+    private summonWave: (x: number, y: number, enemies: string[]) => void,
   ) {
     this.eKey = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.states = positions.map((p) => ({ atm: new Atm(scene, p.x, p.y), phase: 'idle', holdMs: 0, channelMs: 0, creditMs: 0, goonMs: 0 }));
+    this.states = positions.map((p) => ({ atm: new Atm(scene, p.x, p.y), phase: 'idle', holdMs: 0, channelMs: 0, creditMs: 0, wavesSent: 0 }));
   }
 
   /** Where the ATMs are (for keeping other things clear of them). */
@@ -87,7 +87,6 @@ export class Atms {
     if (!inRange) return this.shutDown(s);
     s.channelMs += deltaMs;
     s.creditMs += deltaMs;
-    s.goonMs += deltaMs;
     const every = 1000 / ATMS.creditsPerSecond;
     while (s.creditMs >= every) {
       s.creditMs -= every;
@@ -95,9 +94,9 @@ export class Atms {
       s.atm.floatCredit(1);
     }
     if (s.channelMs >= ATMS.channelMs) return this.shutDown(s);
-    while (s.goonMs >= ATMS.goonIntervalMs) {
-      s.goonMs -= ATMS.goonIntervalMs;
-      this.summonGoon(s.atm.x, s.atm.y);
+    while (s.wavesSent < ATMS.waves.length && s.channelMs >= ATMS.waves[s.wavesSent].atMs) {
+      this.summonWave(s.atm.x, s.atm.y, ATMS.waves[s.wavesSent].enemies);
+      s.wavesSent++;
     }
   }
 

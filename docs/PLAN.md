@@ -81,7 +81,7 @@ Best done together, in this order:
 Candidates from the design doc: boss fight, defend a point, retrieve an item, eliminate a target. None are decided, so pick one and write it into the design doc first (s7).
 
 - [x] Camera pole: optional three-step hack (hold E, PIN, type "reveal") that unlocks a minimap for the rest of the run (s7). `systems/CameraHack.ts`, `entities/CameraPole.ts`, `ui/Minimap.ts`; numbers in `CAMERA_POLE` and `MINIMAP`. The pole texture is a generated placeholder (`camera-pole` in `BootScene.ts`)
-- [x] ATMs: optional interactive element. The player can channel funds from the megacorps from their ATMs with a short decryption. Goons will spawn every 4 seconds from the closest spawning point. Maximum channeling of funds for 20 seconds, if the player leaves the circle, that ATM is disabled for the rest of the run. 4-6 ATMs per map. `systems/Atms.ts`, `entities/Atm.ts`, numbers in `ATMS` and `LIGHTING.atm`; the `atm` texture is a generated placeholder in `BootScene.ts`. Not on the minimap yet
+- [x] ATMs: optional interactive element. The player can channel funds from the megacorps from their ATMs with a short decryption. Waves spawn from the closest spawning point while channeling (5 s: drone and marksman, 10 s: two heavies, 15 s: a goon). Maximum channeling of funds for 20 seconds, if the player leaves the circle, that ATM is disabled for the rest of the run. 4-6 ATMs per map. `systems/Atms.ts`, `entities/Atm.ts`, numbers in `ATMS` and `LIGHTING.atm`; the `atm` texture is a generated placeholder in `BootScene.ts`. Not on the minimap yet
 
 ### H. Street-level city (s6, s7)
 

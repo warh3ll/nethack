@@ -370,8 +370,15 @@ export const ATMS = {
   /** Longest a channel can run. When it is up, the ATM is switched off. */
   channelMs: 20000,
   creditsPerSecond: 1,
-  /** A goon comes out of the spawn point closest to the ATM this often while channeling, and hunts the player until dead. */
-  goonIntervalMs: 4000,
+  /**
+   * Waves sent at the player while channeling: once each, `atMs` after the channel starts, out of the spawn point
+   * closest to the ATM. Enemy keys are from ENEMIES. They hunt the player until dead.
+   */
+  waves: [
+    { atMs: 5000, enemies: ['drone', 'marksman'] },
+    { atMs: 10000, enemies: ['heavy', 'heavy'] },
+    { atMs: 15000, enemies: ['goon'] },
+  ],
 }
 
 export const STARTING_SKILL = 'autoPistol'
