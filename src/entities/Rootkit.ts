@@ -84,6 +84,10 @@ export class Rootkit {
       if (time >= h.nextTickAt) {
         h.nextTickAt = time + s.tickMs;
         this.touchDamage(e, s.contactDamage * this.playerStats.damageMult);
+        if (!e.active) continue;
+        // The swarm fights back: every enemy touching the decoy hurts it. If it dies, onEnemyDied sets off the explosion.
+        this.takeContactDamage(e);
+        if (!e.active) continue;
       }
       if (time >= h.nextPuffAt) {
         h.nextPuffAt = time + FX.puffEveryMs;
@@ -145,12 +149,28 @@ export class Rootkit {
     }
   }
 
+  /** Every swarm enemy touching the hijacked one hits it for its own contact damage. */
+  private takeContactDamage(e: Enemy) {
+    for (const obj of this.enemies.getChildren()) {
+      const o = obj as Enemy;
+      if (!o.active || o.hijacked || o.stats.contactDamage <= 0) continue;
+      const reach = e.stats.radius + o.stats.radius + 4;
+      if (Phaser.Math.Distance.Between(e.x, e.y, o.x, o.y) > reach) continue;
+      if (e.takeDamage(o.stats.contactDamage)) return;
+    }
+  }
+
   /** The hijacked enemy dies outright, then everything near where it stood takes damage. */
   private explode(h: Hijack, damage: number, radius: number) {
     const e = h.enemy;
     const { x, y } = e;
     this.release(h);
     if (e.takeDamage(e.hp, false, this.skillId, false)) this.onKill(e);
+    this.blast(x, y, damage, radius);
+  }
+
+  /** Damage everything swarm-side around a point, and show the ring. */
+  private blast(x: number, y: number, damage: number, radius: number) {
     for (const obj of this.enemies.getChildren()) {
       const o = obj as Enemy;
       if (!o.active || o.hijacked || Phaser.Math.Distance.Between(x, y, o.x, o.y) > radius) continue;
@@ -164,10 +184,14 @@ export class Rootkit {
     if (i >= 0) this.active.splice(i, 1);
   }
 
-  /** A hijacked enemy killed by something else (Virus, EMP, ...) just stops being tracked. */
+  /** A hijacked enemy that dies before its time is up (hit by the swarm, Virus, ...) explodes where it fell. */
   private onEnemyDied(e: Enemy) {
     const h = this.active.find((a) => a.enemy === e);
-    if (h) this.release(h);
+    if (!h) return;
+    this.release(h);
+    const s = this.stats;
+    // Fired while the enemy is still in place (its hijacked flag is cleared after this event), so it isn't caught in its own blast.
+    this.blast(e.x, e.y, s.explosionDamage * this.playerStats.damageMult, s.explosionRadius);
   }
 
   /** Cosmetic: a quick bright flash on the enemy at the moment it is hijacked. */

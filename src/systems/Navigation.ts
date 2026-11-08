@@ -96,12 +96,14 @@ export class Navigation {
   readonly blocked: Uint8Array;
   private readonly half = MAP.size / 2;
   private readonly player: FlowField;
+  private readonly decoy: FlowField;
   private readonly fixed = new Map<number, FlowField>();
 
   constructor(city: City) {
     this.size = city.size;
     this.blocked = city.cells.map((c) => (c === CELL.building ? 1 : 0));
     this.player = new FlowField(this);
+    this.decoy = new FlowField(this);
   }
 
   /** The tile under a world position, clamped to the map. */
@@ -130,6 +132,16 @@ export class Navigation {
 
   get toPlayer() {
     return this.player;
+  }
+
+  /** Rebuilds the decoy's flow field (Rootkit taunt) when the decoy has moved onto another tile. */
+  trackDecoy(x: number, y: number) {
+    const tile = this.tileAt(x, y);
+    if (tile !== this.decoy.target) this.decoy.build(tile);
+  }
+
+  get toDecoy() {
+    return this.decoy;
   }
 
   /** A flow field towards a fixed point, built the first time it is asked for. */

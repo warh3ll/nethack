@@ -47,8 +47,8 @@ export class Weapon {
     const inRange: { e: Enemy; d: number }[] = [];
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
-      if (!e.active) continue;
-      const d = Phaser.Math.Distance.Squared(x, y, e.x, e.y);
+      if (!e.active || e.hijacked) continue; // a Rootkit'd enemy is about to explode: don't waste shots on it
+      const d =Phaser.Math.Distance.Squared(x, y, e.x, e.y);
       if (d <= range * range && d >= minRange * minRange) inRange.push({ e, d });
     }
     // Best first, so the (costlier) line check usually runs once or twice.

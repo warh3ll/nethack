@@ -85,7 +85,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   /** Per-frame behaviour: swarm enemies come for the player through the streets, guards follow their aggro rules. */
-  act(playerX: number, playerY: number, time: number, nav: Navigation) {
+  act(playerX: number, playerY: number, time: number, nav: Navigation, decoy: { x: number; y: number } | null = null) {
     if (this.hijacked) return; // Rootkit steers it
     if (time < this.stunnedUntil) {
       if (!this.stunTinted) this.applyStunTint();
@@ -99,13 +99,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const guard = this.stats.guard;
     if (!guard) {
       this.chasing = true;
-      this.route(playerX, playerY, nav.toPlayer, time, nav);
-      // A marksman stops once in range, but only where it can see the player.
+      // A Rootkit decoy takes preference over the player for as long as it lives.
+      const tx = decoy ? decoy.x : playerX;
+      const ty = decoy ? decoy.y : playerY;
+      this.route(tx, ty, decoy ? nav.toDecoy : nav.toPlayer, time, nav);
+      // A marksman stops once in range, but only where it can see the target.
       const ranged = this.stats.ranged;
-      if (ranged?.holdAtRange && this.direct && Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) <= ranged.range) {
+      if (ranged?.holdAtRange && this.direct && Phaser.Math.Distance.Between(this.x, this.y, tx, ty) <= ranged.range) {
         return this.setVelocity(0, 0);
       }
-      return this.walk(playerX, playerY);
+      return this.walk(tx, ty);
     }
 
     const d = Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY);
@@ -129,9 +132,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * The first shot of a chase comes one full cooldown after it starts, so there's time to react.
    * Buildings stop bullets, so it only fires with a clear line; otherwise it stays ready and fires as soon as it has one.
    */
-  shotAngle(time: number, playerX: number, playerY: number, nav: Navigation): number | null {
+  shotAngle(time: number, playerX: number, playerY: number, nav: Navigation, decoy: { x: number; y: number } | null = null): number | null {
     const ranged = this.stats.ranged;
     if (!ranged || this.hijacked) return null;
+    // Swarm enemies shoot at the Rootkit decoy instead of the player while it lives.
+    if (decoy && !this.stats.guard) {
+      playerX = decoy.x;
+      playerY = decoy.y;
+    }
     if (time < this.stunnedUntil) {
       // Stunned: no shots, and the cooldown is held so it doesn't fire the instant the stun ends.
       if (this.nextShotAt >= 0) this.nextShotAt = Math.max(this.nextShotAt, this.stunnedUntil);

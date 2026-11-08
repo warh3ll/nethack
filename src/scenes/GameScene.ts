@@ -184,6 +184,15 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
+    // Enemy bullets hurt a hijacked (Rootkit) enemy too. Its death makes it explode, see Rootkit.
+    this.physics.add.overlap(this.enemyBullets, this.enemies, (a, b) => {
+      const bullet = (a instanceof EnemyBullet ? a : b) as EnemyBullet;
+      const enemy = (a instanceof Enemy ? a : b) as Enemy;
+      if (!bullet.active || !enemy.active || !enemy.hijacked) return;
+      bullet.kill();
+      enemy.takeDamage(bullet.damage);
+    });
+
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => {
       const bullet = b as EnemyBullet;
       if (!bullet.active) return;
@@ -346,6 +355,20 @@ export class GameScene extends Phaser.Scene {
     this.shadows.update();
     this.nav.trackPlayer(this.player.x, this.player.y);
 
+    // Rootkit taunt: the hijacked enemy nearest the player draws the swarm's attention for as long as it lives.
+    let decoy: Enemy | null = null;
+    let decoyD = Infinity;
+    for (const obj of this.enemies.getChildren()) {
+      const o = obj as Enemy;
+      if (!o.active || !o.hijacked) continue;
+      const d = (o.x - this.player.x) ** 2 + (o.y - this.player.y) ** 2;
+      if (d < decoyD) {
+        decoyD = d;
+        decoy = o;
+      }
+    }
+    if (decoy) this.nav.trackDecoy(decoy.x, decoy.y);
+
     const recycle = SPAWN_POINTS.recycleDistance ** 2;
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
@@ -356,8 +379,8 @@ export class GameScene extends Phaser.Scene {
         e.despawn();
         continue;
       }
-      e.act(this.player.x, this.player.y, this.gameTime, this.nav);
-      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav);
+      e.act(this.player.x, this.player.y, this.gameTime, this.nav, decoy);
+      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav, decoy);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
         (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range);
