@@ -26,6 +26,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 ## Working style
 
 - Always work on a new branch, never directly on main. Do not merge to main until Henrik says so (he does that once he's happy with the result). When he does say so, merge and also push main to origin. Then delete the merged branch locally and on origin (its commits stay in main's history).
+- When asked to clean up branches, delete a branch only if it has no commits missing from main. Check with `git rev-list --count main..<branch>`. Local branches whose remote is gone need `git branch -D`, so verify first.
 - Small, runnable milestones: every change should leave the game playable.
 - Playtest features that come from `docs/PLAN.md` (they are usually larger) before calling them done: run the dev server and drive the game in a real browser, and check that the feature actually shows up and works, not just that it typechecks. Say plainly what was and wasn't exercised.
 - Textures are generated or loaded in `src/scenes/BootScene.ts`; swapping in new art there under the same texture keys is enough.
