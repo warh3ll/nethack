@@ -163,6 +163,11 @@ export class Objectives {
     }
   }
 
+  /** Touch: a double tap on open ground drops a cable being carried (like E away from the target server). */
+  onDoubleTap() {
+    if (this.entries.some((e) => !e.done && e.connect?.grabbed)) this.tapE = true;
+  }
+
   /** One smack on the server (E, or a tap on the server). */
   private smack(e: ObjectiveEntry) {
     if (!e.server || !e.hack) return;

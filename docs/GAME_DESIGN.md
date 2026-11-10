@@ -190,6 +190,7 @@ The game should be fully playable on a phone. Touch play keeps the same rules as
   - Each object uses **only tap or only hold, never both**.
   - Tap areas are **generous**, larger than the sprite, and only respond while the player is in interaction range.
   - **Tap:** opening a data cache _(in game)_. **Tap repeatedly:** Smack, by tapping the server itself (it wriggles on each hit).
+  - **Connect servers:** tap a server to grab the cable, hold the other server to attach it. **Double tap anywhere** on open ground drops the cable (decided); a single tap never does, so stopping or re-placing the thumb can't drop it by accident. A tap is a short touch that barely moves (limits in `balance.ts`).
   - **Hold:** ATM decrypt (5 s) and the camera pole's hold step. The player can hold with one thumb and keep moving with the other. Once a hold has started it continues while the finger stays down, even if it drifts off the object, as long as the player stays in range. Letting go or taking damage restarts it, as on keyboard.
   - The hold progress indicator sits **above the thumb** so the finger doesn't hide it, raised further than on desktop (offset in `balance.ts`).
 - **Hack prompts, layout (decided):** the input panel takes the **bottom half** of the screen in portrait, so the player can type with both thumbs and still move by starting a drag in the top half. In **landscape** it is the same, shifted horizontally: the panel takes the **right side** of the screen and the player moves on the other.

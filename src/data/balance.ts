@@ -426,6 +426,18 @@ export const TOUCH_INTERACT = {
   tapRadius: 70,
   /** On touch screens, hold progress bars sit this much (px) higher than on desktop, so the thumb doesn't hide them. */
   holdBarRaise: 40,
+  /**
+   * Double tap anywhere (not on a button or object) drops the cable in Connect servers. A touch only counts as a tap if
+   * it is short and barely moves, so moving with the joystick never triggers it.
+   */
+  doubleTap: {
+    /** Longest a touch may last (ms) and farthest it may move (px) to count as a tap. */
+    tapMaxMs: 220,
+    tapMaxMove: 14,
+    /** Most time (ms) between the two taps, and how far apart (px) they may land. */
+    gapMs: 350,
+    maxDistance: 80,
+  },
 }
 
 /** Touch play: the panel for hack prompts (keypad and word tiles), GAME_DESIGN section 8b. */

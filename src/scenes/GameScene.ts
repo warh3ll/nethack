@@ -344,6 +344,7 @@ export class GameScene extends Phaser.Scene {
     this.pauseButton = this.createPauseButton();
 
     this.joystick = new TouchJoystick(this, () => !this.gameOver && !this.paused && !this.levelingUp);
+    this.joystick.onDoubleTap = () => this.objectives.onDoubleTap();
 
     this.scale.on('resize', this.onResize, this);
     this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));

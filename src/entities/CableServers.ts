@@ -71,7 +71,7 @@ export class CableServers {
       this.bar.fillStyle(0x1a2140).fillRect(at.x - BAR_W / 2, at.y - 56 - raise, BAR_W, BAR_H);
       this.bar.fillStyle(GREEN).fillRect(at.x - BAR_W / 2, at.y - 56 - raise, BAR_W * state.progress, BAR_H);
     } else {
-      this.label.setText(nearTarget ? hint('HOLD [E] TO ATTACH', 'HOLD THE SERVER TO ATTACH') : hint('BRING THE CABLE HERE  ([E] DROP)', 'BRING THE CABLE HERE'));
+      this.label.setText(nearTarget ? hint('HOLD [E] TO ATTACH', 'HOLD THE SERVER TO ATTACH') : hint('BRING THE CABLE HERE  ([E] DROP)', 'BRING THE CABLE HERE  (DOUBLE TAP: DROP)'));
     }
     this.label.setPosition(at.x, at.y - this.labelOffset - raise);
   }
