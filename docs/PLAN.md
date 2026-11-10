@@ -140,6 +140,8 @@ Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus 
 - [x] Prompt panel layout: bottom half in portrait, right side in landscape, with a quick, smooth camera shift so the player stays in the uncovered part
 - [x] On-screen keypad for PIN and IP (dots fill in automatically)
 - [x] Word tiles for Password, Inject and the camera pole's "reveal": 8 tiles, at least 44 px high, wrong tap blinks red, used tiles dim in place. Code: `ui/TouchInteract.ts`, `ui/TouchPromptPanel.ts`, `ui/touchMode.ts`; numbers in `TOUCH_INTERACT` and `TOUCH_PROMPT` in `balance.ts`. Connect servers works by touch too (tap to grab, hold to attach, double tap anywhere to drop)
+- [x] Fullscreen: button in the main menu and pause screen where supported (Android, desktop, iPad); iPhone uses Add to Home Screen (manifest and meta tags in `index.html`, `public/manifest.webmanifest`)
+- [ ] Home-screen icon art to replace the placeholder `N` (`public/apple-touch-icon.png` 180 px, `icon-192.png`, `icon-512.png`) (Henrik)
 - [ ] Touch buttons for keyboard-only screens: results screen (R/M), pause quit confirmation (Q/Y/N), main menu
 - [ ] Phone layout check: orientation, notches, readable HUD
 - [ ] Performance check on a real phone (lighting, swarm size) (Henrik)

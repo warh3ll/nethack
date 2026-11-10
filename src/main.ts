@@ -10,7 +10,8 @@ const game = new Phaser.Game({
   backgroundColor: '#05060a',
   // Long-press on a phone would otherwise open the browser menu mid-run.
   disableContextMenu: true,
-  scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
+  // Fullscreen takes the whole page, not just the canvas, so HTML overlays like the save code dialog still show.
+  scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%', fullscreenTarget: document.documentElement },
   physics: { default: 'arcade', arcade: { debug: false } },
   render: { maxLights: LIGHTING.maxLights },
   scene: [BootScene, MenuScene, GameScene],

@@ -46,6 +46,7 @@ import { TouchJoystick } from '../ui/TouchJoystick';
 import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
 import { TouchPromptPanel } from '../ui/TouchPromptPanel';
 import { watchTouchMode } from '../ui/touchMode';
+import { canFullscreen, toggleFullscreen } from '../ui/fullscreen';
 
 /** Ignore taps this long after the game-over screen appears, so a thumb still steering doesn't skip it. */
 const RESTART_ARM_DELAY_MS = 800;
@@ -340,6 +341,10 @@ export class GameScene extends Phaser.Scene {
     });
     this.input.keyboard!.on('keydown-N', () => {
       if (this.confirmingQuit) this.setConfirmingQuit(false);
+    });
+    // F is a letter too, so only on the pause screen (never while a prompt takes typing).
+    this.input.keyboard!.on('keydown-F', () => {
+      if (this.paused && !this.confirmingQuit) toggleFullscreen(this);
     });
     this.pauseButton = this.createPauseButton();
 
@@ -717,6 +722,7 @@ export class GameScene extends Phaser.Scene {
       button(cam.width / 2 + 10, 160, '[N] keep playing', '#2ef2ff', () => this.setConfirmingQuit(false));
     } else {
       button(cam.width / 2 - 110, 220, '[Q] quit to menu', '#ff2e88', () => this.setConfirmingQuit(true));
+      if (canFullscreen(this)) addButton(this, overlay, { x: cam.width / 2 - 110, y: y + 56, width: 220, height: 44, label: '[F] fullscreen', color: '#2ef2ff', run: () => toggleFullscreen(this) });
     }
   }
 

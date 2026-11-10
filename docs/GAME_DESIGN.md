@@ -201,6 +201,7 @@ The game should be fully playable on a phone. Touch play keeps the same rules as
   - A **wrong tap** makes the tile blink red and adds nothing, with no other penalty, to keep frustration small (matches "Mistyping: no penalty" in section 8).
   - Tiles stay in place: a used tile dims where it is instead of disappearing, so the others never shift under the thumb.
   - Case-sensitivity doesn't apply, since words are picked, not typed.
+- **Fullscreen:** a FULLSCREEN button in the main menu and on the pause screen (F on desktop), shown only where the browser supports it (Android, desktop, iPad). iPhone doesn't allow websites to go fullscreen, so iPhone players use **Add to Home Screen**, which opens the game without the browser bars. The home-screen icon is a placeholder (`public/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`).
 - **Menus and screens:** everything reachable by key on desktop also needs a touch button (results screen reboot/menu, pause quit confirmation, main menu).
 - **Open:** phone performance (night lighting, large swarms) is unknown until tested on a real device.
 

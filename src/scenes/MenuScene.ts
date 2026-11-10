@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { createParallax } from '../entities/Parallax';
 import { account } from '../systems/Account';
 import { addButton } from '../ui/Button';
+import { canFullscreen, toggleFullscreen } from '../ui/fullscreen';
 import { SaveCodeDialog } from '../ui/SaveCodeDialog';
 
 const CYAN = '#2ef2ff';
@@ -58,12 +59,17 @@ export class MenuScene extends Phaser.Scene {
     button('SHOP  // offline', CYAN);
     button('EQUIPMENT  // offline', CYAN);
     button('[C] SAVE CODE', GOLD, () => this.openSaveCode());
+    // Only where the browser supports it (not on iPhone, which uses Add to Home Screen instead).
+    if (canFullscreen(this)) button('[F] FULLSCREEN', CYAN, () => toggleFullscreen(this));
     this.contentH = y - BUTTON_GAP;
 
     // The keyboard reaches the game even while the player types in the dialog, so these all check for it.
     this.input.keyboard!.on('keydown-ENTER', () => this.startRun());
     this.input.keyboard!.on('keydown-C', () => this.openSaveCode());
     this.input.keyboard!.on('keydown-ESC', () => this.dialog?.close());
+    this.input.keyboard!.on('keydown-F', () => {
+      if (!this.dialog) toggleFullscreen(this);
+    });
 
     this.layout();
     this.scale.on('resize', this.layout, this);
