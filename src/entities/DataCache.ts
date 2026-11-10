@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CACHES, LIGHTING } from '../data/balance';
 import { addGlow, lit } from '../systems/Lighting';
+import { hint } from '../ui/touchMode';
 
 const CYAN = 0x2ef2ff;
 
@@ -34,7 +35,7 @@ export class DataCache {
   /** Shows the "[E] open" prompt. Tapping it opens the cache too (touch has no E key). */
   showPrompt(visible: boolean, onTap: () => void) {
     if (this.prompt.visible === visible) return;
-    this.prompt.setVisible(visible);
+    this.prompt.setVisible(visible).setText(hint('[E] open', 'tap to open'));
     if (visible) this.prompt.setInteractive({ useHandCursor: true }).once('pointerdown', onTap);
     else this.prompt.disableInteractive().off('pointerdown');
   }

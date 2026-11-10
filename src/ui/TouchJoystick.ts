@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TOUCH_JOYSTICK } from '../data/balance';
+import { TOUCH_INTERACT, TOUCH_JOYSTICK } from '../data/balance';
 
 /**
  * Floating virtual joystick for touch screens: put a thumb down anywhere, drag to move.
@@ -12,6 +12,13 @@ export class TouchJoystick {
   private pointerId: number | null = null;
   private baseX = 0;
   private baseY = 0;
+  /** For telling taps from moves: when the current touch started, and the farthest it has moved. */
+  private downAt = 0;
+  private maxMove = 0;
+  /** The last tap (a short touch that barely moved), for spotting a double tap. */
+  private lastTap: { at: number; x: number; y: number } | null = null;
+  /** Called on a double tap on open ground (not on a button or object). */
+  onDoubleTap: (() => void) | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -52,6 +59,8 @@ export class TouchJoystick {
     this.pointerId = pointer.id;
     this.baseX = pointer.x;
     this.baseY = pointer.y;
+    this.downAt = pointer.downTime;
+    this.maxMove = 0;
     this.vector.set(0, 0);
     this.draw(pointer.x, pointer.y);
     this.gfx.setVisible(true);
@@ -63,6 +72,7 @@ export class TouchJoystick {
     let dx = pointer.x - this.baseX;
     let dy = pointer.y - this.baseY;
     let dist = Math.hypot(dx, dy);
+    this.maxMove = Math.max(this.maxMove, dist);
 
     if (dist > radius && baseFollows) {
       // Drag the base along behind the thumb.
@@ -87,7 +97,24 @@ export class TouchJoystick {
   }
 
   private onUp(pointer: Phaser.Input.Pointer) {
-    if (pointer.id === this.pointerId) this.release();
+    if (pointer.id !== this.pointerId) return;
+    this.checkTap(pointer);
+    this.release();
+  }
+
+  private checkTap(pointer: Phaser.Input.Pointer) {
+    const t = TOUCH_INTERACT.doubleTap;
+    if (pointer.upTime - this.downAt > t.tapMaxMs || this.maxMove > t.tapMaxMove) {
+      this.lastTap = null;
+      return;
+    }
+    const prev = this.lastTap;
+    if (prev && pointer.upTime - prev.at <= t.gapMs && Math.hypot(pointer.x - prev.x, pointer.y - prev.y) <= t.maxDistance) {
+      this.lastTap = null;
+      this.onDoubleTap?.();
+      return;
+    }
+    this.lastTap = { at: pointer.upTime, x: pointer.x, y: pointer.y };
   }
 
   private draw(knobX: number, knobY: number) {

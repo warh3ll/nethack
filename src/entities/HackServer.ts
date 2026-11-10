@@ -3,11 +3,20 @@ import { HACK, SERVER } from '../data/objectives';
 import type { Hack, PromptKind } from '../systems/Hack';
 import { LIGHTING } from '../data/balance';
 import { addGlow, lit } from '../systems/Lighting';
+import { hint, isTouchMode } from '../ui/touchMode';
 
 const BAR_W = 120;
 const BAR_H = 8;
 const CYAN = 0x2ef2ff;
 const FONT = 'monospace';
+
+/** On touch screens the words are tapped from tiles and the server itself is smacked. */
+const TOUCH_TITLES: Partial<Record<PromptKind, string>> = {
+  ip: 'ENTER THE IP ADDRESS',
+  password: 'TAP THE PASSWORD',
+  inject: 'TAP THE CODE IN ORDER',
+  smack: 'TAP THE SERVER TO SMACK IT',
+};
 
 const TITLES: Record<PromptKind, string> = {
   ip: 'TYPE THE IP ADDRESS',
@@ -84,10 +93,10 @@ export class HackServer {
       return;
     }
 
-    this.title.setPosition(x, barY - 36).setText(inRange ? TITLES[p.kind] : 'OUT OF RANGE, GET CLOSER');
+    this.title.setPosition(x, barY - 36).setText(inRange ? ((isTouchMode() && TOUCH_TITLES[p.kind]) || TITLES[p.kind]) : 'OUT OF RANGE, GET CLOSER');
     const py = barY - 58;
     if (p.kind === 'smack') {
-      this.base.setText(`[E]${p.hits}/${p.hitsNeeded}`);
+      this.base.setText(`${hint('[E]', '')}${p.hits}/${p.hitsNeeded}`);
       this.typed.setText('');
     } else {
       this.base.setText(p.text);

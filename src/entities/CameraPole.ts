@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { LIGHTING } from '../data/balance';
+import { LIGHTING, TOUCH_INTERACT } from '../data/balance';
+import { hint, holdRaise } from '../ui/touchMode';
 import { CAMERA_POLE } from '../data/objectives';
 import { addGlow, lit } from '../systems/Lighting';
 import type { CameraHack } from '../systems/CameraHack';
@@ -57,15 +58,17 @@ export class CameraPole {
     this.typed.setText('');
 
     if (hack.step === 'worm') {
-      this.title.setPosition(x, top).setText(inRange ? '1/3 HOLD [E] TO INSERT WORM' : CAMERA_POLE.hintText);
+      // On touch screens the hold bar sits higher, clear of the thumb on the pole.
+      const holdTop = top - holdRaise(TOUCH_INTERACT.holdBarRaise);
+      this.title.setPosition(x, holdTop).setText(inRange ? hint('1/3 HOLD [E] TO INSERT WORM', '1/3 HOLD THE POLE TO INSERT WORM') : CAMERA_POLE.hintText);
       if (hack.holdMs > 0) {
-        this.bar.fillStyle(0x1a2140).fillRect(x - BAR_W / 2, top + 12, BAR_W, BAR_H);
-        this.bar.fillStyle(GREEN).fillRect(x - BAR_W / 2, top + 12, BAR_W * hack.holdProgress, BAR_H);
+        this.bar.fillStyle(0x1a2140).fillRect(x - BAR_W / 2, holdTop + 12, BAR_W, BAR_H);
+        this.bar.fillStyle(GREEN).fillRect(x - BAR_W / 2, holdTop + 12, BAR_W * hack.holdProgress, BAR_H);
       }
       return;
     }
 
-    const title = hack.step === 'pin' ? '2/3 ENTER THE PIN CODE' : '3/3 TYPE THE COMMAND';
+    const title = hack.step === 'pin' ? '2/3 ENTER THE PIN CODE' : hint('3/3 TYPE THE COMMAND', '3/3 TAP THE COMMAND');
     this.title.setPosition(x, top - 24).setText(inRange ? title : 'OUT OF RANGE, GET CLOSER');
     this.base.setText(hack.text).setColor(this.scene.time.now < this.errorUntil ? '#ff2e88' : '#ffffff');
     this.typed.setText(hack.text.slice(0, hack.typed));

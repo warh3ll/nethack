@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ENEMIES } from '../data/balance';
-import { CAMERA_POLE, STEAL_SECRETS, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, type ObjectiveDef } from '../data/objectives';
+import { CAMERA_POLE, STEAL_SECRETS, CONNECT_SERVERS, ENCRYPTION_KEY, EXTRACTION, HACK, INJECT_WORDS, PASSWORD_ADJECTIVES, PASSWORD_NOUNS, type ObjectiveDef } from '../data/objectives';
 import { CableServers } from '../entities/CableServers';
 import { CameraPole } from '../entities/CameraPole';
 import { Dossier } from '../entities/Dossier';
@@ -11,7 +11,24 @@ import type { Player } from '../entities/Player';
 import { CameraHack, pickPolePositions } from './CameraHack';
 import type { City, Point } from './City';
 import { Connect } from './Connect';
-import { Hack } from './Hack';
+import { Hack, INTERACT_KEY, promptWords, type KeyResult } from './Hack';
+import type { TouchInteract, TouchTarget } from '../ui/TouchInteract';
+
+/** The prompt that takes input right now, as the touch prompt panel needs it (GAME_DESIGN section 8b). */
+export interface TouchPrompt {
+  /** Changes when a new prompt comes up, so the panel knows to rebuild. */
+  id: unknown;
+  /** Keypad for digits (PIN, IP), word tiles for the rest. */
+  input: 'keypad' | 'words';
+  title: string;
+  text: string;
+  typed: number;
+  /** For word tiles: the correct words in order, and the list the decoys are drawn from. */
+  words: string[];
+  pool: readonly string[];
+}
+
+const PASSWORD_POOL = [...PASSWORD_ADJECTIVES, ...PASSWORD_NOUNS];
 
 export interface ObjectiveEntry {
   def: ObjectiveDef;
@@ -66,6 +83,9 @@ export class Objectives {
   private exit: Point;
   /** The doors of the factories still standing; set by the scene once the factories exist. For the compass. */
   private standingFactories: () => Point[] = () => [];
+  /** Touch stand-ins for E: a tap this frame, and the hold targets (any of them held counts as E held). */
+  private tapE = false;
+  private holds: TouchTarget[] = [];
 
   constructor(
     scene: Phaser.Scene,
@@ -79,6 +99,7 @@ export class Objectives {
     /** Spots the camera pole keeps clear of, besides the objectives. */
     caches: Point[],
     private spawnEnemy: EnemySpawner,
+    touch: TouchInteract,
   ) {
     this.scene = scene;
     this.exit = city.exit;
@@ -111,11 +132,46 @@ export class Objectives {
       }
     }
     this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack() }));
+    this.addTouchTargets(touch);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => {
       scene.input.keyboard?.off('keydown', this.onKey, this);
       scene.input.keyboard?.removeKey(this.eKey);
     });
+  }
+
+  /** Touch: tap the server to smack it, tap a cable server to grab, hold the other to attach, hold a pole to insert the worm. */
+  private addTouchTargets(touch: TouchInteract) {
+    const ok = () => this.acceptingInput() && !this.typing;
+    const tapE = () => (this.tapE = true);
+    for (const e of this.entries) {
+      if (e.server) {
+        touch.tap(e.server.x, e.server.y, () => ok() && this.engaged === e && e.hack?.prompt?.kind === 'smack', () => this.smack(e));
+      }
+      if (e.cable && e.connect) {
+        const c = e.connect;
+        const near = (side: 'a' | 'b') => this.playerWithin(e.cable![side], side === 'a' ? CONNECT_SERVERS.grabRadius : CONNECT_SERVERS.attachRadius);
+        for (const side of ['a', 'b'] as const) {
+          const at = e.cable[side];
+          touch.tap(at.x, at.y, () => ok() && !e.done && !c.grabbed && near(side), tapE);
+          this.holds.push(touch.hold(at.x, at.y, () => ok() && !e.done && c.grabbed && c.from !== side && near(side)));
+        }
+      }
+    }
+    for (const p of this.poles) {
+      this.holds.push(touch.hold(p.pole.x, p.pole.y, () => ok() && !this.mapRevealed && p.hack.step === 'worm' && this.playerWithin(p.pole, CAMERA_POLE.range)));
+    }
+  }
+
+  /** Touch: a double tap on open ground drops a cable being carried (like E away from the target server). */
+  onDoubleTap() {
+    if (this.entries.some((e) => !e.done && e.connect?.grabbed)) this.tapE = true;
+  }
+
+  /** One smack on the server (E, or a tap on the server). */
+  private smack(e: ObjectiveEntry) {
+    if (!e.server || !e.hack) return;
+    if (e.hack.onKey(INTERACT_KEY) === 'ok') e.server.wriggle();
   }
 
   /** A random number of outposts on a ring around the centre; more outposts means a bit less hp each. */
@@ -280,8 +336,9 @@ export class Objectives {
 
     // E only counts while the game takes input and no prompt owns the keyboard.
     const eOk = this.acceptingInput() && !this.typing;
-    const ePressed = Phaser.Input.Keyboard.JustDown(this.eKey) && eOk;
-    const eHeld = this.eKey.isDown && eOk;
+    const ePressed = (Phaser.Input.Keyboard.JustDown(this.eKey) || this.tapE) && eOk;
+    const eHeld = (this.eKey.isDown || this.holds.some((h) => h.held)) && eOk;
+    this.tapE = false;
 
     for (const e of this.entries) {
       if (e.done) continue;
@@ -402,15 +459,75 @@ export class Objectives {
   }
 
   private onKey(ev: KeyboardEvent) {
+    if (ev.repeat) return;
+    this.typeKey(ev.key);
+  }
+
+  /** A key for whichever prompt takes input: a camera pole being typed at, or the engaged server. */
+  typeKey(key: string): KeyResult {
+    if (!this.acceptingInput()) return 'ignored';
     const pole = this.typingPole;
-    if (pole && !ev.repeat && this.acceptingInput()) {
-      if (pole.hack.onKey(ev.key) === 'wrong') pole.pole.flashError();
-      return;
+    if (pole) {
+      const result = pole.hack.onKey(key);
+      if (result === 'wrong') pole.pole.flashError();
+      return result;
     }
     const e = this.engaged;
-    if (ev.repeat || !e?.server || !e.hack || !this.acceptingInput()) return;
-    const result = e.hack.onKey(ev.key);
+    if (!e?.server || !e.hack) return 'ignored';
+    if (e.hack.prompt?.kind === 'smack') {
+      if (key.toLowerCase() !== INTERACT_KEY) return 'ignored';
+      this.smack(e);
+      return 'ok';
+    }
+    const result = e.hack.onKey(key);
     if (result === 'wrong') e.server.flashError();
-    else if (e.hack.prompt?.kind === 'smack' && result === 'ok') e.server.wriggle();
+    return result;
+  }
+
+  /** Touch keypad: like typeKey, but the dots of an IP address fill in by themselves. */
+  typeKeypad(key: string): KeyResult {
+    const result = this.typeKey(key);
+    const p = this.engaged?.hack?.prompt;
+    if (result === 'ok' && p?.kind === 'ip') while (p.text[p.typed] === '.') this.typeKey('.');
+    return result;
+  }
+
+  /** A word tile tapped: added if it's the next word, otherwise nothing happens. */
+  typeWord(word: string): KeyResult {
+    if (!this.acceptingInput()) return 'ignored';
+    const pole = this.typingPole;
+    if (pole) return pole.hack.onWord(word);
+    return this.engaged?.hack?.onWord(word) ?? 'ignored';
+  }
+
+  /** The prompt that takes input right now, for the touch panel. Null when nothing is being typed. */
+  get touchPrompt(): TouchPrompt | null {
+    if (!this.acceptingInput()) return null;
+    const pole = this.typingPole;
+    if (pole) {
+      const h = pole.hack;
+      const pin = h.step === 'pin';
+      return {
+        id: `${this.poles.indexOf(pole)}:${h.step}`,
+        input: pin ? 'keypad' : 'words',
+        title: pin ? '2/3 ENTER THE PIN CODE' : '3/3 TAP THE COMMAND',
+        text: h.text,
+        typed: h.typed,
+        words: pin ? [] : promptWords(h.text),
+        pool: INJECT_WORDS,
+      };
+    }
+    const p = this.engaged?.hack?.prompt;
+    if (!p || p.kind === 'smack') return null;
+    const keypad = p.kind === 'ip' || p.kind === 'pin';
+    return {
+      id: p,
+      input: keypad ? 'keypad' : 'words',
+      title: { ip: 'ENTER THE IP ADDRESS', pin: 'ENTER THE PIN CODE', password: 'TAP THE PASSWORD', inject: 'TAP THE CODE IN ORDER' }[p.kind],
+      text: p.text,
+      typed: p.typed,
+      words: keypad ? [] : promptWords(p.text),
+      pool: p.kind === 'password' ? PASSWORD_POOL : INJECT_WORDS,
+    };
   }
 }
