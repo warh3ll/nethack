@@ -41,7 +41,7 @@ Rules to check every feature against. Edit these first.
 
 - One playable character in the prototype, more are TBD.
 - Movement: direct control.
-- Dash: A small dash can be performed with **Space**, cyberwaer may upgrade cooldown, dash distance, etc. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
+- Dash: A small dash can be performed with **Space**, cyberware may upgrade cooldown, dash distance, etc. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
 - **Hit area (decided):** the player's collision circle has an 18 px radius and enemies are circles sized to their sprites; both are centred on the sprite. Numbers in `balance.ts`.
 - Health with a brief invulnerability window after each hit, by default the player has a small health regen, this can be upgraded by passive skills and cyberware.
 - Auto-firing skills can be gained through data caches or level up upgrades.
@@ -224,7 +224,7 @@ The game should be fully playable on a phone. Touch play keeps the same rules as
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **ripcdoc screen with cyberware upgrades**.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **ripdoc screen with cyberware upgrades**.
 
 **Out of scope for now:** TBD (e.g. multiple characters, multiplayer). Meta progression is in scope, and so is mobile (touch) play (section 8b).
 
