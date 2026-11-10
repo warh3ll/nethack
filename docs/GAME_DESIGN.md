@@ -181,6 +181,28 @@ Some objectives require hacking the ICE protecting a server or objective.
     - **Inject words** else, for, while, void, null, nil, int, char, bool, true, false, var, let, const, func, def, async, await, yield, try, catch, throw, break, eval, exec, main, self, this, new, enum, byte, bit, hex, json, yaml, regex, loop, array, hash, map, sort, stack, queue, heap, node, tree, hack, root, pwn, pwned, leet, 1337, vuln, xss, sqli, ddos, proxy, vpn, tor, port, shell, spoof, sniff, crack, brute, salt, token, admin, login, pass, key, rsa, aes, md5, sha, cron, worm, virus, bomb, patch, ghost, nmap, ACK, SYN, NAT, DNS, ICMP, TCP, UDP, HTTP, GET, POST, 404, 403, git, bash, zsh, sudo, chmod, grep, sed, awk, curl, wget, ssh, ping, kill, top, cat, echo, pipe, touch, mkdir, pwd, tar, diff, push, pull, fetch, merge, clone, stash, blame, fork, HEAD, init, tag, sync, mount
   - **PIN** The player needs to enter a pin code, four random digits from 0-9
 
+## 8b. Mobile controls
+
+The game should be fully playable on a phone. Touch play keeps the same rules as keyboard play; only the input changes. The native phone keyboard is **not** used: it covers too much of the screen, is unreliable to open from a game, has no proper dot key for IP addresses (some locales show a comma), and autocorrect fights case-sensitive words.
+
+- **Movement:** the floating joystick (put a thumb down anywhere, drag to move) _(in game)_. A touch that lands on a button or an interactable object goes to that object instead.
+- **Interact (decided):** the player taps or holds **the object itself** (server, ATM, data cache, camera pole), never "anywhere on screen", since anywhere belongs to the joystick.
+  - Each object uses **only tap or only hold, never both**.
+  - Tap areas are **generous**, larger than the sprite, and only respond while the player is in interaction range.
+  - **Tap:** opening a data cache _(in game)_. **Tap repeatedly:** Smack, by tapping the server itself (it wriggles on each hit).
+  - **Hold:** ATM decrypt (5 s) and the camera pole's hold step. The player can hold with one thumb and keep moving with the other. Once a hold has started it continues while the finger stays down, even if it drifts off the object, as long as the player stays in range. Letting go or taking damage restarts it, as on keyboard.
+  - The hold progress indicator sits **above the thumb** so the finger doesn't hide it, raised further than on desktop (offset in `balance.ts`).
+- **Hack prompts, layout (decided):** the input panel takes the **bottom half** of the screen in portrait, so the player can type with both thumbs and still move by starting a drag in the top half. In **landscape** it is the same, shifted horizontally: the panel takes one side of the screen (the right, _my call, change if you disagree_) and the player moves on the other.
+  - While a prompt is open, the **camera shifts** so the player sits in the uncovered part of the screen (higher in portrait, to the side in landscape), so enemies stay visible. The shift is quick but smooth, and eases back when the prompt closes.
+- **IP and PIN (decided):** an on-screen keypad with digits. For IP addresses the dots fill in by themselves.
+- **Password, Inject and the camera pole's "reveal" (decided):** a masonry of **8 word tiles**. The correct words are among them, and the rest are wrong ones drawn from the same word lists (never a copy of a correct word; Password decoys mix adjectives and nouns). The player taps the correct words in the right order.
+  - Tiles are at least **44 px high** so they are easy to hit.
+  - A **wrong tap** makes the tile blink red and adds nothing, with no other penalty, to keep frustration small (matches "Mistyping: no penalty" in section 8).
+  - Tiles stay in place: a used tile dims where it is instead of disappearing, so the others never shift under the thumb.
+  - Case-sensitivity doesn't apply, since words are picked, not typed.
+- **Menus and screens:** everything reachable by key on desktop also needs a touch button (results screen reboot/menu, pause quit confirmation, main menu).
+- **Open:** phone performance (night lighting, large swarms) is unknown until tested on a real device.
+
 ## 9. Meta progression
 
 - Credits are picked up in a run (magnet radius) and spent in the main-menu store.
@@ -206,7 +228,7 @@ Some objectives require hacking the ICE protecting a server or objective.
 
 **Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two items per slot** to test equip/unequip/swap.
 
-**Out of scope for now:** TBD (e.g. multiple characters, multiplayer, mobile). Meta progression is in scope.
+**Out of scope for now:** TBD (e.g. multiple characters, multiplayer). Meta progression is in scope, and so is mobile (touch) play (section 8b).
 
 ## 12. Technical constraints that shape design
 
