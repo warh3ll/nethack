@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { ATMS, LIGHTING } from '../data/balance';
+import { ATMS, LIGHTING, TOUCH_INTERACT } from '../data/balance';
+import { holdRaise } from '../ui/touchMode';
 import { addGlow, lit, setGlow } from '../systems/Lighting';
 
 const GOLD = 0xffc83a;
@@ -45,7 +46,9 @@ export class Atm {
     const { x, y } = this;
     this.ring.clear();
     this.bar.clear();
-    this.label.setText(text);
+    // On touch screens the label and bar sit higher, clear of the thumb holding the ATM.
+    const raise = holdRaise(TOUCH_INTERACT.holdBarRaise);
+    this.label.setText(text).setY(y - PROMPT_TOP - raise);
     if (phase === 'offline') return;
 
     const active = phase === 'channeling';
@@ -53,7 +56,7 @@ export class Atm {
     this.ring.lineStyle(2, GOLD, active ? 0.8 : inRange ? 0.5 : 0.25).strokeCircle(x, y, ATMS.radius);
 
     if (phase === 'idle') return;
-    const top = y - PROMPT_TOP + 14;
+    const top = y - PROMPT_TOP - raise + 14;
     this.bar.fillStyle(0x1a2140).fillRect(x - BAR_W / 2, top, BAR_W, BAR_H);
     this.bar.fillStyle(active ? GREEN : GOLD).fillRect(x - BAR_W / 2, top, BAR_W * progress, BAR_H);
   }

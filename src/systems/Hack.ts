@@ -30,6 +30,28 @@ function shuffled<T>(arr: readonly T[]): T[] {
   return a;
 }
 
+/** The words of a prompt text, for word tiles: "neon-falcon" -> neon, falcon; "sudo grep" -> sudo, grep. */
+export function promptWords(text: string) {
+  return text.split(/[ -]/).filter((w) => w.length > 0);
+}
+
+/**
+ * Picking a whole word instead of typing it (touch word tiles). If `word` is the next word of `text` after `typed`
+ * characters, returns the new typed count (past the separator that follows it); otherwise -1.
+ */
+export function matchWord(text: string, typed: number, word: string) {
+  if (!text.startsWith(word, typed)) return -1;
+  const end = typed + word.length;
+  if (end === text.length) return end;
+  return text[end] === ' ' || text[end] === '-' ? end + 1 : -1;
+}
+
+/** `count` decoy words from `pool` (none equal to a correct word), mixed in with the correct ones in random order. */
+export function wordTiles(correct: string[], pool: readonly string[], count: number) {
+  const decoys = shuffled(pool.filter((w) => !correct.includes(w))).slice(0, Math.max(0, count - correct.length));
+  return shuffled([...correct, ...decoys]);
+}
+
 /** A random PIN code, as typed in prompts. */
 export function makePin() {
   return Array.from({ length: HACK.pinLength }, () => randInt(0, 9)).join('');
@@ -140,6 +162,18 @@ export class Hack {
       }
       if (p.typed < p.text.length) return 'ok';
     }
+    this.prompt = null;
+    return 'done';
+  }
+
+  /** A word picked from the touch word tiles (Password and Inject). Wrong or out of order: nothing is added. */
+  onWord(word: string): KeyResult {
+    const p = this.prompt;
+    if (!p || (p.kind !== 'password' && p.kind !== 'inject')) return 'ignored';
+    const typed = matchWord(p.text, p.typed, word);
+    if (typed < 0) return 'wrong';
+    p.typed = typed;
+    if (p.typed < p.text.length) return 'ok';
     this.prompt = null;
     return 'done';
   }

@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { CONNECT_SERVERS, SERVER } from '../data/objectives';
 import type { Connect } from '../systems/Connect';
-import { LIGHTING } from '../data/balance';
+import { LIGHTING, TOUCH_INTERACT } from '../data/balance';
+import { hint, holdRaise } from '../ui/touchMode';
 import { addGlow, lit, setGlow } from '../systems/Lighting';
 
 const BAR_W = 100;
@@ -58,19 +59,21 @@ export class CableServers {
     const target = state.from === 'a' ? this.b : this.a;
     const nearTarget = state.from === 'a' ? nearB : nearA;
     const at = state.grabbed ? target : this.a;
+    // On touch screens the attach bar and label sit higher, clear of the thumb on the server.
+    const raise = holdRaise(TOUCH_INTERACT.holdBarRaise);
     if (!state.grabbed) {
-      this.label.setText(nearA || nearB ? '[E] GRAB CABLE' : 'GRAB CABLE AT EITHER SERVER');
+      this.label.setText(nearA || nearB ? hint('[E] GRAB CABLE', 'TAP THE SERVER TO GRAB CABLE') : 'GRAB CABLE AT EITHER SERVER');
       const nearest = nearB && !nearA ? this.b : this.a;
       this.label.setPosition(nearest.x, nearest.y - this.labelOffset);
       return;
     } else if (state.attachMs > 0) {
       this.label.setText('ATTACHING...');
-      this.bar.fillStyle(0x1a2140).fillRect(at.x - BAR_W / 2, at.y - 56, BAR_W, BAR_H);
-      this.bar.fillStyle(GREEN).fillRect(at.x - BAR_W / 2, at.y - 56, BAR_W * state.progress, BAR_H);
+      this.bar.fillStyle(0x1a2140).fillRect(at.x - BAR_W / 2, at.y - 56 - raise, BAR_W, BAR_H);
+      this.bar.fillStyle(GREEN).fillRect(at.x - BAR_W / 2, at.y - 56 - raise, BAR_W * state.progress, BAR_H);
     } else {
-      this.label.setText(nearTarget ? 'HOLD [E] TO ATTACH' : 'BRING THE CABLE HERE  ([E] DROP)');
+      this.label.setText(nearTarget ? hint('HOLD [E] TO ATTACH', 'HOLD THE SERVER TO ATTACH') : hint('BRING THE CABLE HERE  ([E] DROP)', 'BRING THE CABLE HERE'));
     }
-    this.label.setPosition(at.x, at.y - this.labelOffset);
+    this.label.setPosition(at.x, at.y - this.labelOffset - raise);
   }
 
   private ring(p: { x: number; y: number }, radius: number, active: boolean) {

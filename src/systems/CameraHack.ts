@@ -1,7 +1,7 @@
 import { CAMERA_POLE } from '../data/objectives';
 import { CELL, type City, type Point } from './City';
 import { distance, pickApart, tileSpots } from './CitySpots';
-import { makePin, type KeyResult } from './Hack';
+import { makePin, matchWord, type KeyResult } from './Hack';
 
 export type CameraStep = 'worm' | 'pin' | 'reveal' | 'done';
 
@@ -77,6 +77,19 @@ export class CameraHack {
     if (!this.typing || key.length !== 1) return 'ignored';
     if (key !== this.text[this.typed]) return 'wrong';
     this.typed++;
+    return this.advance();
+  }
+
+  /** A word picked from the touch word tiles (the reveal step). */
+  onWord(word: string): KeyResult {
+    if (this.step !== 'reveal') return 'ignored';
+    const typed = matchWord(this.text, this.typed, word);
+    if (typed < 0) return 'wrong';
+    this.typed = typed;
+    return this.advance();
+  }
+
+  private advance(): KeyResult {
     if (this.typed < this.text.length) return 'ok';
     this.typed = 0;
     this.step = this.step === 'pin' ? 'reveal' : 'done';

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL } from '../data/balance';
+import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -43,6 +43,9 @@ import { ResultsScreen } from '../ui/ResultsScreen';
 import { Minimap } from '../ui/Minimap';
 import { SkillBar } from '../ui/SkillBar';
 import { TouchJoystick } from '../ui/TouchJoystick';
+import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
+import { TouchPromptPanel } from '../ui/TouchPromptPanel';
+import { watchTouchMode } from '../ui/touchMode';
 
 /** Ignore taps this long after the game-over screen appears, so a thumb still steering doesn't skip it. */
 const RESTART_ARM_DELAY_MS = 800;
@@ -79,6 +82,10 @@ export class GameScene extends Phaser.Scene {
   private objectivePanel!: ObjectivePanel;
   private objectiveMarker!: ObjectiveMarker;
   private joystick!: TouchJoystick;
+  /** Touch play: tapping and holding objects, and the panel for hack prompts (GAME_DESIGN section 8b). */
+  private touch!: TouchInteract;
+  private promptPanel!: TouchPromptPanel;
+  private cacheTouch = new Map<DataCache, TouchTarget>();
   private pauseButton!: Phaser.GameObjects.Container;
 
   private elapsedMs = 0;
@@ -145,6 +152,10 @@ export class GameScene extends Phaser.Scene {
     // Data caches: scattered on the map. Not objectives, so the compass and marker ignore them.
     this.caches.forEach((c) => c.destroy());
     this.caches = pickCachePositions(city, objectivePoints(objectiveDefs)).map((p) => new DataCache(this, p.x, p.y));
+    watchTouchMode(this);
+    this.touch = new TouchInteract(this);
+    this.cacheTouch.clear();
+    for (const c of this.caches) this.cacheTouch.set(c, this.touch.tap(c.x, c.y, () => this.reachableCache() === c, () => this.openCache(c)));
 
     this.input.keyboard!.on('keydown-E', this.onOpenKey, this);
     this.events.once('shutdown', () => this.input.keyboard?.off('keydown-E', this.onOpenKey, this));
@@ -153,6 +164,7 @@ export class GameScene extends Phaser.Scene {
     this.player = new Player(this, city.start.x, city.start.y, stats);
     this.shadows = new Shadows(this, this.player, this.enemies);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    this.cameras.main.setFollowOffset(0, 0);
     // Draw sprites on whole pixels so a moving pixel-art sprite does not shimmer or blur between pixel positions.
     this.cameras.main.roundPixels = true;
 
@@ -267,7 +279,9 @@ export class GameScene extends Phaser.Scene {
         enemy?.spawn(x, y, type, hp);
         return enemy;
       },
+      this.touch,
     );
+    this.promptPanel = new TouchPromptPanel(this, this.objectives);
     const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
     this.spawner = new Spawner(this, spawnPoints, (x, y, type) => {
       const enemy = this.enemies.get() as Enemy | null;
@@ -300,6 +314,7 @@ export class GameScene extends Phaser.Scene {
         const point = this.spawner.nearest(x, y);
         if (point) this.spawner.summonHunters(this.gameTime, point, enemies);
       },
+      this.touch,
     );
     // The subway stations: the start plaza and the exit plaza. The exit's ring only opens once every objective is done.
     createSubwayEntrance(this, city.start.x, city.start.y);
@@ -344,10 +359,13 @@ export class GameScene extends Phaser.Scene {
     this.gameTime += gameDelta;
 
     this.elapsedMs += gameDelta;
+    this.touch.update();
     this.player.update(this.joystick.vector, gameDelta);
     this.runStats.trackPosition(this.player.x, this.player.y);
     for (const w of this.weapons) w.update(this.gameTime);
     this.objectives.update(delta);
+    this.promptPanel.update(this.objectives.touchPrompt);
+    this.shiftCamera(delta);
     this.atms.update(gameDelta);
     this.spawnEnemies(this.gameTime);
     this.spawner.update(this.gameTime);
@@ -395,6 +413,17 @@ export class GameScene extends Phaser.Scene {
     if (this.player.isDead && !this.gameOver) this.onPlayerDeath();
   }
 
+  /**
+   * While the touch prompt panel is open, the camera eases so the player sits in the part of the screen it leaves free
+   * (and back when it closes). Real time, so it stays quick while the world is slowed for typing.
+   */
+  private shiftCamera(deltaMs: number) {
+    const target = this.promptPanel.cameraOffset();
+    const off = this.cameras.main.followOffset;
+    const k = 1 - Math.exp(-deltaMs / TOUCH_PROMPT.cameraShiftMs);
+    off.set(off.x + (target.x - off.x) * k, off.y + (target.y - off.y) * k);
+  }
+
   /** Real damage (not a blocked hit) interrupts whatever the player is doing with E. */
   private onPlayerHurt() {
     this.objectives.onPlayerHit();
@@ -437,6 +466,8 @@ export class GameScene extends Phaser.Scene {
     new CachePicker(this, contents, (take) => {
       if (take) this.applyUpgrade(contents);
       this.caches = this.caches.filter((c) => c !== cache);
+      this.cacheTouch.get(cache)?.destroy();
+      this.cacheTouch.delete(cache);
       cache.destroy();
       this.levelingUp = false;
       this.physics.resume();

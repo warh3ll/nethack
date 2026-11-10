@@ -4,7 +4,7 @@ import { GameScene } from './scenes/GameScene';
 import { MenuScene } from './scenes/MenuScene';
 import { LIGHTING } from './data/balance';
 
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#05060a',
@@ -15,3 +15,6 @@ new Phaser.Game({
   render: { maxLights: LIGHTING.maxLights },
   scene: [BootScene, MenuScene, GameScene],
 });
+
+// Dev builds only: lets a test script reach the running game (scenes, player) from the browser console.
+if (import.meta.env.DEV) (window as unknown as { game: Phaser.Game }).game = game;

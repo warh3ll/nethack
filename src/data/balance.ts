@@ -420,6 +420,34 @@ export const TOUCH_JOYSTICK = {
   baseFollows: true,
 }
 
+/** Touch play: tapping and holding objects in the world (GAME_DESIGN section 8b). */
+export const TOUCH_INTERACT = {
+  /** Radius (px) around an object's centre that counts as touching it. Bigger than the sprites, so it's easy to hit mid-fight. */
+  tapRadius: 70,
+  /** On touch screens, hold progress bars sit this much (px) higher than on desktop, so the thumb doesn't hide them. */
+  holdBarRaise: 40,
+}
+
+/** Touch play: the panel for hack prompts (keypad and word tiles), GAME_DESIGN section 8b. */
+export const TOUCH_PROMPT = {
+  /** Word tiles shown for Password, Inject and the camera pole's command: the correct words plus decoys. */
+  wordTiles: 8,
+  /** Height (px) of a word tile. Keep at least 44 so it's easy to hit. */
+  tileHeight: 52,
+  /** Keypad key height (px), between these; it grows with the space the panel has. */
+  keyHeight: { min: 48, max: 76 },
+  /** Widest a keypad key gets (px). */
+  keyMaxWidth: 110,
+  /** Space (px) between keys and tiles. */
+  gap: 10,
+  /** How long (ms) a wrong tile blinks red. */
+  wrongBlinkMs: 280,
+  /** In landscape the panel starts this far (px) from the top, leaving the HUD row visible. */
+  landscapeTop: 60,
+  /** How quickly the camera shifts the player into the uncovered part of the screen (ms, roughly the time to get most of the way). */
+  cameraShiftMs: 180,
+}
+
 /**
  * Night-time lighting. Lit things (the city, props, servers, the player and enemies) are multiplied by `ambient`
  * and brightened by the lights near them. Bullets, effects and the UI are not lit, so they always read clearly.

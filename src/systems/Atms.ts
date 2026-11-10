@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { ATMS } from '../data/balance';
 import { Atm, type AtmPhase } from '../entities/Atm';
+import { hint } from '../ui/touchMode';
+import type { TouchInteract, TouchTarget } from '../ui/TouchInteract';
 import { type City, type Point } from './City';
 import { distance, pickApart, serverSpots } from './CitySpots';
 
@@ -18,6 +20,8 @@ export function pickAtmPositions(city: City, avoid: Point[], doors: Point[]): Po
 
 interface AtmState {
   atm: Atm;
+  /** Touch: holding the ATM itself counts as holding E. */
+  touch: TouchTarget;
   phase: AtmPhase;
   /** Decryption: how long E has been held (ms). */
   holdMs: number;
@@ -28,7 +32,7 @@ interface AtmState {
 }
 
 /**
- * The ATMs: hold E in the ring to decrypt, then stay in the ring to channel credits while goons come.
+ * The ATMs: hold E (or the ATM itself, on touch) in the ring to decrypt, then stay in the ring to channel credits while goons come.
  * Leaving the ring while channeling, or running the clock out, switches that ATM off for good.
  * Time is fed in by the caller (game time, so it slows with the rest of the world while a hack prompt is typed).
  */
@@ -45,9 +49,14 @@ export class Atms {
     private addCredits: (amount: number) => void,
     /** Sends a wave of hunters out of the spawn point closest to the ATM. */
     private summonWave: (x: number, y: number, enemies: string[]) => void,
+    touch: TouchInteract,
   ) {
     this.eKey = scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.states = positions.map((p) => ({ atm: new Atm(scene, p.x, p.y), phase: 'idle', holdMs: 0, channelMs: 0, creditMs: 0, wavesSent: 0 }));
+    this.states = positions.map((p) => {
+      const s: AtmState = { atm: new Atm(scene, p.x, p.y), touch: null!, phase: 'idle', holdMs: 0, channelMs: 0, creditMs: 0, wavesSent: 0 };
+      s.touch = touch.hold(s.atm.x, s.atm.y, () => s.phase === 'idle' && this.canInteract() && distance(this.player, s.atm) <= ATMS.radius);
+      return s;
+    });
   }
 
   /** Where the ATMs are (for keeping other things clear of them). */
@@ -61,12 +70,12 @@ export class Atms {
   }
 
   update(deltaMs: number) {
-    const held = this.eKey.isDown && this.canInteract();
+    const keyHeld = this.eKey.isDown && this.canInteract();
     for (const s of this.states) {
       const inRange = distance(this.player, s.atm) <= ATMS.radius;
       switch (s.phase) {
         case 'idle':
-          this.decrypt(s, deltaMs, held && inRange);
+          this.decrypt(s, deltaMs, (keyHeld || s.touch.held) && inRange);
           break;
         case 'channeling':
           this.channel(s, deltaMs, inRange);
@@ -112,7 +121,7 @@ export class Atms {
       const left = Math.max(0, ATMS.channelMs - s.channelMs);
       return s.atm.render(phase, left / ATMS.channelMs, `CHANNELING FUNDS  ${Math.ceil(left / 1000)}s  STAY IN THE RING`, true);
     }
-    if (s.holdMs > 0) return s.atm.render('decrypting', s.holdMs / ATMS.decryptMs, 'DECRYPTING, KEEP HOLDING [E]', true);
-    s.atm.render('idle', 0, inRange ? 'HOLD [E] TO DECRYPT' : '', inRange);
+    if (s.holdMs > 0) return s.atm.render('decrypting', s.holdMs / ATMS.decryptMs, hint('DECRYPTING, KEEP HOLDING [E]', 'DECRYPTING, KEEP HOLDING'), true);
+    s.atm.render('idle', 0, inRange ? hint('HOLD [E] TO DECRYPT', 'HOLD THE ATM TO DECRYPT') : '', inRange);
   }
 }
