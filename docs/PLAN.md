@@ -131,6 +131,19 @@ Only the south side gets a front. The north, east and west sides just show the r
 - [ ] Factory damaged and destroyed versions
 - [ ] Small exits, a single 32x32 tile each, placed in the street-level row: hatch, loading bay, subway exit
 
+### I. Mobile (s8b)
+
+Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus whatever phone performance needs. Touch can be tested with desktop-browser emulation, but feel and speed need a real phone (Henrik).
+
+- [x] Floating touch joystick for movement (`ui/TouchJoystick.ts`)
+- [ ] Tap and hold on objects: generous tap areas, only in range, one gesture per object. Smack (tap the server repeatedly), ATM decrypt (hold), camera pole hold step. Hold keeps going if the finger drifts; hold indicator raised above the thumb (offset in `balance.ts`)
+- [ ] Prompt panel layout: bottom half in portrait, right side in landscape, with a quick, smooth camera shift so the player stays in the uncovered part
+- [ ] On-screen keypad for PIN and IP (dots fill in automatically)
+- [ ] Word tiles for Password, Inject and the camera pole's "reveal": 8 tiles, at least 44 px high, wrong tap blinks red, used tiles dim in place
+- [ ] Touch buttons for keyboard-only screens: results screen (R/M), pause quit confirmation (Q/Y/N), main menu
+- [ ] Phone layout check: orientation, notches, readable HUD
+- [ ] Performance check on a real phone (lighting, swarm size) (Henrik)
+
 ### G. Polish and release
 
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled
