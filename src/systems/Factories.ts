@@ -43,7 +43,9 @@ export class Factories {
       if (!b.factory) continue;
       const building = b.buildings[0];
       const doorX = tileToWorld(building.x + Math.floor(building.w / 2) + 0.5);
-      const point = points.find((p) => p.kind === 'factory' && p.door.x === doorX);
+      // Two factories can stand in the same column, so the door's y has to match too (see pickSpawnPoints).
+      const doorY = tileToWorld(building.y + building.h - 1 + 0.5);
+      const point = points.find((p) => p.kind === 'factory' && p.door.x === doorX && p.door.y === doorY);
       if (!point) continue;
       // The core stands on the sidewalk against the front, three tiles left of the door, clear of the door's flash.
       const front = tileToWorld(building.y + building.h);
