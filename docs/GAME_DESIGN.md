@@ -30,32 +30,28 @@ Rules to check every feature against. Edit these first.
 1. Move around the map while skills fire automatically at enemies
 2. Enemies come out of spawn points around the city and head for the player along the streets; the spawn rate ramps up over the run
 3. Explore the map to find the objectives. A compass always points to the closest unfinished objective. Somewhere out there are two camera poles; hacking either one gives a minimap.
-4. Along the way, find data caches scattered randomly on the map and open them for skills and skill upgrades, money, or even items.
+4. Along the way, find data caches scattered randomly on the map and open them for skills and skill upgrades, money, or even cyberware blueprints (unlocking more cyberware for purchase).
 5. Players gain XP by killing enemies or destroying factories, leveling up provides upgrade choices (3 to begin, could possibly be raised by some upgrade). Player level has no cap.
 6. Complete the objectives. They can be done in any order.
 7. Finish all objectives to unlock the metro extraction. The run clock is always visible.
 8. Extract: walk to the exit subway station (a different one from where the run started) and stay inside its ring for a 5 second countdown.
-9. In the main menu, players can buy items that make their next runs more fun or more badass.
+9. In the main menu, players can buy cyberware upgrades that make their next runs more fun or more badass.
 
 ## 4. Player
 
 - One playable character in the prototype, more are TBD.
 - Movement: direct control.
-- Dash: A small dash can be performed with **Space**, items may upgrade cooldown, dash distance. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
+- Dash: A small dash can be performed with **Space**, cyberwaer may upgrade cooldown, dash distance, etc. The player is unvulnerable for a short period after a dash. Default cooldown is 5 seconds.
 - **Hit area (decided):** the player's collision circle has an 18 px radius and enemies are circles sized to their sprites; both are centred on the sprite. Numbers in `balance.ts`.
-- Health with a brief invulnerability window after each hit, by default the player has a small health regen, this can be upgraded by passive skills and items.
+- Health with a brief invulnerability window after each hit, by default the player has a small health regen, this can be upgraded by passive skills and cyberware.
 - Auto-firing skills can be gained through data caches or level up upgrades.
 - Pause with Escape or P
 
-## 4b. Items
+## 4b. Cyberware
 
-- From the main menu, players can purchase items that permanently increase stats. There are a few slots so not everything they find can be equipped. The slots are:
-- Head, Chest, Hands, Back, Legs, Feet, Slicer (hacking tool), and four trinket slots. Item list TBD (Now in docs/ITEMS.md)
-- Items are bought with credits dropped from enemies, but can also be gained from objectives and a successful mission.
-- **Decided:** items are unique, fixed-stat, one-time buy/find. No tiers, rarities, random rolls or upgrading. One of each item.
-- **Decided:** items (bought, or found via very rare cache drops) belong to the account and are equipped in the main menu.
-- The Feet slot holds the dash item(s).
-- **Find-only items (decided):** a separate list of items that can't be bought, only found. Rare: about **2.5% of caches** contain one.
+- From the main menu, players can purchase upgrades that permanently increase stats and other effects.
+- Head, Chest, Hands, Back, Legs, Feet, ICU, and trinkets. (Now in docs/ITEMS.md)
+- Cyberware are bought with credits dropped from enemies, but blueprints can also be found in data caches.
 
 ## 5. Skills and progression
 
@@ -90,7 +86,7 @@ Rules to check every feature against. Edit these first.
 
 - **Passive rules (decided):** each passive has 3 levels and each level row is the passive's total bonus. Bonuses from all passives are added together and re-summed from scratch on every change.
   - **Firewall:** flat damage taken off every hit (-1/-2/-3). Unless the Defensive Matrix shield blocks it, a hit never does less than 1 damage (`PLAYER.minDamageTaken`).
-  - **Defensive Matrix:** grants a shield that absorbs hits completely, from touch and bullets alike, taking 0 damage. It holds 1 hit at every level (`shieldHits`, which items can raise later) and gets a hit back every 5000/4000/3000 ms. Being hit while it recharges doesn't delay it. A blocked hit starts the normal invulnerability window, but it is not damage, so it doesn't halt a hack or reset a Connect servers attach. An enemy whose touch lands, blocked or not, also takes 4/8/12 damage back, shown as a spike. Only touch triggers that (not bullets), so it fires at most once per invulnerability window. Flat, not boosted by OverClock.
+  - **Defensive Matrix:** grants a shield that absorbs hits completely, from touch and bullets alike, taking 0 damage. It holds 1 hit at every level (`shieldHits`, which cyberware can raise later) and gets a hit back every 5000/4000/3000 ms. Being hit while it recharges doesn't delay it. A blocked hit starts the normal invulnerability window, but it is not damage, so it doesn't halt a hack or reset a Connect servers attach. An enemy whose touch lands, blocked or not, also takes 4/8/12 damage back, shown as a spike. Only touch triggers that (not bullets), so it fires at most once per invulnerability window. Flat, not boosted by OverClock.
 
 - **Synaptic Overload (decided):** the target is picked at random among enemies in the 50-150 px band around the player. If the target dies or leaves that band during the upload, the hack restarts on a new target. The explosion never hurts the player (a possible difficulty setting later). The Goon and outposts (anything with a health bar) are never targeted, since it kills outright. _(my call, change if you disagree)_
 
@@ -160,7 +156,7 @@ TBD: level cap per skill (the player's own level is uncapped), evolutions/combin
   - **Seeds:** a seed (`?seed=` in the URL, shown on the pause screen) replays the whole run layout: streets, objectives, factories to destroy, the exit station, caches and the camera poles.
 - **Lose:** HP reaches 0.
 - **Win:** complete all objectives and extract.
-- **Win/lose screen (decided):** credits gained, items found, objectives completed, and the level reached.
+- **Win/lose screen (decided):** credits gained, cyberware found, objectives completed, and the level reached.
 - **Enemy difficulty** scales with the run clock (section 6). TBD: whether it also scales with number of objectives completed.
 - The earlier "boss on a timer" idea is now just one possible objective type (TBD).
 
@@ -177,7 +173,7 @@ Some objectives require hacking the ICE protecting a server or objective.
   - **IP address** - the player needs to type an IP address that appears over the objective, hacking progression is halted until it is complete - format is xxx.xxx.xxx.xxx (but with numbers)
   - **Password** The player is prompted to type a password using the following structure [adjective-noun] (including the dash). Chosen over symbol-heavy passwords so it works on non-US keyboards.
   - **Smack** The players is prompted to spam E (the interact key) to physically hit the machine, it wriggles with each hit and requires 8-15 hits
-  - **Inject** The player is prompted to type a short code snippet (2-3 words)
+  - **Inject** The player is prompted to type a short code snippet (2-4 words)
     - **Inject words** else, for, while, void, null, nil, int, char, bool, true, false, var, let, const, func, def, async, await, yield, try, catch, throw, break, eval, exec, main, self, this, new, enum, byte, bit, hex, json, yaml, regex, loop, array, hash, map, sort, stack, queue, heap, node, tree, hack, root, pwn, pwned, leet, 1337, vuln, xss, sqli, ddos, proxy, vpn, tor, port, shell, spoof, sniff, crack, brute, salt, token, admin, login, pass, key, rsa, aes, md5, sha, cron, worm, virus, bomb, patch, ghost, nmap, ACK, SYN, NAT, DNS, ICMP, TCP, UDP, HTTP, GET, POST, 404, 403, git, bash, zsh, sudo, chmod, grep, sed, awk, curl, wget, ssh, ping, kill, top, cat, echo, pipe, touch, mkdir, pwd, tar, diff, push, pull, fetch, merge, clone, stash, blame, fork, HEAD, init, tag, sync, mount
   - **PIN** The player needs to enter a pin code, four random digits from 0-9
 
@@ -215,7 +211,7 @@ The game should be fully playable on a phone. Touch play keeps the same rules as
 - **Results screen (decided):** the player can reboot straight into a new run or return to the main menu.
 - **Quit to menu (decided):** the pause screen can quit the run after a confirmation, forfeiting that run's credits.
 - **Importing a save (decided):** a valid code asks for confirmation first, showing the current and new credit totals, since it replaces the current save.
-- Items can be bought from a store in the main menu and equipped there (section 4b).
+- Cyberware upgrades can be purchased from the ripdoc in the main menu (section 4b).
 - Permanent upgrades are account-wide. Storage is browser localStorage (the only option on itch.io), so clearing site data wipes progress.
 - More progression TBD
 
@@ -224,11 +220,11 @@ The game should be fully playable on a phone. Touch play keeps the same rules as
 - **Setting:** cyberpunk.
 - **Art direction:** TBD. The city is shown at night _(in game, first iteration)_: a dim ambient colour over everything, with coloured lights that stand out (street lamps, servers, factories, camera poles, subway stations; a damaged factory turns red, a hacked server green). It must never get dark enough to hide enemies (pillar 1). Colour, radius and intensity of every light type, and the overall brightness, live in `balance.ts` (`LIGHTING`). The player and every enemy cast a still blob shadow (`SHADOWS`). Roofs have at most one antenna and one skylight each. Textures are generated or loaded in `BootScene.ts`; new assets can replace them under the same texture keys.
 - **Audio:** TBD.
-- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and items found** counters (decided). The minimap appears only after a camera pole is hacked (section 7). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
+- **UI:** the HUD always shows the **run clock**. Also needed: objective list, compass, hack progress bar (during hacks), HP, skill slots, and **credits and cyberware blueprints found** counters (decided). The minimap appears only after a camera pole is hacked (section 7). The live enemy counter is removed. Pause screen exists as a first version _(in game)_. TBD: cache-opening screen.
 
 ## 11. Scope
 
-**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **main-menu shop with equippable items** so item functionality can be tested. The first shop version has **two items per slot** to test equip/unequip/swap.
+**Prototype (current target):** one character, one starting skill, 10 slots (5 active skill, 5 passive), 12 skills (7 damage, 5 passives), one enemy type growing to a few, a map to explore, data caches, a run clock, a short run of objectives including at least one hacking objective, and a **ripcdoc screen with cyberware upgrades**.
 
 **Out of scope for now:** TBD (e.g. multiple characters, multiplayer). Meta progression is in scope, and so is mobile (touch) play (section 8b).
 
