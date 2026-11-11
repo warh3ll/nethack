@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { CACHES, CREDITS, DASH, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
-import { CYBERWARE, isCyberwareId } from '../data/cyberware'
+import { CYBERWARE, isCyberwareId, type CyberEffects } from '../data/cyberware'
 import {
   FALLBACK_UPGRADES,
   SKILLS,
@@ -34,6 +34,16 @@ export interface PlayerStats {
   weaponRangeMult: number
   /** Multiplier on how fast timed hack steps progress. */
   hackSpeedMult: number
+  /** Enemies within `radius` move `pct` percent slower (Proximity Sensors). */
+  enemySlow: { pct: number; radius: number } | null
+  /** Ranged enemies shooting at the player aim up to this many degrees off. */
+  enemyAimSpreadDeg: number
+  /** Chance (0..1) an enemy bullet is turned back instead of hitting. */
+  ricochetChance: number
+  /** Periodic zap of nearby enemies (Discharge Plates). */
+  discharge: CyberEffects['discharge'] | null
+  /** Optic Nerve HUD: compass needle to the nearest usable camera pole or ATM. */
+  poiCompass: boolean
 }
 
 export type Upgrade =
@@ -71,6 +81,11 @@ export class Progression {
     magnetRadius: 0,
     weaponRangeMult: 1,
     hackSpeedMult: 1,
+    enemySlow: null,
+    enemyAimSpreadDeg: 0,
+    ricochetChance: 0,
+    discharge: null,
+    poiCompass: false,
   }
   /** Installed cyberware ids, fixed for the run. */
   private readonly cyberware: string[]
@@ -202,8 +217,21 @@ export class Progression {
     let magnetPct = 0
     let rangePct = 0
     let hackPct = 0
+    let slowPct = 0
+    let slowRadius = 0
+    let aimSpread = 0
+    let ricochet = 0
+    let discharge: PlayerStats['discharge'] = null
+    let poiCompass = false
     for (const id of this.cyberware) {
       const c = CYBERWARE[id].effects
+      // Behaviour pieces: one source each for now. Should two ever overlap, they add up (slow, spread, ricochet).
+      slowPct += c.enemySlow?.pct ?? 0
+      slowRadius = Math.max(slowRadius, c.enemySlow?.radius ?? 0)
+      aimSpread += c.enemyAimSpreadDeg ?? 0
+      ricochet += c.ricochetChance ?? 0
+      discharge ??= c.discharge ?? null
+      poiCompass ||= !!c.poiCompass
       damageReductionPct += c.damageReductionPct ?? 0
       moveSpeedPct += c.moveSpeedPct ?? 0
       dashPct += c.dashDistancePct ?? 0
@@ -224,5 +252,10 @@ export class Progression {
     this.stats.magnetRadius = CREDITS.magnetRadius * (1 + magnetPct / 100)
     this.stats.weaponRangeMult = 1 + rangePct / 100
     this.stats.hackSpeedMult = 1 + hackPct / 100
+    this.stats.enemySlow = slowPct > 0 ? { pct: slowPct, radius: slowRadius } : null
+    this.stats.enemyAimSpreadDeg = aimSpread
+    this.stats.ricochetChance = Math.min(1, ricochet)
+    this.stats.discharge = discharge
+    this.stats.poiCompass = poiCompass
   }
 }

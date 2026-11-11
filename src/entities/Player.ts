@@ -191,9 +191,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     return gained;
   }
 
+  /** False while a hit would pass harmlessly (invulnerability window, dash, dead). */
+  canBeHit(now: number) {
+    return !(now < this.invulnerableUntil || this.dashMs > 0 || this.dashSafeMs > 0 || this.isDead);
+  }
+
   /** A charged shield absorbs the hit completely; either way a hit that lands starts the invulnerability window. */
   takeDamage(amount: number, now: number): HitResult {
-    if (now < this.invulnerableUntil || this.dashMs > 0 || this.dashSafeMs > 0 || this.isDead) return null;
+    if (!this.canBeHit(now)) return null;
     this.invulnerableUntil = now + PLAYER.invulnerableMs;
     if (this.shieldCharges > 0) {
       this.shieldCharges--;

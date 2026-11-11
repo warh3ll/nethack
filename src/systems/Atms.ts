@@ -60,6 +60,11 @@ export class Atms {
     });
   }
 
+  /** ATMs not yet used up (idle or channeling), for the Optic Nerve HUD. */
+  get usable(): { x: number; y: number }[] {
+    return this.states.filter((s) => s.phase !== 'offline').map((s) => s.atm);
+  }
+
   /** Where the ATMs are (for keeping other things clear of them). */
   get positions(): Point[] {
     return this.states.map((s) => s.atm);

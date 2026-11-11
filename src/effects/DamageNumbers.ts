@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { DAMAGE_NUMBERS } from '../data/balance';
 import { SKILLS } from '../data/skills';
 import { ENEMY_DAMAGED, type Enemy } from '../entities/Enemy';
+import { CYBER_COLOR, isCyberwareId } from '../data/cyberware';
 
 interface Entry {
   text: Phaser.GameObjects.Text;
@@ -27,7 +28,7 @@ export class DamageNumbers {
 
   private onDamaged(enemy: Enemy, amount: number, skillId: string, _dealt: number, showNumber: boolean) {
     if (!showNumber) return;
-    const color = SKILLS[skillId]?.color ?? DAMAGE_NUMBERS.defaultColor;
+    const color = SKILLS[skillId]?.color ?? (isCyberwareId(skillId) ? CYBER_COLOR : DAMAGE_NUMBERS.defaultColor);
     const now = this.scene.time.now;
     const live = this.pool.find(
       (e) => e.text.visible && e.enemy === enemy && e.color === color && now - e.born < DAMAGE_NUMBERS.mergeMs,

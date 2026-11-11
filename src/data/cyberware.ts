@@ -152,4 +152,20 @@ export const CYBERWARE: Record<string, Cyberware> = {
   },
 };
 
+/** Damage numbers and results-screen rows for cyberware that deals damage (Discharge Plates, ricochets). */
+export const CYBER_COLOR = 0x7df9ff;
+
+/** Tuning for the cyberware with behaviour. The per-piece numbers live in each piece's effects above. */
+export const CYBER_FX = {
+  /** Proximity Sensors: faint ring at the slow radius around the player, so the zone reads. 0 hides it. */
+  slowRingAlpha: 0.12,
+  /** Discharge Plates: how long the lightning arcs stay on screen, and how jagged they are (px). */
+  dischargeFxMs: 220,
+  dischargeJitter: 10,
+  /** Carbon Fiber ricochet: speed of the returned bullet (px/s). */
+  ricochetSpeed: 520,
+  /** Optic Nerve HUD needle colour (the objective needle is gold). */
+  poiNeedleColor: 0x2ef2ff,
+};
+
 export const isCyberwareId = (id: string) => Object.hasOwn(CYBERWARE, id);

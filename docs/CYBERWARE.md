@@ -36,14 +36,14 @@ Slot: Head
 Cost: 300 credits
 Stats: Gives a compass to the closest camera pole and ATM.
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `opticNerveHud`. A second compass needle in its own colour points at the nearest camera pole or ATM that can still be used (not yet hacked or switched off).
+Details/decisions: id `opticNerveHud`. A second compass needle (cyan; the objective needle is gold) points at the nearest camera pole or ATM that can still be used, labelled CAM or ATM with the distance. Poles drop out once the map is revealed, ATMs once they go offline. Hidden while the target is on screen, like the objective needle.
 
 Name: Heightened Proximity Sensors
 Slot: Head
 Cost: 550 credits
 Stats: Enemies move 20% slower while near you.
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `proximitySensors`. Radius 150 px.
+Details/decisions: id `proximitySensors`. Radius 150 px, shown as a faint cyan ring around the player. Applies to every walking enemy, guards included.
 
 Name: Depth Enhancement Bridge
 Slot: Head
@@ -73,7 +73,7 @@ Slot: Chest
 Cost: 1500 credits
 Stats: 10% damage reduction and a 25% chance to ricochet a ranged attack back towards the attacker.
 SHOP/BLUEPRINT: [BLUEPRINT]
-Details/decisions: id `carbonFiberSkin`. Its 10% adds to the other damage reduction. On a ricochet the player takes no damage, and the bullet turns around as the player's own bullet, at its original damage.
+Details/decisions: id `carbonFiberSkin`. Its 10% adds to the other damage reduction. On a ricochet the player takes no damage, and the bullet turns around as the player's own bullet, at its original damage, aimed at the shooter (straight back if the shooter is dead). Only rolled for hits that would land, so not during invulnerability; a ricochet doesn't use up a Defensive Matrix charge.
 
 ## HANDS
 
@@ -91,7 +91,7 @@ Slot: Back
 Cost: 600 credits
 Stats: Enemies are more likely to miss you with ranged attacks.
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `holographicDisruptors`. Ranged enemies aim up to ±12° off at random.
+Details/decisions: id `holographicDisruptors`. Ranged enemies aim up to ±12° off at random. Shots at a Rootkit decoy are unaffected.
 
 ## LEGS
 

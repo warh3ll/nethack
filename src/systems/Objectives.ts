@@ -298,6 +298,11 @@ export class Objectives {
     return this.engaged !== null || this.polesInRange.some((p) => p.hack.started);
   }
 
+  /** Camera poles that can still be hacked: all of them until one reveals the map, then none. */
+  get usablePoles(): { x: number; y: number }[] {
+    return this.mapRevealed ? [] : this.poles.map((p) => p.pole);
+  }
+
   /** The camera poles the player is within range of (the map is only revealed once, so none after that). */
   private get polesInRange() {
     return this.mapRevealed ? [] : this.poles.filter((p) => this.playerWithin(p.pole, CAMERA_POLE.range));

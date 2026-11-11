@@ -4,11 +4,14 @@ import { insideMap } from './MapWall';
 /** Pooled projectile fired by an enemy (the Goon). Hurts the player, passes through other enemies. */
 export class EnemyBullet extends Phaser.Physics.Arcade.Image {
   damage = 0;
-  private maxDistance = 0;
+  /** The enemy that fired it, so a ricochet (Carbon Fiber Second Skin) can fly back at it. */
+  shooter: { x: number; y: number; active: boolean } | null = null;
+  maxDistance = 0;
   private startX = 0;
   private startY = 0;
 
-  fire(x: number, y: number, angle: number, speed: number, damage: number, range: number) {
+  fire(x: number, y: number, angle: number, speed: number, damage: number, range: number, shooter: EnemyBullet['shooter'] = null) {
+    this.shooter = shooter;
     this.setTexture('bullet-enemy');
     this.enableBody(true, x, y, true, true);
     this.body!.setCircle(this.width / 2);
