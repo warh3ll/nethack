@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
-import { CACHES, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
+import { CACHES, CREDITS, DASH, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
+import { CYBERWARE, isCyberwareId } from '../data/cyberware'
 import {
   FALLBACK_UPGRADES,
   SKILLS,
@@ -7,15 +8,15 @@ import {
   maxSkillLevel,
 } from '../data/skills'
 
-/** The player's live stats: base values from balance.ts plus all passive bonuses. */
+/** The player's live stats: base values from balance.ts plus all passive and cyberware bonuses. */
 export interface PlayerStats {
   maxHp: number
   /** HP regenerated per second. */
   hpRegenPerSec: number
   /** Part of hpRegenPerSec that each passive adds (the rest is base regen). For the run stats. */
   hpRegenBySkill: Record<string, number>
-  /** Flat damage taken off every hit the player receives. */
-  damageReduction: number
+  /** Percent off every hit the player receives (passives and cyberware added together). */
+  damageReductionPct: number
   /** Damage dealt back to an enemy whose touch reaches the player, blocked or not. */
   retaliationDamage: number
   /** Hits the shield absorbs when fully charged (0 = no shield). */
@@ -25,6 +26,14 @@ export interface PlayerStats {
   moveSpeed: number
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number
+  /** Pixels covered by one dash (it always takes DASH.durationMs). */
+  dashDistance: number
+  /** Credit chips this close start flying to the player. */
+  magnetRadius: number
+  /** Multiplier on the targeting range of active skills (not area sizes or minimum ranges). */
+  weaponRangeMult: number
+  /** Multiplier on how fast timed hack steps progress. */
+  hackSpeedMult: number
 }
 
 export type Upgrade =
@@ -52,15 +61,22 @@ export class Progression {
     maxHp: 0,
     hpRegenPerSec: 0,
     hpRegenBySkill: {},
-    damageReduction: 0,
+    damageReductionPct: 0,
     retaliationDamage: 0,
     shieldHits: 0,
     shieldRechargeMs: 0,
     moveSpeed: 0,
     damageMult: 1,
+    dashDistance: 0,
+    magnetRadius: 0,
+    weaponRangeMult: 1,
+    hackSpeedMult: 1,
   }
+  /** Installed cyberware ids, fixed for the run. */
+  private readonly cyberware: string[]
 
-  constructor(startingSkill: string) {
+  constructor(startingSkill: string, cyberware: string[] = []) {
+    this.cyberware = cyberware.filter(isCyberwareId)
     this.skills.set(startingSkill, 1)
     this.recomputeStats()
   }
@@ -160,9 +176,9 @@ export class Progression {
     this.recomputeStats()
   }
 
-  /** Re-sums every passive bonus from scratch (never adjusted incrementally). */
+  /** Re-sums every passive and cyberware bonus from scratch (never adjusted incrementally). */
   recomputeStats() {
-    let damageReduction = 0
+    let damageReductionPct = 0
     let retaliation = 0
     let shieldHits = 0
     const shieldRecharges: number[] = []
@@ -173,7 +189,7 @@ export class Progression {
     for (const [id, lvl] of this.skills) {
       if (SKILLS[id].kind !== 'passive') continue
       const p = getPassiveStats(id, lvl)
-      damageReduction += p.damageReduction ?? 0
+      damageReductionPct += p.damageReductionPct ?? 0
       retaliation += p.retaliationDamage ?? 0
       shieldHits += p.shieldHits ?? 0
       if (p.shieldRechargeMs) shieldRecharges.push(p.shieldRechargeMs)
@@ -182,8 +198,21 @@ export class Progression {
       moveSpeedPct += p.moveSpeedPct ?? 0
       damagePct += p.damagePct ?? 0
     }
+    let dashPct = 0
+    let magnetPct = 0
+    let rangePct = 0
+    let hackPct = 0
+    for (const id of this.cyberware) {
+      const c = CYBERWARE[id].effects
+      damageReductionPct += c.damageReductionPct ?? 0
+      moveSpeedPct += c.moveSpeedPct ?? 0
+      dashPct += c.dashDistancePct ?? 0
+      magnetPct += c.magnetRadiusPct ?? 0
+      rangePct += c.weaponRangePct ?? 0
+      hackPct += c.hackSpeedPct ?? 0
+    }
     this.stats.maxHp = PLAYER.maxHp
-    this.stats.damageReduction = damageReduction
+    this.stats.damageReductionPct = damageReductionPct
     this.stats.retaliationDamage = retaliation
     this.stats.shieldHits = shieldHits
     this.stats.shieldRechargeMs = shieldRecharges.length > 0 ? Math.min(...shieldRecharges) : 0
@@ -191,5 +220,9 @@ export class Progression {
     this.stats.hpRegenBySkill = regenBySkill
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100)
     this.stats.damageMult = 1 + damagePct / 100
+    this.stats.dashDistance = DASH.distance * (1 + dashPct / 100)
+    this.stats.magnetRadius = CREDITS.magnetRadius * (1 + magnetPct / 100)
+    this.stats.weaponRangeMult = 1 + rangePct / 100
+    this.stats.hackSpeedMult = 1 + hackPct / 100
   }
 }

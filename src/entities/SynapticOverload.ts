@@ -42,12 +42,13 @@ export class SynapticOverload {
 
   update(time: number) {
     const s = this.stats;
+    const maxRange = s.maxRange * this.playerStats.weaponRangeMult;
     this.fx.clear();
 
-    if (this.target && !this.validTarget(this.target, s.minRange, s.maxRange)) this.target = null;
+    if (this.target && !this.validTarget(this.target, s.minRange, maxRange)) this.target = null;
     if (!this.target) {
       if (time < this.nextHackAt) return;
-      this.target = this.pickTarget(s.minRange, s.maxRange);
+      this.target = this.pickTarget(s.minRange, maxRange);
       if (!this.target) return;
       this.hackStartedAt = time;
     }

@@ -66,7 +66,7 @@ Best done together, in this order:
 - [x] Main menu scene: start run, ripdoc (s9). `scenes/MenuScene.ts`. Results screen offers reboot or main menu; pause screen offers quit to menu, which forfeits the run's credits
 - [x] Cyberware data file (`src/data/cyberware.ts`: slot, cost, shop or blueprint, effects), first list from `docs/CYBERWARE.md`. Save format v2 stores installed cyberware and found blueprints; v1 saves and codes still load
 - [x] Ripdoc screen (`scenes/RipdocScene.ts`, [R] in the menu): list by slot on the left, silhouette with slot markers on the right (stacked on phones), buy with a confirm step, blueprint pieces hidden until found. Placeholder silhouette in `BootScene`; art for a piece goes in as texture `cyberware-<id>`
-- [ ] Simple stat cyberware applied at run start through the same re-sum as passives: damage reduction %, run speed, dash distance, magnet radius, weapon range, hacking speed. Firewall changes to 3/6/9% and all damage-reduction percentages add up
+- [x] Simple stat cyberware applied at run start through the same re-sum as passives (`Progression.recomputeStats`): damage reduction %, run speed, dash distance, magnet radius, targeting range, hacking speed. Firewall is now 3/6/9% and all damage-reduction percentages add up
 - [ ] Cyberware with behaviour: proximity slow, aim spread on enemy shots, discharge zap, ricochet, Optic HUD compass needle
 - [ ] Fast runs awards more credits, up to three minutes give 100% extra credits, at 7 minutes there is 0% extra in top of the default completion bonus
 

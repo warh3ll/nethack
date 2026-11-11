@@ -38,7 +38,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd' | 'space', Phaser.Input.Keyboard.Key>;
 
   /** Live stats (base + passives), owned and re-summed by Progression. */
-  constructor(scene: Phaser.Scene, x: number, y: number, private stats: PlayerStats) {
+  constructor(scene: Phaser.Scene, x: number, y: number, readonly stats: PlayerStats) {
     super(scene, x, y, 'player-idle-down');
     this.hp = stats.maxHp;
     scene.add.existing(this);
@@ -94,7 +94,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.dashMs <= 0 && this.dashCooldownMs <= 0 && Phaser.Input.Keyboard.JustDown(k.space) && dir.lengthSq() > 0) {
       // Snap to one of the 8 directions (the stick can point anywhere).
       const a = Math.round(dir.angle() / (Math.PI / 4)) * (Math.PI / 4);
-      this.dashVel.setToPolar(a, DASH.distance / (DASH.durationMs / 1000));
+      this.dashVel.setToPolar(a, this.stats.dashDistance / (DASH.durationMs / 1000));
       this.dashMs = DASH.durationMs;
       this.dashCooldownMs = DASH.cooldownMs;
       this.facing = dirFromAngle(a);
@@ -200,7 +200,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       if (this.shieldRechargeLeftMs <= 0) this.shieldRechargeLeftMs = this.stats.shieldRechargeMs;
       return 'blocked';
     }
-    this.hp = Math.max(0, this.hp - Math.max(PLAYER.minDamageTaken, amount - this.stats.damageReduction));
+    // Damage reduction is a percentage; all sources add up (Firewall, cyberware).
+    const reduced = amount * Math.max(0, 1 - this.stats.damageReductionPct / 100);
+    this.hp = Math.max(0, this.hp - Math.max(PLAYER.minDamageTaken, reduced));
     this.scene.tweens.add({ targets: this, alpha: 0.3, duration: 80, yoyo: true, repeat: 2 });
     return 'damaged';
   }

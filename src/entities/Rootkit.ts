@@ -63,7 +63,7 @@ export class Rootkit {
 
     // Hijack new enemies when off cooldown and nothing is still hijacked.
     if (this.active.length === 0 && time >= this.nextHijackAt) {
-      const targets = this.pickTargets(s.hijackRange, s.count);
+      const targets = this.pickTargets(s.hijackRange * this.playerStats.weaponRangeMult, s.count);
       for (const e of targets) this.hijack(e, time, s.durationMs, s.tickMs);
       this.hijacking = targets.length > 0;
     }

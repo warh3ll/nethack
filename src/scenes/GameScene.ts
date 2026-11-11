@@ -123,7 +123,7 @@ export class GameScene extends Phaser.Scene {
     this.levelingUp = false;
     this.pendingLevelUps = 0;
     this.minimap = null;
-    this.progression = new Progression(STARTING_SKILL);
+    this.progression = new Progression(STARTING_SKILL, account.installed);
 
     createParallax(this);
     this.citySeed = pickSeed();
@@ -484,7 +484,7 @@ export class GameScene extends Phaser.Scene {
     if (this.player.isDead) return;
     for (const obj of this.chips.getChildren()) {
       const chip = obj as CreditChip;
-      if (chip.active) this.credits += chip.update(this.player.x, this.player.y, dtSeconds);
+      if (chip.active) this.credits += chip.update(this.player.x, this.player.y, dtSeconds, this.progression.stats.magnetRadius);
     }
   }
 

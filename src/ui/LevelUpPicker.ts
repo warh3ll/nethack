@@ -23,7 +23,7 @@ const LABELS: Record<string, string> = {
   contactDamage: 'touch damage',
   explosionDamage: 'blast damage',
   explosionRadius: 'blast radius',
-  damageReduction: 'damage reduction',
+  damageReductionPct: 'damage reduction %',
   retaliationDamage: 'retaliation damage',
   shieldHits: 'shield hits',
   shieldRechargeMs: 'shield recharge ms',

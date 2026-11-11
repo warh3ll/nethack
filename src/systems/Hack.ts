@@ -95,7 +95,8 @@ export class Hack {
   /** Prompts still to come, with the progress at which each one appears. */
   private upcoming: { at: number; kind: PromptKind }[];
 
-  constructor() {
+  /** @param speed multiplier on how fast the upload runs (cyberware); decay and halts are unaffected. */
+  constructor(private speed = 1) {
     const count = randInt(HACK.promptCount.min, HACK.promptCount.max);
     // Each prompt kind at most once per hack.
     this.upcoming = shuffled(KINDS)
@@ -128,7 +129,7 @@ export class Hack {
     }
     if (this.prompt || this.haltMs > 0) return;
 
-    this.progress = Math.min(1, this.progress + deltaMs / HACK.durationMs);
+    this.progress = Math.min(1, this.progress + (deltaMs * this.speed) / HACK.durationMs);
     const next = this.upcoming[0];
     if (next && this.progress >= next.at) {
       this.progress = next.at;

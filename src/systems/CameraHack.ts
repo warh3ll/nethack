@@ -34,6 +34,9 @@ export class CameraHack {
   typed = 0;
   private pin = makePin();
 
+  /** @param speed multiplier on how fast the worm hold fills (cyberware). Typing is up to the player. */
+  constructor(private speed = 1) {}
+
   /** What to type at this step. Empty when nothing needs typing. */
   get text() {
     if (this.step === 'pin') return this.pin;
@@ -65,7 +68,7 @@ export class CameraHack {
 
   update(deltaMs: number, held: boolean, inRange: boolean) {
     if (this.step !== 'worm') return;
-    this.holdMs = held && inRange ? this.holdMs + deltaMs : 0;
+    this.holdMs = held && inRange ? this.holdMs + deltaMs * this.speed : 0;
     if (this.holdMs >= CAMERA_POLE.holdMs) {
       this.holdMs = 0;
       this.step = 'pin';

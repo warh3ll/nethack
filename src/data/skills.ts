@@ -94,8 +94,8 @@ export interface PassiveStats {
   shieldHits?: number
   /** Time (ms) for the shield to get one hit back. The fastest source wins. */
   shieldRechargeMs?: number
-  /** Flat damage taken off every hit the player receives (a hit the shield doesn't block never does less than PLAYER.minDamageTaken). */
-  damageReduction?: number
+  /** Percent off every hit the player receives. Adds up with cyberware; a hit the shield doesn't block never does less than PLAYER.minDamageTaken. */
+  damageReductionPct?: number
   /** Flat extra HP regenerated per second (added to the base regen in balance.ts). */
   hpRegenPerSec?: number
   /** Percent extra move speed (10 = +10%). */
@@ -403,9 +403,9 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Reduces the damage of every hit you take.',
     color: 0x9aa7c7,
     levels: [
-      { damageReduction: 1 },
-      { damageReduction: 2 },
-      { damageReduction: 3 },
+      { damageReductionPct: 3 },
+      { damageReductionPct: 6 },
+      { damageReductionPct: 9 },
     ],
   },
   healingNanites: {

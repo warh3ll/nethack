@@ -105,11 +105,11 @@ export class Objectives {
     this.exit = city.exit;
     this.entries = defs.map((def) => ({
       def,
-      hack: def.type === 'hackServer' ? new Hack() : null,
+      hack: def.type === 'hackServer' ? new Hack(player.stats.hackSpeedMult) : null,
       server: null,
       dossier: null,
       goon: null,
-      connect: def.type === 'connectServers' ? new Connect() : null,
+      connect: def.type === 'connectServers' ? new Connect(player.stats.hackSpeedMult) : null,
       cable: null,
       outposts: null,
       factoriesDown: 0,
@@ -131,7 +131,7 @@ export class Objectives {
         e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
       }
     }
-    this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack() }));
+    this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack(player.stats.hackSpeedMult) }));
     this.addTouchTargets(touch);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => {

@@ -50,7 +50,7 @@ Slot: Head
 Cost: 1250 credits
 Stats: Increased range by 20% for all weapons (not passive effects)
 SHOP/BLUEPRINT: [BLUEPRINT]
-Details/decisions: id `depthBridge`. Weapons only, not passives. The minimum range of the sniper-type skill stays the same.
+Details/decisions: id `depthBridge`. Extends every targeting range of the active skills: gun range (Auto Pistol, Railgun, Scatter Gun), Virus infect range, Rootkit hijack range and Synaptic Overload's max range. Area sizes are unchanged (EMP Shock ring, blast radii, Virus spread), and so are minimum ranges.
 
 ## CHEST
 
@@ -104,12 +104,12 @@ Details/decisions: id `hydraulicJointsLegs`. Adds to the passives' move speed pe
 
 ## FEET
 
-Name: Hydraulic Joints
+Name: MagLev Soles
 Slot: Feet
 Cost: 850 credits
 Stats: Dash distance increased by 30%
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `hydraulicJointsFeet`. The dash takes the same time, so it is faster rather than longer; invulnerability timing is unchanged.
+Details/decisions: id `maglevSoles`. The dash takes the same time, so it is faster rather than longer; invulnerability timing is unchanged.
 
 ## ICU
 
@@ -120,6 +120,6 @@ Slot: ICU
 Cost: 500 credits
 Stats: Hacking speed increased by 10%
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `megathreading`. What hacking speed covers still to be decided (server hacks, camera poles, ATMs?).
+Details/decisions: id `megathreading`. Speeds up every timed hack step: the server hack upload, the camera pole hold, the ATM decrypt hold and the Connect servers attach. Typing prompts and Smack (a tap count) depend on the player and are unchanged.
 
 ## TRINKETS

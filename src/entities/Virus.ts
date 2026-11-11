@@ -62,7 +62,7 @@ export class Virus {
     }
 
     if (time >= this.nextInfectAt) {
-      const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange, null);
+      const target = this.nearestUninfected(this.owner.x, this.owner.y, s.infectRange * this.playerStats.weaponRangeMult, null);
       if (target) {
         this.infect(target);
         this.playJump(this.owner.x, this.owner.y, target);

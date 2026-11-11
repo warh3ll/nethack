@@ -34,9 +34,9 @@ export interface CyberEffects {
   dashDistancePct?: number;
   /** Credit chip magnet radius. */
   magnetRadiusPct?: number;
-  /** Range of the player's weapons (not passive effects). */
+  /** Targeting range of active skills: gun range, Virus infect, Rootkit hijack, Synaptic Overload max range. Not area sizes. */
   weaponRangePct?: number;
-  /** Hacking speed. */
+  /** Speed of every timed hack step: server upload, camera pole hold, ATM decrypt, Connect servers attach. Not typing or Smack. */
   hackSpeedPct?: number;
   /** Enemies within `radius` px move `pct` percent slower. */
   enemySlow?: { pct: number; radius: number };
@@ -134,8 +134,8 @@ export const CYBERWARE: Record<string, Cyberware> = {
     description: '+8% run speed.',
     effects: { moveSpeedPct: 8 },
   },
-  hydraulicJointsFeet: {
-    name: 'Hydraulic Joints',
+  maglevSoles: {
+    name: 'MagLev Soles',
     slot: 'feet',
     cost: 850,
     source: 'shop',
