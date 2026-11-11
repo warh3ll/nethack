@@ -37,7 +37,7 @@ export class CableServers {
       this.lights.push(addGlow(scene, p.x, p.y, LIGHTING.server));
     }
     this.bar = scene.add.graphics().setDepth(20);
-    this.label = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '13px', color: '#ffd23e' }).setOrigin(0.5).setDepth(21);
+    this.label = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '13px', color: '#ffd23e', stroke: '#05060a', strokeThickness: 3 }).setOrigin(0.5).setDepth(21);
   }
 
   render(state: Connect, playerX: number, playerY: number, nearA: boolean, nearB: boolean) {
@@ -105,7 +105,7 @@ export class CableServers {
     for (const l of this.lights) setGlow(l, LIGHTING.serverDone);
     const mx = (this.a.x + this.b.x) / 2;
     const text = this.scene.add
-      .text(mx, this.a.y - 40, 'CONNECTED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+      .text(mx, this.a.y - 40, 'CONNECTED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a', stroke: '#05060a', strokeThickness: 4 })
       .setOrigin(0.5)
       .setDepth(21);
     this.scene.tweens.add({ targets: text, y: text.y - 50, alpha: 0, duration: 1200, onComplete: () => text.destroy() });

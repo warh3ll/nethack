@@ -22,7 +22,8 @@ export function pickPolePositions(city: City, avoid: Point[]): Point[] {
 }
 
 /**
- * State of the camera pole hack: hold E to insert the worm, enter the PIN, type the reveal word.
+ * State of the camera pole hack: hold E to insert the worm, wait, enter the PIN, wait, type the reveal word.
+ * The waits (CAMERA_POLE.stepDelayMs) run while the player is in range and are sped up by hack-speed cyberware.
  * Pure logic, no Phaser: the caller feeds it time and keys. Finished steps stay finished, so walking
  * away only pauses it. Letting go of E, leaving range or taking damage restarts the hold.
  */
@@ -32,6 +33,8 @@ export class CameraHack {
   holdMs = 0;
   /** Characters of the current text typed so far. */
   typed = 0;
+  /** Time left of the pause before the current typed step opens (ms). */
+  waitMs = 0;
   private pin = makePin();
 
   /** @param speed multiplier on how fast the worm hold fills (cyberware). Typing is up to the player. */
@@ -48,13 +51,23 @@ export class CameraHack {
     return Math.min(1, this.holdMs / CAMERA_POLE.holdMs);
   }
 
+  /** True while the worm is working on the pole, before the next prompt opens. */
+  get waiting() {
+    return this.waitMs > 0;
+  }
+
+  /** 0..1, how far the current wait has come. */
+  get waitProgress() {
+    return 1 - Math.min(1, this.waitMs / CAMERA_POLE.stepDelayMs);
+  }
+
   get typing() {
-    return this.step === 'pin' || this.step === 'reveal';
+    return (this.step === 'pin' || this.step === 'reveal') && !this.waiting;
   }
 
   /** True once the player has actually begun the hack, rather than just walking past. */
   get started() {
-    return this.holdMs > 0 || this.typing;
+    return this.holdMs > 0 || this.waiting || this.typing;
   }
 
   get done() {
@@ -67,11 +80,16 @@ export class CameraHack {
   }
 
   update(deltaMs: number, held: boolean, inRange: boolean) {
+    if (this.waiting) {
+      if (inRange) this.waitMs = Math.max(0, this.waitMs - deltaMs * this.speed);
+      return;
+    }
     if (this.step !== 'worm') return;
     this.holdMs = held && inRange ? this.holdMs + deltaMs * this.speed : 0;
     if (this.holdMs >= CAMERA_POLE.holdMs) {
       this.holdMs = 0;
       this.step = 'pin';
+      this.waitMs = CAMERA_POLE.stepDelayMs;
     }
   }
 
@@ -96,6 +114,7 @@ export class CameraHack {
     if (this.typed < this.text.length) return 'ok';
     this.typed = 0;
     this.step = this.step === 'pin' ? 'reveal' : 'done';
+    if (this.step === 'reveal') this.waitMs = CAMERA_POLE.stepDelayMs;
     return 'done';
   }
 }

@@ -113,6 +113,8 @@ export const CAMERA_POLE = {
   range: 120,
   /** How long E must be held to insert the worm. Taking damage restarts it. */
   holdMs: 2000,
+  /** Pause after the worm is in, and again after the PIN, before the next prompt opens (only runs in range; hack-speed cyberware shortens it). */
+  stepDelayMs: 5000,
   /** What to type in the last step (case-sensitive, mistypes just get retyped). The PIN length is HACK.pinLength. */
   revealText: 'reveal',
   /** Shown above a pole that hasn't been touched yet, so it reads as something to do. */

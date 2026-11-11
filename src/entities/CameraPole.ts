@@ -68,6 +68,14 @@ export class CameraPole {
       return;
     }
 
+    if (hack.waiting) {
+      const label = hack.step === 'pin' ? 'WORM IN, CRACKING PIN...' : 'PIN ACCEPTED, DECRYPTING...';
+      this.title.setPosition(x, top - 24).setText(inRange ? label : 'OUT OF RANGE, GET CLOSER');
+      this.bar.fillStyle(0x1a2140).fillRect(x - BAR_W / 2, top, BAR_W, BAR_H);
+      this.bar.fillStyle(GREEN, inRange ? 1 : 0.5).fillRect(x - BAR_W / 2, top, BAR_W * hack.waitProgress, BAR_H);
+      return;
+    }
+
     const title = hack.step === 'pin' ? '2/3 ENTER THE PIN CODE' : hint('3/3 TYPE THE COMMAND', '3/3 TAP THE COMMAND');
     this.title.setPosition(x, top - 24).setText(inRange ? title : 'OUT OF RANGE, GET CLOSER');
     this.base.setText(hack.text).setColor(this.scene.time.now < this.errorUntil ? '#ff2e88' : '#ffffff');
@@ -81,7 +89,7 @@ export class CameraPole {
   playRevealed(announce = true) {
     if (announce) {
       const label = this.scene.add
-        .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+        .text(this.x, this.y - PROMPT_TOP, 'MAP ONLINE', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a', stroke: '#05060a', strokeThickness: 4 })
         .setOrigin(0.5)
         .setDepth(21);
       this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
