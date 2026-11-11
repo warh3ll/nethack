@@ -46,7 +46,7 @@ import { TouchJoystick } from '../ui/TouchJoystick';
 import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
 import { TouchPromptPanel } from '../ui/TouchPromptPanel';
 import { watchTouchMode } from '../ui/touchMode';
-import { CYBER_FX } from '../data/cyberware';
+import { CYBERWARE, CYBER_FX } from '../data/cyberware';
 import { Discharge } from '../systems/Discharge';
 import { canFullscreen, toggleFullscreen } from '../ui/fullscreen';
 
@@ -103,6 +103,8 @@ export class GameScene extends Phaser.Scene {
   private paused = false;
   private pauseOverlay?: Phaser.GameObjects.Container;
   private matrixFx!: DefensiveMatrixFx;
+  /** Cyberware blueprints found this run; banked with the credits when the run ends. */
+  private blueprints: string[] = [];
   /** Cyberware with behaviour (null when not installed). */
   private discharge: Discharge | null = null;
   private poiMarker: ObjectiveMarker | null = null;
@@ -124,6 +126,7 @@ export class GameScene extends Phaser.Scene {
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
     this.credits = 0;
+    this.blueprints = [];
     this.gameOver = false;
     this.dying = false;
     this.levelingUp = false;
@@ -485,7 +488,8 @@ export class GameScene extends Phaser.Scene {
     this.levelingUp = true; // same freeze as the level-up picker
     this.joystick.release();
     this.physics.pause();
-    const contents = this.progression.rollCacheContents();
+    const locked = Object.keys(CYBERWARE).filter((id) => !account.isAvailable(id) && !this.blueprints.includes(id));
+    const contents = this.progression.rollCacheContents(locked);
     new CachePicker(this, contents, (take) => {
       if (take) this.applyUpgrade(contents);
       this.caches = this.caches.filter((c) => c !== cache);
@@ -553,6 +557,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (u.type === 'credits') {
       this.credits += u.amount;
+      return;
+    }
+    if (u.type === 'blueprint') {
+      this.blueprints.push(u.cyberwareId);
       return;
     }
     const hpBefore = this.player.maxHp;
@@ -642,7 +650,7 @@ export class GameScene extends Phaser.Scene {
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
     this.clockText.setText(time);
-    this.hud.setText(`lv ${this.progression.level}   kills ${this.kills}   credits ${this.credits}`);
+    this.hud.setText(`lv ${this.progression.level}   kills ${this.kills}   credits ${this.credits}   blueprints ${this.blueprints.length}`);
     this.objectivePanel.update();
     this.objectiveMarker.update();
     this.poiMarker?.update();
@@ -689,7 +697,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.pause();
     const bonus = won ? CREDITS.extractionBonus : 0;
     this.credits += bonus;
-    account.bankRun(this.credits);
+    account.bankRun(this.credits, this.blueprints);
     this.drawHud();
     const reboot = () => this.scene.restart();
     const toMenu = () => this.scene.start('menu');
@@ -707,7 +715,7 @@ export class GameScene extends Phaser.Scene {
       credits: this.credits,
       bonus,
       totalCredits: account.credits,
-      items: 0, // TODO: caches and drops (PLAN section 4)
+      blueprints: this.blueprints.map((id) => CYBERWARE[id].name),
       stats: this.runStats,
     }, {
       reboot: () => tapped(reboot),

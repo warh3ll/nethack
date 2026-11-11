@@ -342,8 +342,13 @@ export const CACHES = {
   ringRadius: 40,
   /** Press E (or tap the prompt) within this distance of a cache to open it. */
   openRadius: 80,
-  /** Chance (0-1) that a cache holds credits. The rest hold a skill upgrade; find-only items will come out of that share. */
+  /** Chance (0-1) that a cache holds credits. The rest hold a skill upgrade or, rarely, a cyberware blueprint. */
   creditChance: 0.75,
+  /**
+   * Chance (0-1, of all caches) of a cyberware blueprint, taken out of the upgrade share: 0.025 leaves 22.5% upgrades.
+   * Once every blueprint has been found, that share goes back to upgrades.
+   */
+  blueprintChance: 0.025,
   /** Credits in a cache that holds credits. */
   creditAmount: 5,
 }

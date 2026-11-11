@@ -22,8 +22,8 @@ export interface RunResult {
   bonus: number;
   /** Credits banked across all runs, this one included. */
   totalCredits: number;
-  /** Items found this run. Stays 0 until caches and drops exist (PLAN section 4). */
-  items: number;
+  /** Names of the cyberware blueprints found this run (banked with the credits). */
+  blueprints: string[];
   /** Damage per skill, healing and distance, shown beside the summary. */
   stats: RunStats;
 }
@@ -83,7 +83,8 @@ export class ResultsScreen {
       ['credits gained', String(r.credits - r.bonus)],
       ...(r.bonus > 0 ? ([['extraction bonus', `+${r.bonus}`]] as [string, string][]) : []),
       ['total credits', String(r.totalCredits)],
-      ['items found', String(r.items)],
+      ['blueprints found', String(r.blueprints.length)],
+      ...r.blueprints.map((name): [string, string] => [`  ${name}`, '']),
     ];
     const contentW = wide ? COL * 2 + 80 : COL;
     text(contentW / 2, 0, r.won ? 'EXTRACTION COMPLETE' : 'SYSTEM FAILURE', 30, accent);

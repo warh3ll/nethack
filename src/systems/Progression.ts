@@ -53,6 +53,8 @@ export type Upgrade =
   | { type: 'heal'; fraction: number }
   /** Grants credits for the run (fallback choice, or the contents of a data cache). */
   | { type: 'credits'; amount: number }
+  /** Unlocks a cyberware piece at the ripdoc once the run ends (data caches only). */
+  | { type: 'blueprint'; cyberwareId: string }
 
 /** XP needed to go from `level` to `level + 1`. */
 export function xpToNextLevel(level: number): number {
@@ -169,13 +171,18 @@ export class Progression {
   }
 
   /**
-   * What a data cache holds: usually credits (CACHES.creditChance), otherwise one random entry from the
-   * same pool as level-ups, so the slot rules apply. With nothing useful in the pool it always holds credits.
+   * What a data cache holds: usually credits (CACHES.creditChance), rarely a cyberware blueprint (CACHES.blueprintChance),
+   * otherwise one random entry from the same pool as level-ups, so the slot rules apply.
+   * `lockedBlueprints` are the blueprints not found yet; with none left, their share holds upgrades.
+   * With nothing useful in the pool, the upgrade share holds credits.
    */
-  rollCacheContents(): Upgrade {
+  rollCacheContents(lockedBlueprints: string[] = []): Upgrade {
+    const roll = Math.random()
+    if (roll < CACHES.creditChance) return { type: 'credits', amount: CACHES.creditAmount }
+    if (roll < CACHES.creditChance + CACHES.blueprintChance && lockedBlueprints.length > 0)
+      return { type: 'blueprint', cyberwareId: Phaser.Utils.Array.GetRandom(lockedBlueprints) }
     const options = this.offerPool()
-    if (options.length === 0 || Math.random() < CACHES.creditChance)
-      return { type: 'credits', amount: CACHES.creditAmount }
+    if (options.length === 0) return { type: 'credits', amount: CACHES.creditAmount }
     return Phaser.Utils.Array.GetRandom(options)
   }
 

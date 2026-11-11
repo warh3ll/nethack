@@ -10,6 +10,8 @@ All upgrades can be installed for a single player, they function like upgrades r
 
 Some upgrades can only be found as blueprints in caches (and in the future possibly other places). When a blueprint is found, that upgrade will be available to purchase from the Ripdoc in the main menu. It should not be visible at the Ripdoc beforehand, should come as a surprise to players.
 
+Details/decisions: 2.5% of data caches hold a blueprint (`blueprintChance` in `CACHES`, balance.ts), taken out of the 25% upgrade share. A cache only offers a blueprint not found yet (in earlier runs or this one); once all are found, that share holds upgrades again. Like any cache it can be taken or discarded. Found blueprints are banked with the credits when the run ends by death or extraction, and lost on quit. The HUD counts them and the results screen lists them by name.
+
 ## BUILD INSTRUCTIONS
 
 When you build these items, ask for any specifics ragarding implementation, anything that we decide you can put in the "Details/decisions" section of each upgrade. Then I can make an manual changes here if necessary.
