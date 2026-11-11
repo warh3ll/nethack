@@ -51,7 +51,7 @@ export class HackServer {
     this.sprite = lit(scene.add.sprite(x, y, 'server').setScale(SERVER.spriteScale).setDepth(4).play('server'));
     this.light = addGlow(scene, x, y, LIGHTING.server);
     this.bar = scene.add.graphics().setDepth(20);
-    const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color }).setDepth(21);
+    const text = (size: string, color: string) => scene.add.text(x, y, '', { fontFamily: FONT, fontSize: size, color, stroke: '#05060a', strokeThickness: size === '22px' ? 4 : 3 }).setDepth(21);
     this.percent = text('14px', '#c8f7ff').setOrigin(0.5);
     this.title = text('13px', '#ffd23e').setOrigin(0.5);
     this.base = text('22px', '#ffffff').setOrigin(0, 0.5);
@@ -117,7 +117,7 @@ export class HackServer {
   /** Floating "HACKED" and then the server is gone. */
   playHacked() {
     const label = this.scene.add
-      .text(this.x, this.y - SERVER.frameSize * SERVER.spriteScale / 4, 'HACKED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a' })
+      .text(this.x, this.y - SERVER.frameSize * SERVER.spriteScale / 4, 'HACKED', { fontFamily: FONT, fontSize: '24px', fontStyle: 'bold', color: '#5fe08a', stroke: '#05060a', strokeThickness: 4 })
       .setOrigin(0.5)
       .setDepth(21);
     this.scene.tweens.add({ targets: label, y: label.y - 50, alpha: 0, duration: 1200, onComplete: () => label.destroy() });
