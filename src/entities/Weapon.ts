@@ -26,7 +26,8 @@ export class Weapon {
   update(time: number) {
     if (time < this.nextFireAt) return;
     const s = this.stats;
-    const target = this.findTarget(s.range, s.minRange ?? 0, s.targeting ?? 'nearest');
+    const range = s.range * this.playerStats.weaponRangeMult;
+    const target = this.findTarget(range, s.minRange ?? 0, s.targeting ?? 'nearest');
     if (!target) return; // hold fire (and stay ready) until something is in range
     this.nextFireAt = time + s.cooldownMs;
 
@@ -37,7 +38,7 @@ export class Weapon {
       const offset = (i - (s.projectiles - 1) / 2) * spread;
       const b = this.bullets.get() as Bullet | null;
       if (!b) return; // pool exhausted
-      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, s.range, `bullet-${this.skillId}`, this.skillId);
+      b.fire(this.owner.x, this.owner.y, base + offset, s.projectileSpeed, s.damage * this.playerStats.damageMult, s.pierce, range, `bullet-${this.skillId}`, this.skillId);
     }
   }
 

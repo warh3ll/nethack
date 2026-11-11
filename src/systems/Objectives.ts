@@ -105,11 +105,11 @@ export class Objectives {
     this.exit = city.exit;
     this.entries = defs.map((def) => ({
       def,
-      hack: def.type === 'hackServer' ? new Hack() : null,
+      hack: def.type === 'hackServer' ? new Hack(player.stats.hackSpeedMult) : null,
       server: null,
       dossier: null,
       goon: null,
-      connect: def.type === 'connectServers' ? new Connect() : null,
+      connect: def.type === 'connectServers' ? new Connect(player.stats.hackSpeedMult) : null,
       cable: null,
       outposts: null,
       factoriesDown: 0,
@@ -131,7 +131,7 @@ export class Objectives {
         e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
       }
     }
-    this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack() }));
+    this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack(player.stats.hackSpeedMult) }));
     this.addTouchTargets(touch);
     scene.input.keyboard!.on('keydown', this.onKey, this);
     scene.events.once('shutdown', () => {
@@ -296,6 +296,11 @@ export class Objectives {
   /** True while the player is hacking: in range of a server, or working on a camera pole. */
   get hacking() {
     return this.engaged !== null || this.polesInRange.some((p) => p.hack.started);
+  }
+
+  /** Camera poles that can still be hacked: all of them until one reveals the map, then none. */
+  get usablePoles(): { x: number; y: number }[] {
+    return this.mapRevealed ? [] : this.poles.map((p) => p.pole);
   }
 
   /** The camera poles the player is within range of (the map is only revealed once, so none after that). */

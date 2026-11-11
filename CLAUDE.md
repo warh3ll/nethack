@@ -30,7 +30,7 @@ Cyberpunk survivors-like (auto-firing weapons, enemy swarms, XP and level-up cho
 - Small, runnable milestones: every change should leave the game playable.
 - Playtest features that come from `docs/PLAN.md` (they are usually larger) before calling them done: run the dev server and drive the game in a real browser, and check that the feature actually shows up and works, not just that it typechecks. Say plainly what was and wasn't exercised.
 - Textures are generated or loaded in `src/scenes/BootScene.ts`; swapping in new art there under the same texture keys is enough.
-- Item designs are detailed in `docs/ITEMS.md`, always check this when handling skills or other player, enemy, world interaction since equipped items may affect them.
+- Cyberware designs are detailed in `docs/CYBERWARE.md` (data in `src/data/cyberware.ts`), always check this when handling skills or other player, enemy, world interaction since installed cyberware may affect them.
 - Always ask the director (multi-choice) for anything that needs clarification
 
 ## Commands

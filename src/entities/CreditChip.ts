@@ -22,13 +22,13 @@ export class CreditChip extends Phaser.GameObjects.Image {
    * Pulls toward the player once inside the magnet radius (it stays locked on after that, so a
    * fast-moving player can't outrun a chip that's already flying). Returns the value if collected.
    */
-  update(playerX: number, playerY: number, dtSeconds: number): number {
+  update(playerX: number, playerY: number, dtSeconds: number, magnetRadius: number): number {
     const d = Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY);
     if (d <= CREDITS.collectRadius) {
       this.collect();
       return this.value;
     }
-    if (d <= CREDITS.magnetRadius) this.magnetized = true;
+    if (d <= magnetRadius) this.magnetized = true;
     if (this.magnetized) {
       const step = Math.min(d, CREDITS.magnetSpeed * dtSeconds);
       this.x += ((playerX - this.x) / d) * step;

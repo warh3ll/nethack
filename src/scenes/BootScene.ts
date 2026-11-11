@@ -165,6 +165,29 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0x2ef2ff).fillRect(14, 38, 10, 5);
     g.generateTexture('camera-pole', 36, 72).clear();
 
+    // Ripdoc silhouette (placeholder): a front-facing body, 200 x 400. The slot markers sit on it at CYBER_SLOTS anchors.
+    // Art for a single piece of cyberware goes in under `cyberware-<id>`; the ripdoc draws it at the slot's anchor.
+    const body = 0x141a33;
+    g.fillStyle(body).lineStyle(2, 0x2ef2ff, 0.35);
+    const part = (points: number[]) => {
+      const pts = [];
+      for (let i = 0; i < points.length; i += 2) pts.push(new Phaser.Math.Vector2(points[i], points[i + 1]));
+      g.fillPoints(pts, true).strokePoints(pts, true);
+    };
+    part([90, 58, 110, 58, 112, 78, 88, 78]); // neck
+    part([52, 78, 148, 78, 136, 200, 64, 200]); // torso
+    part([52, 80, 34, 88, 18, 212, 32, 216, 58, 112]); // left arm
+    part([148, 80, 166, 88, 182, 212, 168, 216, 142, 112]); // right arm
+    part([64, 200, 136, 200, 142, 228, 58, 228]); // pelvis
+    part([58, 228, 98, 228, 94, 372, 68, 372]); // left leg
+    part([102, 228, 142, 228, 132, 372, 106, 372]); // right leg
+    part([62, 372, 96, 372, 98, 388, 58, 388]); // left foot
+    part([104, 372, 138, 372, 142, 388, 102, 388]); // right foot
+    g.fillCircle(25, 224, 11).strokeCircle(25, 224, 11); // hands
+    g.fillCircle(175, 224, 11).strokeCircle(175, 224, 11);
+    g.fillCircle(100, 34, 27).strokeCircle(100, 34, 27); // head
+    g.generateTexture('ripdoc-silhouette', 200, 400).clear();
+
     // Tile size of the wall texture below.
     const t = 64;
 

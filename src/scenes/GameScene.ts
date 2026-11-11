@@ -46,6 +46,8 @@ import { TouchJoystick } from '../ui/TouchJoystick';
 import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
 import { TouchPromptPanel } from '../ui/TouchPromptPanel';
 import { watchTouchMode } from '../ui/touchMode';
+import { CYBERWARE, CYBER_FX } from '../data/cyberware';
+import { Discharge } from '../systems/Discharge';
 import { canFullscreen, toggleFullscreen } from '../ui/fullscreen';
 
 /** Ignore taps this long after the game-over screen appears, so a thumb still steering doesn't skip it. */
@@ -101,6 +103,12 @@ export class GameScene extends Phaser.Scene {
   private paused = false;
   private pauseOverlay?: Phaser.GameObjects.Container;
   private matrixFx!: DefensiveMatrixFx;
+  /** Cyberware blueprints found this run; banked with the credits when the run ends. */
+  private blueprints: string[] = [];
+  /** Cyberware with behaviour (null when not installed). */
+  private discharge: Discharge | null = null;
+  private poiMarker: ObjectiveMarker | null = null;
+  private slowRing: Phaser.GameObjects.Graphics | null = null;
   /** True while the pause screen asks whether to give up the run. */
   private confirmingQuit = false;
   /** True from the level-up burst until the last pending upgrade is picked. The run is frozen meanwhile. */
@@ -118,12 +126,13 @@ export class GameScene extends Phaser.Scene {
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
     this.credits = 0;
+    this.blueprints = [];
     this.gameOver = false;
     this.dying = false;
     this.levelingUp = false;
     this.pendingLevelUps = 0;
     this.minimap = null;
-    this.progression = new Progression(STARTING_SKILL);
+    this.progression = new Progression(STARTING_SKILL, account.installed);
 
     createParallax(this);
     this.citySeed = pickSeed();
@@ -209,7 +218,11 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => {
       const bullet = b as EnemyBullet;
       if (!bullet.active) return;
+      // Carbon Fiber Second Skin: a hit that would land may instead fly back at the shooter, doing no damage.
+      const turned = this.player.canBeHit(this.gameTime) && Math.random() < this.progression.stats.ricochetChance;
+      if (turned) this.ricochet(bullet); // reads the bullet's velocity, so before kill() stops it
       bullet.kill();
+      if (turned) return;
       if (this.player.takeDamage(bullet.damage, this.gameTime) === 'damaged') this.onPlayerHurt();
     });
 
@@ -323,7 +336,8 @@ export class GameScene extends Phaser.Scene {
     // Last, since it uses the city's random stream after everything that stands on the map has been placed.
     createCityProps(this, city, [...objectivePoints(objectiveDefs), ...this.caches, ...spawnPoints, ...this.atms.positions, ...this.objectives.poles.map((p) => p.pole), city.start, city.exit]);
     this.objectivePanel = new ObjectivePanel(this, this.objectives);
-    this.objectiveMarker = new ObjectiveMarker(this, this.objectives, this.player);
+    this.objectiveMarker = new ObjectiveMarker(this, () => this.objectives.target, this.player);
+    this.createCyberware();
 
     this.paused = false;
     this.pauseOverlay = undefined;
@@ -369,6 +383,8 @@ export class GameScene extends Phaser.Scene {
     this.player.update(this.joystick.vector, gameDelta);
     this.runStats.trackPosition(this.player.x, this.player.y);
     for (const w of this.weapons) w.update(this.gameTime);
+    this.discharge?.update(this.gameTime);
+    this.slowRing?.setPosition(this.player.x, this.player.y);
     this.objectives.update(delta);
     this.promptPanel.update(this.objectives.touchPrompt);
     this.shiftCamera(delta);
@@ -403,11 +419,15 @@ export class GameScene extends Phaser.Scene {
         e.despawn();
         continue;
       }
-      e.act(this.player.x, this.player.y, this.gameTime, this.nav, decoy);
-      const angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav, decoy);
+      e.act(this.player.x, this.player.y, this.gameTime, this.nav, decoy, this.progression.stats.enemySlow);
+      let angle = e.shotAngle(this.gameTime, this.player.x, this.player.y, this.nav, decoy);
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
-        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range);
+        // Holographic Disruptors: shots at the player (not at a Rootkit decoy) go up to this many degrees off.
+        const atPlayer = !(decoy && !e.stats.guard);
+        const spread = this.progression.stats.enemyAimSpreadDeg;
+        if (atPlayer && spread > 0) angle += Phaser.Math.DegToRad(Phaser.Math.FloatBetween(-spread, spread));
+        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range, e);
       }
     }
     this.drawEnemyBars();
@@ -468,7 +488,8 @@ export class GameScene extends Phaser.Scene {
     this.levelingUp = true; // same freeze as the level-up picker
     this.joystick.release();
     this.physics.pause();
-    const contents = this.progression.rollCacheContents();
+    const locked = Object.keys(CYBERWARE).filter((id) => !account.isAvailable(id) && !this.blueprints.includes(id));
+    const contents = this.progression.rollCacheContents(locked);
     new CachePicker(this, contents, (take) => {
       if (take) this.applyUpgrade(contents);
       this.caches = this.caches.filter((c) => c !== cache);
@@ -484,7 +505,7 @@ export class GameScene extends Phaser.Scene {
     if (this.player.isDead) return;
     for (const obj of this.chips.getChildren()) {
       const chip = obj as CreditChip;
-      if (chip.active) this.credits += chip.update(this.player.x, this.player.y, dtSeconds);
+      if (chip.active) this.credits += chip.update(this.player.x, this.player.y, dtSeconds, this.progression.stats.magnetRadius);
     }
   }
 
@@ -536,6 +557,10 @@ export class GameScene extends Phaser.Scene {
     }
     if (u.type === 'credits') {
       this.credits += u.amount;
+      return;
+    }
+    if (u.type === 'blueprint') {
+      this.blueprints.push(u.cyberwareId);
       return;
     }
     const hpBefore = this.player.maxHp;
@@ -625,9 +650,45 @@ export class GameScene extends Phaser.Scene {
     const t = Math.floor(this.elapsedMs / 1000);
     const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
     this.clockText.setText(time);
-    this.hud.setText(`lv ${this.progression.level}   kills ${this.kills}   credits ${this.credits}`);
+    this.hud.setText(`lv ${this.progression.level}   kills ${this.kills}   credits ${this.credits}   blueprints ${this.blueprints.length}`);
     this.objectivePanel.update();
     this.objectiveMarker.update();
+    this.poiMarker?.update();
+  }
+
+  /** The installed cyberware that needs its own objects in the run (docs/CYBERWARE.md). Stat pieces live in Progression. */
+  private createCyberware() {
+    const s = this.progression.stats;
+    this.discharge = s.discharge ? new Discharge(this, this.player, this.enemies, s.discharge, (e) => this.onSkillKill(e)) : null;
+    this.slowRing = null;
+    if (s.enemySlow && CYBER_FX.slowRingAlpha > 0) {
+      this.slowRing = this.add.graphics().setDepth(1);
+      this.slowRing.lineStyle(2, CYBER_FX.poiNeedleColor, CYBER_FX.slowRingAlpha).strokeCircle(0, 0, s.enemySlow.radius);
+    }
+    // Optic Nerve HUD: the nearest camera pole or ATM still usable.
+    this.poiMarker = s.poiCompass
+      ? new ObjectiveMarker(
+          this,
+          () => {
+            const near = (list: { x: number; y: number }[], tag: string) =>
+              list.map((p) => ({ x: p.x, y: p.y, tag, d: Phaser.Math.Distance.Squared(p.x, p.y, this.player.x, this.player.y) }));
+            const all = [...near(this.objectives.usablePoles, 'CAM'), ...near(this.atms.usable, 'ATM')];
+            return all.sort((a, b) => a.d - b.d)[0] ?? null;
+          },
+          this.player,
+          CYBER_FX.poiNeedleColor,
+        )
+      : null;
+  }
+
+  /**
+   * Sends a player bullet back at whoever fired `bullet`, at its original damage (straight back if the shooter is gone).
+   */
+  private ricochet(bullet: EnemyBullet) {
+    const shooter = bullet.shooter?.active ? bullet.shooter : null;
+    const v = bullet.body!.velocity;
+    const angle = shooter ? Phaser.Math.Angle.Between(bullet.x, bullet.y, shooter.x, shooter.y) : Math.atan2(-v.y, -v.x);
+    (this.bullets.get() as Bullet | null)?.fire(bullet.x, bullet.y, angle, CYBER_FX.ricochetSpeed, bullet.damage, 0, bullet.maxDistance, 'bullet-enemy', 'carbonFiberSkin');
   }
 
   private endRun(won = false) {
@@ -636,7 +697,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.pause();
     const bonus = won ? CREDITS.extractionBonus : 0;
     this.credits += bonus;
-    account.bankCredits(this.credits);
+    account.bankRun(this.credits, this.blueprints);
     this.drawHud();
     const reboot = () => this.scene.restart();
     const toMenu = () => this.scene.start('menu');
@@ -654,7 +715,7 @@ export class GameScene extends Phaser.Scene {
       credits: this.credits,
       bonus,
       totalCredits: account.credits,
-      items: 0, // TODO: caches and drops (PLAN section 4)
+      blueprints: this.blueprints.map((id) => CYBERWARE[id].name),
       stats: this.runStats,
     }, {
       reboot: () => tapped(reboot),

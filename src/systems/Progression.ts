@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
-import { CACHES, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
+import { CACHES, CREDITS, DASH, LEVELING, PASSIVE_SLOTS, PLAYER, WEAPON_SLOTS } from '../data/balance'
+import { CYBERWARE, isCyberwareId, type CyberEffects } from '../data/cyberware'
 import {
   FALLBACK_UPGRADES,
   SKILLS,
@@ -7,15 +8,15 @@ import {
   maxSkillLevel,
 } from '../data/skills'
 
-/** The player's live stats: base values from balance.ts plus all passive bonuses. */
+/** The player's live stats: base values from balance.ts plus all passive and cyberware bonuses. */
 export interface PlayerStats {
   maxHp: number
   /** HP regenerated per second. */
   hpRegenPerSec: number
   /** Part of hpRegenPerSec that each passive adds (the rest is base regen). For the run stats. */
   hpRegenBySkill: Record<string, number>
-  /** Flat damage taken off every hit the player receives. */
-  damageReduction: number
+  /** Percent off every hit the player receives (passives and cyberware added together). */
+  damageReductionPct: number
   /** Damage dealt back to an enemy whose touch reaches the player, blocked or not. */
   retaliationDamage: number
   /** Hits the shield absorbs when fully charged (0 = no shield). */
@@ -25,6 +26,24 @@ export interface PlayerStats {
   moveSpeed: number
   /** Multiplier on all damage the player deals (1 = no bonus). */
   damageMult: number
+  /** Pixels covered by one dash (it always takes DASH.durationMs). */
+  dashDistance: number
+  /** Credit chips this close start flying to the player. */
+  magnetRadius: number
+  /** Multiplier on the targeting range of active skills (not area sizes or minimum ranges). */
+  weaponRangeMult: number
+  /** Multiplier on how fast timed hack steps progress. */
+  hackSpeedMult: number
+  /** Enemies within `radius` move `pct` percent slower (Proximity Sensors). */
+  enemySlow: { pct: number; radius: number } | null
+  /** Ranged enemies shooting at the player aim up to this many degrees off. */
+  enemyAimSpreadDeg: number
+  /** Chance (0..1) an enemy bullet is turned back instead of hitting. */
+  ricochetChance: number
+  /** Periodic zap of nearby enemies (Discharge Plates). */
+  discharge: CyberEffects['discharge'] | null
+  /** Optic Nerve HUD: compass needle to the nearest usable camera pole or ATM. */
+  poiCompass: boolean
 }
 
 export type Upgrade =
@@ -34,6 +53,8 @@ export type Upgrade =
   | { type: 'heal'; fraction: number }
   /** Grants credits for the run (fallback choice, or the contents of a data cache). */
   | { type: 'credits'; amount: number }
+  /** Unlocks a cyberware piece at the ripdoc once the run ends (data caches only). */
+  | { type: 'blueprint'; cyberwareId: string }
 
 /** XP needed to go from `level` to `level + 1`. */
 export function xpToNextLevel(level: number): number {
@@ -52,15 +73,27 @@ export class Progression {
     maxHp: 0,
     hpRegenPerSec: 0,
     hpRegenBySkill: {},
-    damageReduction: 0,
+    damageReductionPct: 0,
     retaliationDamage: 0,
     shieldHits: 0,
     shieldRechargeMs: 0,
     moveSpeed: 0,
     damageMult: 1,
+    dashDistance: 0,
+    magnetRadius: 0,
+    weaponRangeMult: 1,
+    hackSpeedMult: 1,
+    enemySlow: null,
+    enemyAimSpreadDeg: 0,
+    ricochetChance: 0,
+    discharge: null,
+    poiCompass: false,
   }
+  /** Installed cyberware ids, fixed for the run. */
+  private readonly cyberware: string[]
 
-  constructor(startingSkill: string) {
+  constructor(startingSkill: string, cyberware: string[] = []) {
+    this.cyberware = cyberware.filter(isCyberwareId)
     this.skills.set(startingSkill, 1)
     this.recomputeStats()
   }
@@ -138,13 +171,18 @@ export class Progression {
   }
 
   /**
-   * What a data cache holds: usually credits (CACHES.creditChance), otherwise one random entry from the
-   * same pool as level-ups, so the slot rules apply. With nothing useful in the pool it always holds credits.
+   * What a data cache holds: usually credits (CACHES.creditChance), rarely a cyberware blueprint (CACHES.blueprintChance),
+   * otherwise one random entry from the same pool as level-ups, so the slot rules apply.
+   * `lockedBlueprints` are the blueprints not found yet; with none left, their share holds upgrades.
+   * With nothing useful in the pool, the upgrade share holds credits.
    */
-  rollCacheContents(): Upgrade {
+  rollCacheContents(lockedBlueprints: string[] = []): Upgrade {
+    const roll = Math.random()
+    if (roll < CACHES.creditChance) return { type: 'credits', amount: CACHES.creditAmount }
+    if (roll < CACHES.creditChance + CACHES.blueprintChance && lockedBlueprints.length > 0)
+      return { type: 'blueprint', cyberwareId: Phaser.Utils.Array.GetRandom(lockedBlueprints) }
     const options = this.offerPool()
-    if (options.length === 0 || Math.random() < CACHES.creditChance)
-      return { type: 'credits', amount: CACHES.creditAmount }
+    if (options.length === 0) return { type: 'credits', amount: CACHES.creditAmount }
     return Phaser.Utils.Array.GetRandom(options)
   }
 
@@ -160,9 +198,9 @@ export class Progression {
     this.recomputeStats()
   }
 
-  /** Re-sums every passive bonus from scratch (never adjusted incrementally). */
+  /** Re-sums every passive and cyberware bonus from scratch (never adjusted incrementally). */
   recomputeStats() {
-    let damageReduction = 0
+    let damageReductionPct = 0
     let retaliation = 0
     let shieldHits = 0
     const shieldRecharges: number[] = []
@@ -173,7 +211,7 @@ export class Progression {
     for (const [id, lvl] of this.skills) {
       if (SKILLS[id].kind !== 'passive') continue
       const p = getPassiveStats(id, lvl)
-      damageReduction += p.damageReduction ?? 0
+      damageReductionPct += p.damageReductionPct ?? 0
       retaliation += p.retaliationDamage ?? 0
       shieldHits += p.shieldHits ?? 0
       if (p.shieldRechargeMs) shieldRecharges.push(p.shieldRechargeMs)
@@ -182,8 +220,34 @@ export class Progression {
       moveSpeedPct += p.moveSpeedPct ?? 0
       damagePct += p.damagePct ?? 0
     }
+    let dashPct = 0
+    let magnetPct = 0
+    let rangePct = 0
+    let hackPct = 0
+    let slowPct = 0
+    let slowRadius = 0
+    let aimSpread = 0
+    let ricochet = 0
+    let discharge: PlayerStats['discharge'] = null
+    let poiCompass = false
+    for (const id of this.cyberware) {
+      const c = CYBERWARE[id].effects
+      // Behaviour pieces: one source each for now. Should two ever overlap, they add up (slow, spread, ricochet).
+      slowPct += c.enemySlow?.pct ?? 0
+      slowRadius = Math.max(slowRadius, c.enemySlow?.radius ?? 0)
+      aimSpread += c.enemyAimSpreadDeg ?? 0
+      ricochet += c.ricochetChance ?? 0
+      discharge ??= c.discharge ?? null
+      poiCompass ||= !!c.poiCompass
+      damageReductionPct += c.damageReductionPct ?? 0
+      moveSpeedPct += c.moveSpeedPct ?? 0
+      dashPct += c.dashDistancePct ?? 0
+      magnetPct += c.magnetRadiusPct ?? 0
+      rangePct += c.weaponRangePct ?? 0
+      hackPct += c.hackSpeedPct ?? 0
+    }
     this.stats.maxHp = PLAYER.maxHp
-    this.stats.damageReduction = damageReduction
+    this.stats.damageReductionPct = damageReductionPct
     this.stats.retaliationDamage = retaliation
     this.stats.shieldHits = shieldHits
     this.stats.shieldRechargeMs = shieldRecharges.length > 0 ? Math.min(...shieldRecharges) : 0
@@ -191,5 +255,14 @@ export class Progression {
     this.stats.hpRegenBySkill = regenBySkill
     this.stats.moveSpeed = PLAYER.moveSpeed * (1 + moveSpeedPct / 100)
     this.stats.damageMult = 1 + damagePct / 100
+    this.stats.dashDistance = DASH.distance * (1 + dashPct / 100)
+    this.stats.magnetRadius = CREDITS.magnetRadius * (1 + magnetPct / 100)
+    this.stats.weaponRangeMult = 1 + rangePct / 100
+    this.stats.hackSpeedMult = 1 + hackPct / 100
+    this.stats.enemySlow = slowPct > 0 ? { pct: slowPct, radius: slowRadius } : null
+    this.stats.enemyAimSpreadDeg = aimSpread
+    this.stats.ricochetChance = Math.min(1, ricochet)
+    this.stats.discharge = discharge
+    this.stats.poiCompass = poiCompass
   }
 }

@@ -84,9 +84,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.clearTint();
   }
 
-  /** Per-frame behaviour: swarm enemies come for the player through the streets, guards follow their aggro rules. */
-  act(playerX: number, playerY: number, time: number, nav: Navigation, decoy: { x: number; y: number } | null = null) {
+  /** Multiplier on walking speed this frame (Proximity Sensors slows enemies near the player). */
+  private speedMult = 1;
+
+  /**
+   * Per-frame behaviour: swarm enemies come for the player through the streets, guards follow their aggro rules.
+   * `slow`: enemies within `radius` of the player walk `pct` percent slower.
+   */
+  act(playerX: number, playerY: number, time: number, nav: Navigation, decoy: { x: number; y: number } | null = null, slow: { pct: number; radius: number } | null = null) {
     if (this.hijacked) return; // Rootkit steers it
+    this.speedMult = slow && Phaser.Math.Distance.Between(this.x, this.y, playerX, playerY) <= slow.radius ? Math.max(0, 1 - slow.pct / 100) : 1;
     if (time < this.stunnedUntil) {
       if (!this.stunTinted) this.applyStunTint();
       return this.setVelocity(0, 0);
@@ -214,10 +221,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   /** Straight at the target (the sprite goes there, like the guard's post), or the hit circle along the route. */
   private walk(targetX: number, targetY: number) {
-    if (this.direct) return this.scene.physics.moveTo(this, targetX, targetY, this.stats.speed);
+    const speed = this.stats.speed * this.speedMult;
+    if (this.direct) return this.scene.physics.moveTo(this, targetX, targetY, speed);
     const { x, y } = (this.body as Phaser.Physics.Arcade.Body).center;
     const a = Math.atan2(this.waypointY - y, this.waypointX - x);
-    this.setVelocity(Math.cos(a) * this.stats.speed, Math.sin(a) * this.stats.speed);
+    this.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
   }
 
   /** Returns true if this hit killed the enemy. `flash: false` is for damage over time. */

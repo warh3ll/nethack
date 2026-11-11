@@ -42,7 +42,8 @@ export class Atms {
 
   constructor(
     scene: Phaser.Scene,
-    private player: { x: number; y: number },
+    /** `stats.hackSpeedMult` speeds up the decrypt hold (cyberware). */
+    private player: { x: number; y: number; stats: { hackSpeedMult: number } },
     positions: Point[],
     /** Asked each frame: false while the game is paused, a hack prompt takes the keys, and so on. */
     private canInteract: () => boolean,
@@ -57,6 +58,11 @@ export class Atms {
       s.touch = touch.hold(s.atm.x, s.atm.y, () => s.phase === 'idle' && this.canInteract() && distance(this.player, s.atm) <= ATMS.radius);
       return s;
     });
+  }
+
+  /** ATMs not yet used up (idle or channeling), for the Optic Nerve HUD. */
+  get usable(): { x: number; y: number }[] {
+    return this.states.filter((s) => s.phase !== 'offline').map((s) => s.atm);
   }
 
   /** Where the ATMs are (for keeping other things clear of them). */
@@ -86,7 +92,7 @@ export class Atms {
   }
 
   private decrypt(s: AtmState, deltaMs: number, holding: boolean) {
-    s.holdMs = holding ? s.holdMs + deltaMs : 0;
+    s.holdMs = holding ? s.holdMs + deltaMs * this.player.stats.hackSpeedMult : 0;
     if (s.holdMs < ATMS.decryptMs) return;
     s.phase = 'channeling';
     s.holdMs = 0;

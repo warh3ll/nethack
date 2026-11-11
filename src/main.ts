@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { GameScene } from './scenes/GameScene';
 import { MenuScene } from './scenes/MenuScene';
+import { RipdocScene } from './scenes/RipdocScene';
 import { LIGHTING } from './data/balance';
 
 const game = new Phaser.Game({
@@ -14,7 +15,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%', fullscreenTarget: document.documentElement },
   physics: { default: 'arcade', arcade: { debug: false } },
   render: { maxLights: LIGHTING.maxLights },
-  scene: [BootScene, MenuScene, GameScene],
+  scene: [BootScene, MenuScene, RipdocScene, GameScene],
 });
 
 // Dev builds only: lets a test script reach the running game (scenes, player) from the browser console.

@@ -5,6 +5,9 @@ import { CONNECT_SERVERS } from '../data/objectives';
  * hold E there to attach it. Pure logic, no Phaser; CableServers draws it.
  */
 export class Connect {
+  /** @param speed multiplier on how fast the attach hold fills (cyberware). */
+  constructor(private speed = 1) {}
+
   /** True once the cable has been grabbed at either server. */
   grabbed = false;
   /** Which server the cable is attached to while grabbed; the other one is the target. */
@@ -55,7 +58,7 @@ export class Connect {
       this.unwind = { x: playerX, y: playerY, ms: 0, from: this.from };
       return;
     }
-    if (held && nearTarget) this.attachMs += deltaMs;
+    if (held && nearTarget) this.attachMs += deltaMs * this.speed;
     else this.attachMs = 0;
   }
 }

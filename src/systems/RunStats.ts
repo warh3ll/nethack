@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { FALLBACK_UPGRADES, SKILLS } from '../data/skills';
 import { ENEMY_DAMAGED, type Enemy } from '../entities/Enemy';
 import { BASE_REGEN, PLAYER_HEALED } from '../entities/Player';
+import { CYBERWARE, CYBER_COLOR, isCyberwareId } from '../data/cyberware';
 
 /** The "Patch Up" fallback level-up reward. */
 export const PATCH_UP = 'patchUp';
@@ -10,6 +11,7 @@ export const PATCH_UP = 'patchUp';
 export function sourceInfo(id: string): { name: string; color: number } {
   if (id === BASE_REGEN) return { name: 'Base regen', color: 0x9aa7c7 };
   if (id === PATCH_UP) return { name: FALLBACK_UPGRADES.heal.name, color: 0x5fe08a };
+  if (isCyberwareId(id)) return { name: CYBERWARE[id].name, color: CYBER_COLOR };
   const s = SKILLS[id];
   return { name: s?.name.replace(/^\[PH\]\s*/, '') ?? id, color: s?.color ?? 0xffffff };
 }

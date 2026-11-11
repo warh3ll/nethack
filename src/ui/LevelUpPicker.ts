@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { CYBERWARE } from '../data/cyberware';
 import { FALLBACK_UPGRADES, SKILLS, getSkillStats } from '../data/skills';
 import type { Upgrade } from '../systems/Progression';
 
@@ -23,7 +24,7 @@ const LABELS: Record<string, string> = {
   contactDamage: 'touch damage',
   explosionDamage: 'blast damage',
   explosionRadius: 'blast radius',
-  damageReduction: 'damage reduction',
+  damageReductionPct: 'damage reduction %',
   retaliationDamage: 'retaliation damage',
   shieldHits: 'shield hits',
   shieldRechargeMs: 'shield recharge ms',
@@ -67,6 +68,11 @@ export function describe(u: Upgrade) {
   if (u.type === 'credits') {
     const f = FALLBACK_UPGRADES.credits;
     return { tag: 'PAYOUT', name: f.name, body: `${f.description}\n\n+${u.amount} credits`, color: 0xffd23e };
+  }
+  if (u.type === 'blueprint') {
+    const c = CYBERWARE[u.cyberwareId];
+    const body = `${c.description}\n\nUnlocks it at the ripdoc. Kept when the run ends, by death or extraction.`;
+    return { tag: 'CYBERWARE BLUEPRINT', name: c.name, body, color: 0xb88cff };
   }
   const s = SKILLS[u.skillId];
   const kind = s.kind === 'weapon' ? 'WEAPON' : 'PASSIVE';

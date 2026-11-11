@@ -88,13 +88,14 @@ export class SaveCodeDialog {
     }
     if (!this.confirming) {
       this.setConfirming(true);
-      this.say(`Replace your ${account.credits} credits with ${save.credits} credits?`, false);
+      const summary = (credits: number, installed: number) => `${credits} credits and ${installed} cyberware`;
+      this.say(`Replace your ${summary(account.credits, account.installed.length)} with ${summary(save.credits, save.installed.length)}?`, false);
       return;
     }
     account.importCode(this.importBox.value);
     this.setConfirming(false);
     this.importBox.value = '';
     this.exportBox.value = account.exportCode();
-    this.say(`Save restored: ${account.credits} credits.`, true);
+    this.say(`Save restored: ${account.credits} credits, ${account.installed.length} cyberware.`, true);
   }
 }
