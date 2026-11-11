@@ -636,7 +636,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.pause();
     const bonus = won ? CREDITS.extractionBonus : 0;
     this.credits += bonus;
-    account.bankCredits(this.credits);
+    account.bankRun(this.credits);
     this.drawHud();
     const reboot = () => this.scene.restart();
     const toMenu = () => this.scene.start('menu');

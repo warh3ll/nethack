@@ -55,9 +55,7 @@ export class MenuScene extends Phaser.Scene {
       y += BUTTON_H + BUTTON_GAP;
     };
     button('[ENTER] START RUN', CYAN, () => this.startRun());
-    // Both open once the item system lands (PLAN package D).
-    button('SHOP  // offline', CYAN);
-    button('EQUIPMENT  // offline', CYAN);
+    button('[R] RIPDOC', CYAN, () => this.openRipdoc());
     button('[C] SAVE CODE', GOLD, () => this.openSaveCode());
     // Only where the browser supports it (not on iPhone, which uses Add to Home Screen instead).
     if (canFullscreen(this)) button('[F] FULLSCREEN', CYAN, () => toggleFullscreen(this));
@@ -65,6 +63,7 @@ export class MenuScene extends Phaser.Scene {
 
     // The keyboard reaches the game even while the player types in the dialog, so these all check for it.
     this.input.keyboard!.on('keydown-ENTER', () => this.startRun());
+    this.input.keyboard!.on('keydown-R', () => this.openRipdoc());
     this.input.keyboard!.on('keydown-C', () => this.openSaveCode());
     this.input.keyboard!.on('keydown-ESC', () => this.dialog?.close());
     this.input.keyboard!.on('keydown-F', () => {
@@ -82,6 +81,10 @@ export class MenuScene extends Phaser.Scene {
 
   private startRun() {
     if (!this.dialog) this.scene.start('game');
+  }
+
+  private openRipdoc() {
+    if (!this.dialog) this.scene.start('ripdoc');
   }
 
   private openSaveCode() {

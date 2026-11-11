@@ -52,21 +52,22 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5). Placed at run start (`systems/Caches.ts`, `CACHES` in `balance.ts`); inert until opening lands
 - [x] Opening a cache grants a skill/passive using the slot rules; the player can only take it or discard it, and the cache is removed either way (s5). `Progression.rollCacheContents()`; credits if the pool is empty
 - [x] Most caches hold credits instead of an upgrade: 75% credits, 25% upgrade (s5). `creditChance` and `creditAmount` in `CACHES`
-- [ ] Cache-opening UI (done: `CachePicker`, press E or tap the prompt) and the items-found counter (still to do, needs find-only items) (s10)
-- [ ] Rare find-only items, about 2.5% of caches, taken from the upgrade share so upgrades end up at 22.5%. Needs the item system from D first, so a rough first item list is fine (s4b)
+- [ ] Cache-opening UI (done: `CachePicker`, press E or tap the prompt) and the blueprints-found counter (still to do, needs cyberware blueprints) (s10)
+- [ ] Rare cyberware blueprints, about 2.5% of caches, taken from the upgrade share so upgrades end up at 22.5%. Banked like credits: kept on death or extraction, forfeited on quit. Shown on the results screen (s4b)
 - [ ] Optional: rare cache drop from enemies (s5)
 
-### D. Meta loop: save, menu, shop, items (turns it into a game you return to)
+### D. Meta loop: save, menu, ripdoc, cyberware (turns it into a game you return to)
 
 Best done together, in this order:
 
 - [x] Credits persist across runs (kept on death) (s9). `systems/Account.ts`
 - [x] Save to localStorage (s9). `systems/Save.ts`; saved only when a run ends, so leaving mid-run forfeits that run's credits
 - [x] Export/import save code buttons in the main menu (s9). `ui/SaveCodeDialog.ts`; importing asks for confirmation first
-- [x] Main menu scene: start run, shop, equipment (s9). `scenes/MenuScene.ts`; shop and equipment are shown as offline until their UI lands. Results screen offers reboot or main menu; pause screen offers quit to menu, which forfeits the run's credits
-- [ ] Item data file in `src/data/` (slots, stats, price) with two items per slot: Head, Chest, Hands, Back, Legs, Feet, Slicer, 4 trinkets (s4b)
-- [ ] Shop (buy) and equipment (equip/unequip/swap) UI (s4b)
-- [ ] Item stats applied at run start through the same re-sum as passives
+- [x] Main menu scene: start run, ripdoc (s9). `scenes/MenuScene.ts`. Results screen offers reboot or main menu; pause screen offers quit to menu, which forfeits the run's credits
+- [x] Cyberware data file (`src/data/cyberware.ts`: slot, cost, shop or blueprint, effects), first list from `docs/CYBERWARE.md`. Save format v2 stores installed cyberware and found blueprints; v1 saves and codes still load
+- [x] Ripdoc screen (`scenes/RipdocScene.ts`, [R] in the menu): list by slot on the left, silhouette with slot markers on the right (stacked on phones), buy with a confirm step, blueprint pieces hidden until found. Placeholder silhouette in `BootScene`; art for a piece goes in as texture `cyberware-<id>`
+- [ ] Simple stat cyberware applied at run start through the same re-sum as passives: damage reduction %, run speed, dash distance, magnet radius, weapon range, hacking speed. Firewall changes to 3/6/9% and all damage-reduction percentages add up
+- [ ] Cyberware with behaviour: proximity slow, aim spread on enemy shots, discharge zap, ricochet, Optic HUD compass needle
 - [ ] Fast runs awards more credits, up to three minutes give 100% extra credits, at 7 minutes there is 0% extra in top of the default completion bonus
 
 ### E. Enemies and difficulty
