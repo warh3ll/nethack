@@ -266,3 +266,5 @@ Answer inline or strike out. Answered questions get folded into the sections abo
 
 - Under a future Options menu we should have a few things where players can customize their experience
   - One is a choice to freeze time completely while inputing hacks, for players who struggle to stay alive while typing
+- As the player grows stronger with more upgrades, they may want to up the difficulty to gain more credits.
+  - Plan is to have more levels: Normal, Veteran, Hyper
