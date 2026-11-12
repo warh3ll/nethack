@@ -349,8 +349,8 @@ export const CACHES = {
    * Once every blueprint has been found, that share goes back to upgrades.
    */
   blueprintChance: 0.025,
-  /** Credits in a cache that holds credits. */
-  creditAmount: 5,
+  /** Credits in a cache that holds credits: a random whole number in this range (inclusive). */
+  creditAmount: { min: 5, max: 15 },
 }
 
 /**

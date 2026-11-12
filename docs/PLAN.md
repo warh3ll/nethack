@@ -51,7 +51,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 
 - [x] Caches scattered randomly on the map, rare; compass/marker does not point to them (s3, s5). Placed at run start (`systems/Caches.ts`, `CACHES` in `balance.ts`); inert until opening lands
 - [x] Opening a cache grants a skill/passive using the slot rules; the player can only take it or discard it, and the cache is removed either way (s5). `Progression.rollCacheContents()`; credits if the pool is empty
-- [x] Most caches hold credits instead of an upgrade: 75% credits, 25% upgrade (s5). `creditChance` and `creditAmount` in `CACHES`
+- [x] Most caches hold credits instead of an upgrade: 75% credits, 25% upgrade (s5). `creditChance` and `creditAmount` (random 5-15) in `CACHES`
 - [x] Cache-opening UI (`CachePicker`, press E or tap the prompt) and the blueprints-found counter in the HUD (s10)
 - [x] Rare cyberware blueprints, 2.5% of caches (`blueprintChance` in `CACHES`), taken from the upgrade share so upgrades end up at 22.5%; once every blueprint is found that share is upgrades again. Banked like credits: kept on death or extraction, forfeited on quit. Listed by name on the results screen (s4b)
 - [ ] Optional: rare cache drop from enemies (s5)
