@@ -178,11 +178,15 @@ export class Progression {
    */
   rollCacheContents(lockedBlueprints: string[] = []): Upgrade {
     const roll = Math.random()
-    if (roll < CACHES.creditChance) return { type: 'credits', amount: CACHES.creditAmount }
+    const credits = (): Upgrade => ({
+      type: 'credits',
+      amount: Phaser.Math.Between(CACHES.creditAmount.min, CACHES.creditAmount.max),
+    })
+    if (roll < CACHES.creditChance) return credits()
     if (roll < CACHES.creditChance + CACHES.blueprintChance && lockedBlueprints.length > 0)
       return { type: 'blueprint', cyberwareId: Phaser.Utils.Array.GetRandom(lockedBlueprints) }
     const options = this.offerPool()
-    if (options.length === 0) return { type: 'credits', amount: CACHES.creditAmount }
+    if (options.length === 0) return credits()
     return Phaser.Utils.Array.GetRandom(options)
   }
 
