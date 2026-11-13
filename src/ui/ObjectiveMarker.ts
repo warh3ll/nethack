@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import type { Player } from '../entities/Player';
 
-/** How far from the screen edge the marker sits. */
-const INSET = 44;
+/** How far from the screen edge the marker sits. Clears the skill bar (bottom 60px) and other edge HUD. */
+const INSET = 96;
 const SIZE = 12;
 const COLOR = 0xffd23e;
 
