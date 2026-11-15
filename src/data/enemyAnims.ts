@@ -54,6 +54,17 @@ export const ENEMY_SPRITES: Record<string, EnemySpriteDef> = {
       'move-right': { file: 'move-down.png', frames: 4, fps: 6 },
     },
   },
+  marksman: {
+    frameWidth: 32,
+    frameHeight: 32,
+    scale: 2,
+    anims: {
+      'move-down': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-up': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-left': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-right': { file: 'move-down.png', frames: 4, fps: 8 },
+    },
+  },
 };
 
 export const enemyAnimKey = (type: string, state: string) => `enemy-${type}-${state}`;
