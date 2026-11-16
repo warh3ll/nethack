@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
+import { CREDITS, ENEMY_SCALING, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -192,8 +192,8 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
       const enemy = e as Enemy;
-      if (enemy.stats.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
-      const hit = this.player.takeDamage(enemy.stats.contactDamage, this.gameTime);
+      if (enemy.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
+      const hit = this.player.takeDamage(enemy.contactDamage, this.gameTime);
       if (!hit) return;
       if (hit === 'damaged') this.onPlayerHurt();
       // Defensive Matrix: the enemy whose touch landed takes damage back, blocked or not.
@@ -299,7 +299,7 @@ export class GameScene extends Phaser.Scene {
     const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
     this.spawner = new Spawner(this, spawnPoints, (x, y, type) => {
       const enemy = this.enemies.get() as Enemy | null;
-      enemy?.spawn(x, y, type);
+      enemy?.spawn(x, y, type, undefined, this.enemyScale());
       return enemy;
     });
     this.factories = new Factories(
@@ -427,7 +427,7 @@ export class GameScene extends Phaser.Scene {
         const atPlayer = !(decoy && !e.stats.guard);
         const spread = this.progression.stats.enemyAimSpreadDeg;
         if (atPlayer && spread > 0) angle += Phaser.Math.DegToRad(Phaser.Math.FloatBetween(-spread, spread));
-        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range, e);
+        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, e.shotDamage, r.range, e);
       }
     }
     this.drawEnemyBars();
@@ -604,6 +604,15 @@ export class GameScene extends Phaser.Scene {
     if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
     // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
     this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds));
+  }
+
+  /** Run-clock multipliers for swarm enemies spawned now (ENEMY_SCALING). */
+  private enemyScale() {
+    const minutes = this.elapsedMs / 60000;
+    return {
+      hp: 1 + (minutes * ENEMY_SCALING.hpPctPerMinute) / 100,
+      damage: 1 + (minutes * ENEMY_SCALING.damagePctPerMinute) / 100,
+    };
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */

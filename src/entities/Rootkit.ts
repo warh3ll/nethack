@@ -156,7 +156,7 @@ export class Rootkit {
       if (!o.active || o.hijacked || o.stats.contactDamage <= 0) continue;
       const reach = e.stats.radius + o.stats.radius + 4;
       if (Phaser.Math.Distance.Between(e.x, e.y, o.x, o.y) > reach) continue;
-      if (e.takeDamage(o.stats.contactDamage)) return;
+      if (e.takeDamage(o.contactDamage)) return;
     }
   }
 

@@ -47,10 +47,25 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private waypointX = 0;
   private waypointY = 0;
 
-  spawn(x: number, y: number, typeKey: string, hp?: number) {
+  /** Multiplier on this spawn's touch and bullet damage (run-clock scaling, see ENEMY_SCALING). */
+  damageMult = 1;
+
+  /** Touch damage of this spawn, with run-clock scaling. */
+  get contactDamage() {
+    return Math.round(this.stats.contactDamage * this.damageMult);
+  }
+
+  /** Bullet damage of this spawn, with run-clock scaling (0 if it doesn't shoot). */
+  get shotDamage() {
+    return Math.round((this.stats.ranged?.damage ?? 0) * this.damageMult);
+  }
+
+  /** `scale` multiplies hp and damage (run-clock scaling for swarm enemies); omitted means the base numbers. */
+  spawn(x: number, y: number, typeKey: string, hp?: number, scale?: { hp: number; damage: number }) {
     this.stats = ENEMIES[typeKey];
     lit(this);
-    this.hp = this.maxHp = hp ?? this.stats.hp;
+    this.hp = this.maxHp = Math.round((hp ?? this.stats.hp) * (scale?.hp ?? 1));
+    this.damageMult = scale?.damage ?? 1;
     this.infection = null;
     this.stunnedUntil = 0;
     this.stunTinted = false;

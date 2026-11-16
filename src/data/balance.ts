@@ -279,6 +279,18 @@ export const SPAWNING = {
 }
 
 /**
+ * Swarm enemies get tougher with the run clock. Applies to everything that comes out of a factory or small exit
+ * (including ATM waves); objective guards, outposts and factory cores keep their fixed numbers.
+ * Grows in a straight line: at 7:00 with 25% per minute, hp is 1 + 7 * 0.25 = 2.75x. Set to 0 to switch off.
+ */
+export const ENEMY_SCALING = {
+  /** Percent extra hp per minute of run time. */
+  hpPctPerMinute: 25,
+  /** Percent extra damage (touch and bullets) per minute of run time. */
+  damagePctPerMinute: 10,
+}
+
+/**
  * Where swarm enemies come from: factories and small exits (placed by the city generator, counts in city.ts).
  * Which ones are active depends only on world distance to the player, never on the screen size.
  * Every spawn from SPAWNING picks one active spawn point; with few of them around, some spawns are skipped (quiet zones).
