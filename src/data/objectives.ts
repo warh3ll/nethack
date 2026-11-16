@@ -5,7 +5,12 @@
 
 export interface ObjectiveDef {
   id: string
-  type: 'hackServer' | 'encryptionKey' | 'connectServers' | 'stealSecrets' | 'destroyFactories'
+  type:
+    | 'hackServer'
+    | 'encryptionKey'
+    | 'connectServers'
+    | 'stealSecrets'
+    | 'destroyFactories'
   /** Shown in the objective list (top right). Keep it short, the panel is narrow. */
   name: string
   /** World position. For connectServers this is the first server, for stealSecrets the middle of the compound. */
@@ -132,7 +137,7 @@ export const SERVER = {
 
 export const HACK = {
   /** The player must stay within this distance of the server for the hack to progress. */
-  range: 250,
+  range: 200,
   /** While the player is in range, the zone's background colour pulses between these opacities (0 to 1), one cycle per `zonePulseMs`. */
   zoneAlphaMin: 0.05,
   zoneAlphaMax: 0.16,
