@@ -281,13 +281,13 @@ export const SPAWNING = {
 /**
  * Swarm enemies get tougher with the run clock. Applies to everything that comes out of a factory or small exit
  * (including ATM waves); objective guards, outposts and factory cores keep their fixed numbers.
- * Grows in a straight line: at 7:00 with 25% per minute, hp is 1 + 7 * 0.25 = 2.75x. Set to 0 to switch off.
+ * Grows in a straight line: at 7:00 with 5% per minute, hp is 1 + 7 * 0.05 = 1.35x. Set to 0 to switch off.
  */
 export const ENEMY_SCALING = {
   /** Percent extra hp per minute of run time. */
-  hpPctPerMinute: 25,
+  hpPctPerMinute: 5,
   /** Percent extra damage (touch and bullets) per minute of run time. */
-  damagePctPerMinute: 10,
+  damagePctPerMinute: 5,
 }
 
 /**
