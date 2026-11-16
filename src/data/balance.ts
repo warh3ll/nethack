@@ -304,6 +304,31 @@ export const ENEMY_SCALING = {
 }
 
 /**
+ * Enemy hordes: at set run times an alert goes up, every spawn point near the player flashes for `warningMs`,
+ * then they let the horde out between them (split as evenly as possible). Horde enemies roll their types and
+ * get the run-clock scaling like any other spawn, and they still count towards `SPAWNING.maxEnemies`.
+ */
+export const HORDES = {
+  /** When each horde comes (run time in seconds) and how many enemies it brings. */
+  waves: [
+    { atSec: 180, count: 25 },
+    { atSec: 300, count: 50 },
+    { atSec: 420, count: 75 },
+  ],
+  /** Time between the alert going up and the enemies stepping out; the spawn points flash all along. */
+  warningMs: 5000,
+  /** Spawn points this far from the player take part (in px). Wider than the normal active ranges so a horde has room. */
+  range: { min: 450, max: 1800 },
+  /** If fewer spawn points than this are in range, the nearest ones beyond `range.min` are added until there are this many. */
+  minPoints: 4,
+  /** Alert banner: text, colour, size and how long it stays up (it pulses until the horde is out, then fades). */
+  alertText: 'INCOMING ENEMY HORDE',
+  alertColor: 0xff2e4a,
+  alertFontSize: 30,
+  alertFadeMs: 600,
+}
+
+/**
  * Where swarm enemies come from: factories and small exits (placed by the city generator, counts in city.ts).
  * Which ones are active depends only on world distance to the player, never on the screen size.
  * Every spawn from SPAWNING picks one active spawn point; with few of them around, some spawns are skipped (quiet zones).

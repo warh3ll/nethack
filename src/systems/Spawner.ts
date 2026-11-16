@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SPAWN_POINTS, SPAWNING } from '../data/balance';
+import { HORDES, SPAWN_POINTS, SPAWNING } from '../data/balance';
 import { CITY } from '../data/city';
 import type { Enemy } from '../entities/Enemy';
 import type { SpawnPoint } from './SpawnPoints';
@@ -73,6 +73,28 @@ export class Spawner {
   summonHunters(now: number, point: SpawnPoint, types: string[]) {
     const flash = point.kind === 'factory' ? SPAWN_POINTS.factoryFlashMs : SPAWN_POINTS.exitFlashMs;
     this.pending.push({ point, types, startedAt: now, spawnAt: now + flash, hunt: true });
+  }
+
+  /**
+   * A horde (HORDES): every spawn point within `HORDES.range` of the player flashes for `flashMs`, then they let
+   * `count` enemies out between them, split as evenly as possible. Topped up with the nearest points beyond
+   * `range.min` when too few are in range. Returns how many spawn points take part.
+   */
+  horde(now: number, playerX: number, playerY: number, count: number, rollType: () => string, flashMs: number): number {
+    const h = HORDES;
+    const byDist = this.points
+      .map((p) => ({ p, d: Math.hypot(p.x - playerX, p.y - playerY) }))
+      .filter((o) => o.d >= h.range.min)
+      .sort((a, b) => a.d - b.d);
+    let chosen = byDist.filter((o) => o.d <= h.range.max);
+    if (chosen.length < h.minPoints) chosen = byDist.slice(0, h.minPoints);
+    if (chosen.length === 0 || count <= 0) return 0;
+    const groups: string[][] = chosen.map(() => []);
+    for (let i = 0; i < count; i++) groups[i % chosen.length].push(rollType());
+    chosen.forEach((o, i) => {
+      if (groups[i].length) this.pending.push({ point: o.p, types: groups[i], startedAt: now, spawnAt: now + flashMs });
+    });
+    return chosen.length;
   }
 
   /**

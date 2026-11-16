@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, ENEMY_SCALING, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
+import { CREDITS, ENEMY_SCALING, HORDES, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -42,6 +42,7 @@ import { ObjectivePanel } from '../ui/ObjectivePanel';
 import { ResultsScreen } from '../ui/ResultsScreen';
 import { Minimap } from '../ui/Minimap';
 import { SkillBar } from '../ui/SkillBar';
+import { HordeAlert } from '../ui/HordeAlert';
 import { TouchJoystick } from '../ui/TouchJoystick';
 import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
 import { TouchPromptPanel } from '../ui/TouchPromptPanel';
@@ -93,6 +94,9 @@ export class GameScene extends Phaser.Scene {
 
   private elapsedMs = 0;
   private nextSpawnAt = 0;
+  /** Index of the next horde in HORDES.waves. */
+  private nextHorde = 0;
+  private hordeAlert!: HordeAlert;
   /** Scaled game clock (ms): runs slower than real time during hack typing. */
   private gameTime = 0;
   private appliedScale = 1;
@@ -122,6 +126,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.elapsedMs = 0;
     this.nextSpawnAt = 0;
+    this.nextHorde = 0;
     this.gameTime = 0;
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
@@ -266,6 +271,7 @@ export class GameScene extends Phaser.Scene {
     this.placeClock(this.scale.width);
 
     this.skillBar = new SkillBar(this, this.progression);
+    this.hordeAlert = new HordeAlert(this);
 
     this.objectives = new Objectives(
       this,
@@ -390,7 +396,9 @@ export class GameScene extends Phaser.Scene {
     this.shiftCamera(delta);
     this.atms.update(gameDelta);
     this.spawnEnemies(this.gameTime);
+    this.startHordes();
     this.spawner.update(this.gameTime);
+    this.hordeAlert.update(this.gameTime);
     this.factories.update();
     this.shadows.update();
     this.nav.trackPlayer(this.player.x, this.player.y);
@@ -591,6 +599,18 @@ export class GameScene extends Phaser.Scene {
   private onSkillKill(enemy: Enemy) {
     this.kills++;
     this.gainXp(enemy.stats.xp);
+  }
+
+  /** Starts the next horde once its run time comes (HORDES): alert, long flash at every nearby spawn point, then the enemies. */
+  private startHordes() {
+    const wave = HORDES.waves[this.nextHorde];
+    if (!wave || this.elapsedMs / 1000 < wave.atSec) return;
+    this.nextHorde++;
+    const seconds = this.elapsedMs / 1000;
+    // Still bound by the enemy cap, counting the ones already waiting behind doors.
+    const room = SPAWNING.maxEnemies - this.enemies.countActive(true) - this.spawner.waiting;
+    this.spawner.horde(this.gameTime, this.player.x, this.player.y, Math.min(wave.count, room), () => this.rollEnemyType(seconds), HORDES.warningMs);
+    this.hordeAlert.show(this.gameTime, this.nextHorde, HORDES.waves.length);
   }
 
   private spawnEnemies(time: number) {
