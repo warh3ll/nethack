@@ -5,9 +5,9 @@
 // ─────────────────────────────────────────────────────────────
 
 export const PLAYER = {
-  maxHp: 100,
+  maxHp: 1000,
   /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
-  hpRegenPerSec: 0.15,
+  hpRegenPerSec: 1.5,
   moveSpeed: 200,
   radius: 18,
   /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
@@ -15,7 +15,7 @@ export const PLAYER = {
   /** Time after taking a hit during which the player can't be hit again. */
   invulnerableMs: 500,
   /** Damage reduction (Firewall) can never bring a hit below this. */
-  minDamageTaken: 1,
+  minDamageTaken: 10,
   /** How long after a shot the player keeps the shooting pose. */
   shootingPoseMs: 350,
   /** Animation speed (frames per second; every sheet has 8 frames). */
@@ -152,9 +152,9 @@ export interface EnemyType {
 
 export const ENEMIES: Record<string, EnemyType> = {
   drone: {
-    hp: 10,
+    hp: 100,
     speed: 85,
-    contactDamage: 8,
+    contactDamage: 80,
     xp: 1,
     credits: 1,
     creditChance: 0.1,
@@ -163,16 +163,16 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
-    hp: 8,
+    hp: 80,
     speed: 70,
-    contactDamage: 6,
+    contactDamage: 60,
     xp: 2,
     credits: 2,
     creditChance: 0.1,
     radius: 11,
     color: 0xffd62e,
     ranged: {
-      damage: 6,
+      damage: 60,
       speed: 260,
       range: 350,
       cooldownMs: 2000,
@@ -180,9 +180,9 @@ export const ENEMIES: Record<string, EnemyType> = {
     },
   },
   heavy: {
-    hp: 45,
+    hp: 450,
     speed: 100,
-    contactDamage: 12,
+    contactDamage: 120,
     xp: 3,
     credits: 3,
     creditChance: 0.2,
@@ -191,9 +191,9 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
-    hp: 150,
+    hp: 1500,
     speed: 120,
-    contactDamage: 20,
+    contactDamage: 200,
     xp: 15,
     credits: 5,
     creditChance: 1,
@@ -202,12 +202,12 @@ export const ENEMIES: Record<string, EnemyType> = {
     healthBar: true,
     stunMultiplier: 0.5,
     guard: { aggroRadius: 380, leashRadius: 700 },
-    ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
+    ranged: { damage: 100, speed: 260, range: 500, cooldownMs: 1800 },
   },
   // Destructible structure in the Steal secrets objective. Its hp is the value for the fewest outposts;
   // see STEAL_SECRETS in objectives.ts for how it shrinks with more of them.
   outpost: {
-    hp: 90,
+    hp: 900,
     speed: 0,
     contactDamage: 0,
     xp: 5,
@@ -221,7 +221,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // The part of a factory that can be shot, by its door. Destroying it shuts the factory down (SPAWN_POINTS).
   factoryCore: {
-    hp: 250,
+    hp: 2500,
     speed: 0,
     contactDamage: 0,
     xp: 20,
@@ -237,12 +237,25 @@ export const ENEMIES: Record<string, EnemyType> = {
 }
 
 export const SPAWNING = {
-  /** Spawn interval at the start of a run. */
-  startIntervalMs: 900,
-  /** The interval shrinks toward this over time. */
-  minIntervalMs: 400,
-  /** How much the interval shrinks every second of the run. */
-  intervalDecayPerSecond: 5,
+  /**
+   * Spawns per second over the run clock (one spawn = one door or factory opening, see SPAWN_POINTS).
+   * Straight line between the points, and the last value holds after its time. The first two points match
+   * the old ramp (900 ms down to 400 ms at 1:40); from there it keeps rising so the late game stays busy.
+   */
+  spawnRate: [
+    { atSec: 0, perSec: 1.1 },
+    { atSec: 100, perSec: 2.5 },
+    { atSec: 420, perSec: 3.5 },
+  ],
+  /**
+   * How many enemies a small exit lets out at once, by run clock (both ends included, each rolls its own type).
+   * The last row whose `atSec` has passed applies. More per exit later on means destroyed factories matter less.
+   */
+  exitGroup: [
+    { atSec: 0, min: 1, max: 1 },
+    { atSec: 180, min: 1, max: 2 },
+    { atSec: 300, min: 1, max: 3 },
+  ],
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */
@@ -276,6 +289,69 @@ export const SPAWNING = {
       maxChance: 0.05,
     },
   ],
+}
+
+/**
+ * Swarm enemies get tougher with the run clock. Applies to everything that comes out of a factory or small exit
+ * (including ATM waves); objective guards, outposts and factory cores keep their fixed numbers.
+ * Grows in a straight line: at 7:00 with 5% per minute, hp is 1 + 7 * 0.05 = 1.35x. Set to 0 to switch off.
+ */
+export const ENEMY_SCALING = {
+  /** Percent extra hp per minute of run time. */
+  hpPctPerMinute: 5,
+  /** Percent extra damage (touch and bullets) per minute of run time. */
+  damagePctPerMinute: 5,
+}
+
+/**
+ * Target density: keeps the area around the player from going empty when they move on. Every `checkMs` the swarm
+ * enemies within `radius` (plus those waiting behind flashing doors) are counted; below the target, extra spawn
+ * points open on top of the normal spawning, preferring the ones in the direction the player is moving.
+ * Quiet zones stay quieter: the target shrinks the same way the normal rate does with few spawn points nearby
+ * (SPAWN_POINTS.fullRateAt). Uses the normal active ranges, flashes and group sizes.
+ */
+export const DENSITY = {
+  /** Enemies within this distance of the player count towards the target (px). */
+  radius: 1100,
+  /** Target number of swarm enemies around the player, by run time. Straight line between points, last one holds. */
+  target: [
+    { atSec: 0, count: 8 },
+    { atSec: 180, count: 25 },
+    { atSec: 420, count: 45 },
+  ],
+  /** How often the count is checked (ms of game time). */
+  checkMs: 600,
+  /** At most this many spawn points open per check, so a top-up arrives as a trickle rather than a wall. */
+  maxOpensPerCheck: 2,
+  /** How much a spawn point straight ahead of the player is favoured: weight 1 + aheadBias (behind = 1). */
+  aheadBias: 3,
+  /** Below this speed (px/s) the player counts as standing still and no direction is favoured. */
+  minSpeed: 40,
+}
+
+/**
+ * Enemy hordes: at set run times an alert goes up, every spawn point near the player flashes for `warningMs`,
+ * then they let the horde out between them (split as evenly as possible). Horde enemies roll their types and
+ * get the run-clock scaling like any other spawn, and they still count towards `SPAWNING.maxEnemies`.
+ */
+export const HORDES = {
+  /** When each horde comes (run time in seconds) and how many enemies it brings. */
+  waves: [
+    { atSec: 180, count: 25 },
+    { atSec: 300, count: 50 },
+    { atSec: 420, count: 75 },
+  ],
+  /** Time between the alert going up and the enemies stepping out; the spawn points flash all along. */
+  warningMs: 5000,
+  /** Spawn points this far from the player take part (in px). Wider than the normal active ranges so a horde has room. */
+  range: { min: 450, max: 1800 },
+  /** If fewer spawn points than this are in range, the nearest ones beyond `range.min` are added until there are this many. */
+  minPoints: 4,
+  /** Alert banner: text, colour, size and how long it stays up (it pulses until the horde is out, then fades). */
+  alertText: 'INCOMING ENEMY HORDE',
+  alertColor: 0xff2e4a,
+  alertFontSize: 30,
+  alertFadeMs: 600,
 }
 
 /**
@@ -394,14 +470,14 @@ export const PASSIVE_SLOTS = 5
 
 export const LEVELING = {
   /** XP needed to go from level 1 to level 2. A drone gives 1 XP, so this is roughly "kills per level". */
-  xpForLevel2: 9,
+  xpForLevel2: 5,
   /**
-   * Each level needs this many times the XP of the previous one (1.2 = 20% more).
+   * Each level needs this many times the XP of the previous one (1.25 = 25% more).
    * Formula: XP for level n -> n+1 = xpForLevel2 * xpGrowth ^ (n - 1). Total XP to reach level 10 / 20 / 30 / 40 / 50:
    * about 188 / 1,394 / 8,858 / 55,072 / 341,221. Maxing every skill takes roughly 29 level-ups (level 30).
    * There is no level cap (GAME_DESIGN section 3): the curve getting steeper is what slows levelling down late.
    */
-  xpGrowth: 1.2,
+  xpGrowth: 1.25,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**

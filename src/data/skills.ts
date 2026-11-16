@@ -165,7 +165,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xfff35c,
     levels: [
       {
-        damage: 2,
+        damage: 20,
         cooldownMs: 400,
         projectileSpeed: 700,
         pierce: 0,
@@ -174,7 +174,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 500,
       },
       {
-        damage: 3,
+        damage: 30,
         cooldownMs: 350,
         projectileSpeed: 700,
         pierce: 1,
@@ -183,7 +183,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 550,
       },
       {
-        damage: 4,
+        damage: 40,
         cooldownMs: 300,
         projectileSpeed: 700,
         pierce: 2,
@@ -203,7 +203,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x5fe08a,
     levels: [
       {
-        dps: 1,
+        dps: 10,
         cooldownMs: 3000,
         infectRange: 300,
         spreadRange: 200,
@@ -212,7 +212,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 2,
+        dps: 20,
         cooldownMs: 2500,
         infectRange: 300,
         spreadRange: 200,
@@ -221,7 +221,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 3,
+        dps: 30,
         cooldownMs: 2000,
         infectRange: 300,
         spreadRange: 200,
@@ -240,7 +240,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xff4fd8,
     levels: [
       {
-        damage: 25,
+        damage: 200,
         cooldownMs: 3000,
         projectileSpeed: 1800,
         pierce: 99,
@@ -251,7 +251,7 @@ export const SKILLS: Record<string, SkillData> = {
         targeting: 'highestHp',
       },
       {
-        damage: 30,
+        damage: 240,
         cooldownMs: 2600,
         projectileSpeed: 1800,
         pierce: 99,
@@ -262,7 +262,7 @@ export const SKILLS: Record<string, SkillData> = {
         targeting: 'highestHp',
       },
       {
-        damage: 35,
+        damage: 280,
         cooldownMs: 2200,
         projectileSpeed: 1800,
         pierce: 99,
@@ -282,7 +282,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xc77dff,
     levels: [
       {
-        damage: 4,
+        damage: 40,
         cooldownMs: 1100,
         projectileSpeed: 480,
         pierce: 0,
@@ -291,7 +291,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 280,
       },
       {
-        damage: 5,
+        damage: 50,
         cooldownMs: 1000,
         projectileSpeed: 480,
         pierce: 0,
@@ -300,7 +300,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 300,
       },
       {
-        damage: 6,
+        damage: 60,
         cooldownMs: 900,
         projectileSpeed: 500,
         pierce: 1,
@@ -322,7 +322,7 @@ export const SKILLS: Record<string, SkillData> = {
         hackMs: 500,
         minRange: 75,
         maxRange: 450,
-        damage: 20,
+        damage: 160,
         radius: 100,
         cooldownMs: 2500,
       },
@@ -330,7 +330,7 @@ export const SKILLS: Record<string, SkillData> = {
         hackMs: 400,
         minRange: 75,
         maxRange: 450,
-        damage: 32,
+        damage: 260,
         radius: 130,
         cooldownMs: 2000,
       },
@@ -338,7 +338,7 @@ export const SKILLS: Record<string, SkillData> = {
         hackMs: 300,
         minRange: 75,
         maxRange: 450,
-        damage: 45,
+        damage: 360,
         radius: 160,
         cooldownMs: 1500,
       },
@@ -352,9 +352,9 @@ export const SKILLS: Record<string, SkillData> = {
       'A ring pulses out from you, damaging and briefly stunning enemies.',
     color: 0x2ef2ff,
     levels: [
-      { damage: 8, radius: 120, stunMs: 800, cooldownMs: 4000 },
-      { damage: 13, radius: 180, stunMs: 1400, cooldownMs: 3600 },
-      { damage: 20, radius: 250, stunMs: 2000, cooldownMs: 3200 },
+      { damage: 65, radius: 120, stunMs: 800, cooldownMs: 4000 },
+      { damage: 105, radius: 180, stunMs: 1400, cooldownMs: 3600 },
+      { damage: 160, radius: 250, stunMs: 2000, cooldownMs: 3200 },
     ],
   },
   rootkit: {
@@ -370,9 +370,9 @@ export const SKILLS: Record<string, SkillData> = {
         durationMs: 3000,
         hijackRange: 400,
         count: 1,
-        contactDamage: 6,
+        contactDamage: 60,
         tickMs: 300,
-        explosionDamage: 25,
+        explosionDamage: 250,
         explosionRadius: 95,
       },
       {
@@ -380,9 +380,9 @@ export const SKILLS: Record<string, SkillData> = {
         durationMs: 3600,
         hijackRange: 440,
         count: 1,
-        contactDamage: 10,
+        contactDamage: 100,
         tickMs: 300,
-        explosionDamage: 40,
+        explosionDamage: 400,
         explosionRadius: 125,
       },
       {
@@ -390,9 +390,9 @@ export const SKILLS: Record<string, SkillData> = {
         durationMs: 4500,
         hijackRange: 480,
         count: 1,
-        contactDamage: 15,
+        contactDamage: 150,
         tickMs: 300,
-        explosionDamage: 62,
+        explosionDamage: 620,
         explosionRadius: 155,
       },
     ],
@@ -403,9 +403,9 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Reduces the damage of every hit you take.',
     color: 0x9aa7c7,
     levels: [
-      { damageReductionPct: 3 },
-      { damageReductionPct: 6 },
-      { damageReductionPct: 9 },
+      { damageReductionPct: 8 },
+      { damageReductionPct: 15 },
+      { damageReductionPct: 22 },
     ],
   },
   healingNanites: {
@@ -414,9 +414,9 @@ export const SKILLS: Record<string, SkillData> = {
     description: 'Nanites repair you over time. Faster health regeneration.',
     color: 0x5fe08a,
     levels: [
-      { hpRegenPerSec: 0.5 },
-      { hpRegenPerSec: 0.75 },
-      { hpRegenPerSec: 1 },
+      { hpRegenPerSec: 15 },
+      { hpRegenPerSec: 25 },
+      { hpRegenPerSec: 35 },
     ],
   },
   legServos: {
@@ -424,14 +424,14 @@ export const SKILLS: Record<string, SkillData> = {
     kind: 'passive',
     description: 'Servo assisted legs for faster movement.',
     color: 0x2ef2ff,
-    levels: [{ moveSpeedPct: 5 }, { moveSpeedPct: 10 }, { moveSpeedPct: 15 }],
+    levels: [{ moveSpeedPct: 8 }, { moveSpeedPct: 15 }, { moveSpeedPct: 22 }],
   },
   overclock: {
     name: 'OverClock',
     kind: 'passive',
     description: 'CPU upgrade. Increased damage for all weapons.',
     color: 0xff9d2e,
-    levels: [{ damagePct: 3 }, { damagePct: 6 }, { damagePct: 9 }],
+    levels: [{ damagePct: 10 }, { damagePct: 20 }, { damagePct: 30 }],
   },
   defensiveMatrix: {
     name: 'Defensive Matrix',
@@ -440,9 +440,9 @@ export const SKILLS: Record<string, SkillData> = {
       'Gains a shield that will protect from one hit, it also retaliates against melee enemies.',
     color: 0x7a5cff,
     levels: [
-      { retaliationDamage: 4, shieldHits: 1, shieldRechargeMs: 5000 },
-      { retaliationDamage: 8, shieldHits: 1, shieldRechargeMs: 4000 },
-      { retaliationDamage: 12, shieldHits: 1, shieldRechargeMs: 3000 },
+      { retaliationDamage: 60, shieldHits: 1, shieldRechargeMs: 4000 },
+      { retaliationDamage: 120, shieldHits: 1, shieldRechargeMs: 3000 },
+      { retaliationDamage: 200, shieldHits: 1, shieldRechargeMs: 2000 },
     ],
   },
 }

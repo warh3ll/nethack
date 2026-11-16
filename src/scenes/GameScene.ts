@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
+import { CREDITS, DENSITY, ENEMY_SCALING, HORDES, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -11,7 +11,7 @@ import { Atms, pickAtmPositions } from '../systems/Atms';
 import { generateCity, pickSeed } from '../systems/City';
 import { Navigation } from '../systems/Navigation';
 import { pickSpawnPoints } from '../systems/SpawnPoints';
-import { Spawner } from '../systems/Spawner';
+import { densityTargetAt, exitGroupAt, Spawner, spawnsPerSecond } from '../systems/Spawner';
 import { Factories } from '../systems/Factories';
 import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
@@ -42,6 +42,7 @@ import { ObjectivePanel } from '../ui/ObjectivePanel';
 import { ResultsScreen } from '../ui/ResultsScreen';
 import { Minimap } from '../ui/Minimap';
 import { SkillBar } from '../ui/SkillBar';
+import { HordeAlert } from '../ui/HordeAlert';
 import { TouchJoystick } from '../ui/TouchJoystick';
 import { TouchInteract, type TouchTarget } from '../ui/TouchInteract';
 import { TouchPromptPanel } from '../ui/TouchPromptPanel';
@@ -93,6 +94,11 @@ export class GameScene extends Phaser.Scene {
 
   private elapsedMs = 0;
   private nextSpawnAt = 0;
+  /** Index of the next horde in HORDES.waves. */
+  private nextHorde = 0;
+  /** Game time of the next target-density check (DENSITY). */
+  private nextDensityAt = 0;
+  private hordeAlert!: HordeAlert;
   /** Scaled game clock (ms): runs slower than real time during hack typing. */
   private gameTime = 0;
   private appliedScale = 1;
@@ -122,6 +128,8 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.elapsedMs = 0;
     this.nextSpawnAt = 0;
+    this.nextHorde = 0;
+    this.nextDensityAt = 0;
     this.gameTime = 0;
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
@@ -192,8 +200,8 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.enemies, (_p, e) => {
       const enemy = e as Enemy;
-      if (enemy.stats.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
-      const hit = this.player.takeDamage(enemy.stats.contactDamage, this.gameTime);
+      if (enemy.contactDamage <= 0 || enemy.hijacked) return; // outposts and hijacked enemies don't hurt on touch
+      const hit = this.player.takeDamage(enemy.contactDamage, this.gameTime);
       if (!hit) return;
       if (hit === 'damaged') this.onPlayerHurt();
       // Defensive Matrix: the enemy whose touch landed takes damage back, blocked or not.
@@ -266,6 +274,7 @@ export class GameScene extends Phaser.Scene {
     this.placeClock(this.scale.width);
 
     this.skillBar = new SkillBar(this, this.progression);
+    this.hordeAlert = new HordeAlert(this);
 
     this.objectives = new Objectives(
       this,
@@ -299,7 +308,7 @@ export class GameScene extends Phaser.Scene {
     const spawnPoints = pickSpawnPoints(city, [...objectivePoints(objectiveDefs), ...this.caches, city.exit]);
     this.spawner = new Spawner(this, spawnPoints, (x, y, type) => {
       const enemy = this.enemies.get() as Enemy | null;
-      enemy?.spawn(x, y, type);
+      enemy?.spawn(x, y, type, undefined, this.enemyScale());
       return enemy;
     });
     this.factories = new Factories(
@@ -390,7 +399,10 @@ export class GameScene extends Phaser.Scene {
     this.shiftCamera(delta);
     this.atms.update(gameDelta);
     this.spawnEnemies(this.gameTime);
+    this.startHordes();
+    this.topUpDensity();
     this.spawner.update(this.gameTime);
+    this.hordeAlert.update(this.gameTime);
     this.factories.update();
     this.shadows.update();
     this.nav.trackPlayer(this.player.x, this.player.y);
@@ -427,7 +439,7 @@ export class GameScene extends Phaser.Scene {
         const atPlayer = !(decoy && !e.stats.guard);
         const spread = this.progression.stats.enemyAimSpreadDeg;
         if (atPlayer && spread > 0) angle += Phaser.Math.DegToRad(Phaser.Math.FloatBetween(-spread, spread));
-        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, r.damage, r.range, e);
+        (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, e.shotDamage, r.range, e);
       }
     }
     this.drawEnemyBars();
@@ -593,17 +605,59 @@ export class GameScene extends Phaser.Scene {
     this.gainXp(enemy.stats.xp);
   }
 
+  /** Starts the next horde once its run time comes (HORDES): alert, long flash at every nearby spawn point, then the enemies. */
+  /** Target density (DENSITY): counts the swarm around the player and opens extra spawn points ahead of them when short. */
+  private topUpDensity() {
+    if (this.gameTime < this.nextDensityAt) return;
+    this.nextDensityAt = this.gameTime + DENSITY.checkMs;
+    if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
+    const r2 = DENSITY.radius ** 2;
+    let nearby = this.spawner.waiting;
+    for (const obj of this.enemies.getChildren()) {
+      const e = obj as Enemy;
+      if (!e.active || e.hijacked || e.stats.guard || e.stats.stationary) continue;
+      if ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 <= r2) nearby++;
+    }
+    const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
+    const speed = v.length();
+    const heading = speed >= DENSITY.minSpeed ? { x: v.x / speed, y: v.y / speed } : null;
+    const seconds = this.elapsedMs / 1000;
+    this.spawner.topUp(this.gameTime, this.player.x, this.player.y, heading, densityTargetAt(seconds), nearby, () => this.rollEnemyType(seconds), exitGroupAt(seconds));
+  }
+
+  private startHordes() {
+    const wave = HORDES.waves[this.nextHorde];
+    if (!wave || this.elapsedMs / 1000 < wave.atSec) return;
+    this.nextHorde++;
+    const seconds = this.elapsedMs / 1000;
+    // Still bound by the enemy cap, counting the ones already waiting behind doors.
+    const room = SPAWNING.maxEnemies - this.enemies.countActive(true) - this.spawner.waiting;
+    this.spawner.horde(this.gameTime, this.player.x, this.player.y, Math.min(wave.count, room), () => this.rollEnemyType(seconds), HORDES.warningMs);
+    this.hordeAlert.show(this.gameTime, this.nextHorde, HORDES.waves.length);
+  }
+
   private spawnEnemies(time: number) {
     if (time < this.nextSpawnAt) return;
     const seconds = this.elapsedMs / 1000;
-    const interval = Math.max(SPAWNING.minIntervalMs, SPAWNING.startIntervalMs - seconds * SPAWNING.intervalDecayPerSecond);
+    const interval = 1000 / spawnsPerSecond(seconds);
     // Hacking draws enemies in a bit faster; every factory destroyed slows the whole map down.
-    this.nextSpawnAt = time + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
+    // Counted from when this spawn was due (not from this frame), so frame timing doesn't slow the rate down; after a long gap it restarts from now.
+    const due = time - this.nextSpawnAt < 1000 ? this.nextSpawnAt : time;
+    this.nextSpawnAt = due + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
 
     // Enemies behind a flashing door count towards the cap already.
     if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
     // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
-    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds));
+    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds), exitGroupAt(seconds));
+  }
+
+  /** Run-clock multipliers for swarm enemies spawned now (ENEMY_SCALING). */
+  private enemyScale() {
+    const minutes = this.elapsedMs / 60000;
+    return {
+      hp: 1 + (minutes * ENEMY_SCALING.hpPctPerMinute) / 100,
+      damage: 1 + (minutes * ENEMY_SCALING.damagePctPerMinute) / 100,
+    };
   }
 
   /** One roll per spawn: each special type gets its time-scaled chance, otherwise a plain swarm enemy. */

@@ -59,7 +59,7 @@ export const STEAL_SECRETS = {
   /** Outposts stand on a circle of this radius around the objective position. */
   ringRadius: 170,
   /** Each outpost beyond the minimum count takes this much hp off every outpost (see ENEMIES.outpost.hp). */
-  hpLossPerExtra: 10,
+  hpLossPerExtra: 100,
   /** An outpost spawns drones only while the player is within this distance of it. */
   spawnTriggerRadius: 650,
   /** Time between drones from one outpost. */

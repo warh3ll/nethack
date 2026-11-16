@@ -72,7 +72,7 @@ Best done together, in this order:
 
 ### E. Enemies and difficulty
 
-- [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6)
+- [x] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6). Moved into J (Balance), steps 2 and 3
 - [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
 - [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
 - [x] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
@@ -147,7 +147,27 @@ Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus 
 - [ ] Phone layout check: orientation, notches, readable HUD
 - [ ] Performance check on a real phone (lighting, swarm size) (Henrik)
 
-### G. Polish and release
+## J. Balance
+
+The game is quite unbalanced at the moment, both in terms of skills and progression, but also spawn rates. Typically the game is tough for maybe the first minute, then you get powerful really quick and the sense of agency is gone. Destroy a couple of factories and the chance of being overwhelmed is basically removed. I want to plan this with you, but here are some of my initial ideas.
+
+Why it goes easy (found in the code, 2026-11-16):
+
+- The spawn interval hits its 400 ms floor at 1:40 (`SPAWNING.intervalDecayPerSecond`), so after that only the enemy mix changes.
+- Enemy hp and damage never change over the run; level 1 Synaptic Overload (20) and Railgun (25) already one-shot every Drone (10 hp) they reach.
+- Factories supply most of the local swarm: picked twice as often as an exit and letting out 3-5 enemies instead of 1. Near one factory and three exits, about 70% of enemies come from the factory, so destroying it more than halves local spawns, on top of the 8% map-wide cut.
+- Passives top out at +9% (OverClock, Firewall) while a second weapon roughly doubles damage output.
+
+Agreed order and approach (each step leaves the game playable):
+
+1. - [x] Multiply all health and damage numbers by 10, so that % upgrades aren't in the fractions (that often). Its own change with no feel change: player hp, regen, min damage taken, enemy hp, contact and bullet damage, every skill's damage, Defensive Matrix retaliation. Percentages, credits and XP stay as they are
+2. - [x] Enemy difficulty over the run clock (moved here from E): swarm enemies (anything from a factory or small exit, ATM waves included) spawn with +5% hp and +5% damage per minute of run time (`ENEMY_SCALING` in `balance.ts`). Objective guards, outposts and factory cores keep their fixed numbers
+3. - [x] Door spawns should increase over time so that destroying factories aren't making it too easy. The spawn rate now follows `SPAWNING.spawnRate` (1.1/s at the start, 2.5/s at 1:40, 3.5/s at 7:00, straight line between, held after) instead of stopping at 1:40, and small exits let out 1, then 1-2 from 3:00 and 1-3 from 5:00 (`SPAWNING.exitGroup`)
+4. - [x] Reduce the power of skills across the board, improve passive numbers instead, there's currently no reason to pick a passive before a weapon (Claude did a first pass, Henrik balances after). Area skills trimmed about 20% at every level: Railgun 200/240/280, Synaptic Overload 160/260/360, EMP Shock 65/105/160. Passives: OverClock 10/20/30%, Firewall 8/15/22%, Healing Nanites 15/25/35 HP/s, Exoskeleton 8/15/22%, Defensive Matrix recharge 4/3/2 s and retaliation 60/120/200
+5. - [x] At 3, 5 and 7 minutes an "Incoming enemy horde" alert, increasing in intensity: 25, 50 and 75 enemies in the player's vicinity. Decided: after the alert, every active spawn point near the player flashes and lets out its share, so the horde comes from readable places (enemies never just appear). In game: `HORDES` in `balance.ts` (times, counts, 5 s warning, range 450-1800 px, at least 4 spawn points); banner `ui/HordeAlert.ts`, spawning `Spawner.horde()`. Horde enemies get the run-clock scaling and still respect the enemy cap
+6. - [x] Moving away feels empty outside the player's current location. Decided: target density, keep about N enemies (N grows over time) within a radius of the player and top up from spawn points when below it, favouring the direction the player is moving. In game: `DENSITY` in `balance.ts` (radius 1100 px, target 8 at the start, 25 at 3:00, 45 at 7:00, at most 2 extra openings every 0.6 s, points ahead weigh up to 4x), `Spawner.topUp()`. Quiet zones still shrink the target. First playtest: running down a street kept about 19 enemies around the player on average against 14 without it
+
+### X. Polish and release
 
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled
 - [x] Floating damage numbers over enemies, coloured like the skill that did the damage
@@ -157,8 +177,3 @@ Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus 
 - [ ] Playtest build review with outside testers via GitHub Pages
 - [ ] itch.io HTML5 build and upload (CLAUDE.md)
 
-## Suggested order
-
-A (quick HUD cleanup) -> B (skill rules, so level-ups feel right) -> D (menu, shop and items, which gives the run a purpose) -> C (caches, which need B's slot rules and D's items) -> E (enemies, once there are builds to challenge) -> G, with F slotted in whenever more variety is wanted.
-
-Why this order: the run itself already works end to end, so the missing pieces are depth within a run (B, C, E) and a reason to start another one (D). B comes before C because caches reuse the slot rules, and D before the item part of C because find-only items need the item list.
