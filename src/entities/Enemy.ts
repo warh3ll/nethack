@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ENEMIES, EnemyType, NAVIGATION } from '../data/balance';
-import { ENEMY_SPRITES, MOVE_STATE, enemyAnimKey } from '../data/enemyAnims';
+import { ENEMY_SPRITES, directionOf, enemyAnimKey, pickMoveState } from '../data/enemyAnims';
 import { lit } from '../systems/Lighting';
 import type { FlowField, Navigation } from '../systems/Navigation';
 
@@ -27,6 +27,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /** Starting hp of this spawn (may differ from stats.hp), for health bars. */
   maxHp = 0;
   stats!: EnemyType;
+  private typeKey = '';
   infection: Infection | null = null;
   /** Game time until which the enemy is stunned (no moving, no shooting). */
   private stunnedUntil = 0;
@@ -49,6 +50,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   spawn(x: number, y: number, typeKey: string, hp?: number) {
     this.stats = ENEMIES[typeKey];
+    this.typeKey = typeKey;
     lit(this);
     this.hp = this.maxHp = hp ?? this.stats.hp;
     this.infection = null;
@@ -66,7 +68,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const sprite = ENEMY_SPRITES[typeKey];
     if (sprite) {
       // Animated sheet: the hit circle is centred on the frame. Phaser reads radius and offset in unscaled frame pixels, so divide the world radius by the sprite scale.
-      const key = enemyAnimKey(typeKey, MOVE_STATE);
+      const key = enemyAnimKey(typeKey, pickMoveState(sprite, 'down'));
       this.setTexture(key).setScale(sprite.scale).play(key);
       const k = this.stats.radius / sprite.scale;
       this.body!.setCircle(k, sprite.frameWidth / 2 - k, sprite.frameHeight / 2 - k);
@@ -82,6 +84,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setImmovable(!!this.stats.stationary);
     (this.body as Phaser.Physics.Arcade.Body).moves = !this.stats.stationary;
     this.clearTint();
+  }
+
+  /** Keeps the walk animation facing the way the enemy moves (directional art only). */
+  preUpdate(time: number, delta: number) {
+    super.preUpdate(time, delta);
+    const sprite = this.active ? ENEMY_SPRITES[this.typeKey] : undefined;
+    if (!sprite || !this.body) return;
+    const v = this.body.velocity;
+    if (v.x === 0 && v.y === 0) return;
+    const key = enemyAnimKey(this.typeKey, pickMoveState(sprite, directionOf(v.x, v.y)));
+    if (this.anims.currentAnim?.key !== key) this.play(key, true);
   }
 
   /** Multiplier on walking speed this frame (Proximity Sensors slows enemies near the player). */

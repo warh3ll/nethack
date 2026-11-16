@@ -19,12 +19,51 @@ export interface EnemySpriteDef {
 
 export const MOVE_STATE = 'move';
 
+/** Enemies walk in four directions (the player has eight). Types with directional art define `move-<dir>` states instead of `move`. */
+export const ENEMY_DIRECTIONS = ['down', 'up', 'left', 'right'] as const;
+export type EnemyDirection = (typeof ENEMY_DIRECTIONS)[number];
+export const moveStateFor = (dir: EnemyDirection) => `move-${dir}`;
+
+/** The animation state to play: `move` for non-directional art, otherwise the direction state (falling back to down). */
+export function pickMoveState(def: EnemySpriteDef, dir: EnemyDirection) {
+  if (def.anims[MOVE_STATE]) return MOVE_STATE;
+  return def.anims[moveStateFor(dir)] ? moveStateFor(dir) : moveStateFor('down');
+}
+
+/** Four-way facing from a velocity: the dominant axis wins. */
+export function directionOf(vx: number, vy: number): EnemyDirection {
+  return Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : vy < 0 ? 'up' : 'down';
+}
+
 export const ENEMY_SPRITES: Record<string, EnemySpriteDef> = {
   drone: {
     frameWidth: 32,
     frameHeight: 32,
     scale: 2,
     anims: { move: { file: 'move.png', frames: 4, fps: 8 } },
+  },
+  // Only the down walk is drawn so far: the other three directions reuse it until their art arrives (swap the file names).
+  heavy: {
+    frameWidth: 32,
+    frameHeight: 32,
+    scale: 2,
+    anims: {
+      'move-down': { file: 'move-down.png', frames: 4, fps: 6 },
+      'move-up': { file: 'move-down.png', frames: 4, fps: 6 },
+      'move-left': { file: 'move-down.png', frames: 4, fps: 6 },
+      'move-right': { file: 'move-down.png', frames: 4, fps: 6 },
+    },
+  },
+  marksman: {
+    frameWidth: 32,
+    frameHeight: 32,
+    scale: 2,
+    anims: {
+      'move-down': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-up': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-left': { file: 'move-down.png', frames: 4, fps: 8 },
+      'move-right': { file: 'move-down.png', frames: 4, fps: 8 },
+    },
   },
 };
 
