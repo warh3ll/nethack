@@ -72,7 +72,7 @@ Best done together, in this order:
 
 ### E. Enemies and difficulty
 
-- [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6)
+- [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6). Moved into J (Balance), steps 2 and 3
 - [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
 - [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
 - [x] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
@@ -147,7 +147,27 @@ Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus 
 - [ ] Phone layout check: orientation, notches, readable HUD
 - [ ] Performance check on a real phone (lighting, swarm size) (Henrik)
 
-### G. Polish and release
+## J. Balance
+
+The game is quite unbalanced at the moment, both in terms of skills and progression, but also spawn rates. Typically the game is tough for maybe the first minute, then you get powerful really quick and the sense of agency is gone. Destroy a couple of factories and the chance of being overwhelmed is basically removed. I want to plan this with you, but here are some of my initial ideas.
+
+Why it goes easy (found in the code, 2026-11-16):
+
+- The spawn interval hits its 400 ms floor at 1:40 (`SPAWNING.intervalDecayPerSecond`), so after that only the enemy mix changes.
+- Enemy hp and damage never change over the run; level 1 Synaptic Overload (20) and Railgun (25) already one-shot every Drone (10 hp) they reach.
+- Factories supply most of the local swarm: picked twice as often as an exit and letting out 3-5 enemies instead of 1. Near one factory and three exits, about 70% of enemies come from the factory, so destroying it more than halves local spawns, on top of the 8% map-wide cut.
+- Passives top out at +9% (OverClock, Firewall) while a second weapon roughly doubles damage output.
+
+Agreed order and approach (each step leaves the game playable):
+
+1. - [ ] Multiply all health and damage numbers by 10, so that % upgrades aren't in the fractions (that often). Its own change with no feel change: player hp, regen, min damage taken, enemy hp, contact and bullet damage, every skill's damage, Defensive Matrix retaliation. Percentages, credits and XP stay as they are
+2. - [ ] Enemy difficulty over the run clock (moved here from E): enemy hp (and maybe damage) grow with time, numbers in `balance.ts`
+3. - [ ] Door spawns should increase over time so that destroying factories aren't making it too easy. Replace the interval floor with a ramp that keeps rising to the end of the run (spawns per second at set times), and let small exits release more than one enemy later in the run
+4. - [ ] Reduce the power of skills across the board, improve passive numbers instead, there's currently no reason to pick a passive before a weapon (Claude does a first pass, Henrik balances after). Hardest cut on area skills' level 1 (Synaptic Overload, EMP Shock, Railgun); passives roughly OverClock 10/20/30%, Firewall 8/15/22%, Nanites about 3x
+5. - [ ] At 3, 5 and 7 minutes an "Incoming enemy horde" alert, increasing in intensity: 25, 50 and 75 enemies in the player's vicinity. Decided: after the alert, every active spawn point near the player flashes and lets out its share, so the horde comes from readable places (enemies never just appear)
+6. - [ ] Moving away feels empty outside the player's current location. Decided: target density, keep about N enemies (N grows over time) within a radius of the player and top up from spawn points when below it, favouring the direction the player is moving
+
+### X. Polish and release
 
 - [x] Results screen run stats: damage per skill (number and %), HP healed per source, distance travelled
 - [x] Floating damage numbers over enemies, coloured like the skill that did the damage
@@ -157,8 +177,3 @@ Rough size: 3-5 focused sessions to "playable start to finish on a phone", plus 
 - [ ] Playtest build review with outside testers via GitHub Pages
 - [ ] itch.io HTML5 build and upload (CLAUDE.md)
 
-## Suggested order
-
-A (quick HUD cleanup) -> B (skill rules, so level-ups feel right) -> D (menu, shop and items, which gives the run a purpose) -> C (caches, which need B's slot rules and D's items) -> E (enemies, once there are builds to challenge) -> G, with F slotted in whenever more variety is wanted.
-
-Why this order: the run itself already works end to end, so the missing pieces are depth within a run (B, C, E) and a reason to start another one (D). B comes before C because caches reuse the slot rules, and D before the item part of C because find-only items need the item list.
