@@ -99,8 +99,8 @@ export const CYBERWARE: Record<string, Cyberware> = {
     slot: 'chest',
     cost: 900,
     source: 'shop',
-    description: 'Every 12 s at most, zaps enemies close to you for 5 damage and stuns them for 2 s.',
-    effects: { discharge: { damage: 5, stunMs: 2000, cooldownMs: 12000, radius: 100 } },
+    description: 'Every 12 s at most, zaps enemies close to you for 50 damage and stuns them for 2 s.',
+    effects: { discharge: { damage: 50, stunMs: 2000, cooldownMs: 12000, radius: 100 } },
   },
   carbonFiberSkin: {
     name: 'Carbon Fiber Second Skin',

@@ -160,7 +160,7 @@ Why it goes easy (found in the code, 2026-11-16):
 
 Agreed order and approach (each step leaves the game playable):
 
-1. - [ ] Multiply all health and damage numbers by 10, so that % upgrades aren't in the fractions (that often). Its own change with no feel change: player hp, regen, min damage taken, enemy hp, contact and bullet damage, every skill's damage, Defensive Matrix retaliation. Percentages, credits and XP stay as they are
+1. - [x] Multiply all health and damage numbers by 10, so that % upgrades aren't in the fractions (that often). Its own change with no feel change: player hp, regen, min damage taken, enemy hp, contact and bullet damage, every skill's damage, Defensive Matrix retaliation. Percentages, credits and XP stay as they are
 2. - [ ] Enemy difficulty over the run clock (moved here from E): enemy hp (and maybe damage) grow with time, numbers in `balance.ts`
 3. - [ ] Door spawns should increase over time so that destroying factories aren't making it too easy. Replace the interval floor with a ramp that keeps rising to the end of the run (spawns per second at set times), and let small exits release more than one enemy later in the run
 4. - [ ] Reduce the power of skills across the board, improve passive numbers instead, there's currently no reason to pick a passive before a weapon (Claude does a first pass, Henrik balances after). Hardest cut on area skills' level 1 (Synaptic Overload, EMP Shock, Railgun); passives roughly OverClock 10/20/30%, Firewall 8/15/22%, Nanites about 3x

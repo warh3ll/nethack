@@ -5,9 +5,9 @@
 // ─────────────────────────────────────────────────────────────
 
 export const PLAYER = {
-  maxHp: 100,
+  maxHp: 1000,
   /** Base passive health regeneration in HP per second (0.1 = 1 HP every 10 s). */
-  hpRegenPerSec: 0.15,
+  hpRegenPerSec: 1.5,
   moveSpeed: 200,
   radius: 18,
   /** Sprite size multiplier (the frames are 48x64). The hit circle (radius) is not scaled by this. */
@@ -15,7 +15,7 @@ export const PLAYER = {
   /** Time after taking a hit during which the player can't be hit again. */
   invulnerableMs: 500,
   /** Damage reduction (Firewall) can never bring a hit below this. */
-  minDamageTaken: 1,
+  minDamageTaken: 10,
   /** How long after a shot the player keeps the shooting pose. */
   shootingPoseMs: 350,
   /** Animation speed (frames per second; every sheet has 8 frames). */
@@ -152,9 +152,9 @@ export interface EnemyType {
 
 export const ENEMIES: Record<string, EnemyType> = {
   drone: {
-    hp: 10,
+    hp: 100,
     speed: 85,
-    contactDamage: 8,
+    contactDamage: 80,
     xp: 1,
     credits: 1,
     creditChance: 0.1,
@@ -163,16 +163,16 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
-    hp: 8,
+    hp: 80,
     speed: 70,
-    contactDamage: 6,
+    contactDamage: 60,
     xp: 2,
     credits: 2,
     creditChance: 0.1,
     radius: 11,
     color: 0xffd62e,
     ranged: {
-      damage: 6,
+      damage: 60,
       speed: 260,
       range: 350,
       cooldownMs: 2000,
@@ -180,9 +180,9 @@ export const ENEMIES: Record<string, EnemyType> = {
     },
   },
   heavy: {
-    hp: 45,
+    hp: 450,
     speed: 100,
-    contactDamage: 12,
+    contactDamage: 120,
     xp: 3,
     credits: 3,
     creditChance: 0.2,
@@ -191,9 +191,9 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
-    hp: 150,
+    hp: 1500,
     speed: 120,
-    contactDamage: 20,
+    contactDamage: 200,
     xp: 15,
     credits: 5,
     creditChance: 1,
@@ -202,12 +202,12 @@ export const ENEMIES: Record<string, EnemyType> = {
     healthBar: true,
     stunMultiplier: 0.5,
     guard: { aggroRadius: 380, leashRadius: 700 },
-    ranged: { damage: 10, speed: 260, range: 500, cooldownMs: 1800 },
+    ranged: { damage: 100, speed: 260, range: 500, cooldownMs: 1800 },
   },
   // Destructible structure in the Steal secrets objective. Its hp is the value for the fewest outposts;
   // see STEAL_SECRETS in objectives.ts for how it shrinks with more of them.
   outpost: {
-    hp: 90,
+    hp: 900,
     speed: 0,
     contactDamage: 0,
     xp: 5,
@@ -221,7 +221,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // The part of a factory that can be shot, by its door. Destroying it shuts the factory down (SPAWN_POINTS).
   factoryCore: {
-    hp: 250,
+    hp: 2500,
     speed: 0,
     contactDamage: 0,
     xp: 20,

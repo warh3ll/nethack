@@ -66,7 +66,7 @@ Details/decisions: id `softTissueShielding`. All damage-reduction percentages ad
 Name: Auxilliary Discharge Plates
 Slot: Chest
 Cost: 900 credits
-Stats: Enemies close to you will periodically be zapped by electricity for 5 damage and stunned for 2s. This can at most occur every 12 seconds. (Radius 100px)
+Stats: Enemies close to you will periodically be zapped by electricity for 50 damage and stunned for 2s. This can at most occur every 12 seconds. (Radius 100px)
 SHOP/BLUEPRINT: [SHOP]
 Details/decisions: id `dischargePlates`. Zaps every enemy within the radius at once, and only fires when at least one enemy is in range (that starts the 12 s cooldown). Flat damage, not boosted by damage bonuses. Stun-immune enemies take the damage but not the stun.
 
