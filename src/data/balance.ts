@@ -304,6 +304,32 @@ export const ENEMY_SCALING = {
 }
 
 /**
+ * Target density: keeps the area around the player from going empty when they move on. Every `checkMs` the swarm
+ * enemies within `radius` (plus those waiting behind flashing doors) are counted; below the target, extra spawn
+ * points open on top of the normal spawning, preferring the ones in the direction the player is moving.
+ * Quiet zones stay quieter: the target shrinks the same way the normal rate does with few spawn points nearby
+ * (SPAWN_POINTS.fullRateAt). Uses the normal active ranges, flashes and group sizes.
+ */
+export const DENSITY = {
+  /** Enemies within this distance of the player count towards the target (px). */
+  radius: 1100,
+  /** Target number of swarm enemies around the player, by run time. Straight line between points, last one holds. */
+  target: [
+    { atSec: 0, count: 8 },
+    { atSec: 180, count: 25 },
+    { atSec: 420, count: 45 },
+  ],
+  /** How often the count is checked (ms of game time). */
+  checkMs: 600,
+  /** At most this many spawn points open per check, so a top-up arrives as a trickle rather than a wall. */
+  maxOpensPerCheck: 2,
+  /** How much a spawn point straight ahead of the player is favoured: weight 1 + aheadBias (behind = 1). */
+  aheadBias: 3,
+  /** Below this speed (px/s) the player counts as standing still and no direction is favoured. */
+  minSpeed: 40,
+}
+
+/**
  * Enemy hordes: at set run times an alert goes up, every spawn point near the player flashes for `warningMs`,
  * then they let the horde out between them (split as evenly as possible). Horde enemies roll their types and
  * get the run-clock scaling like any other spawn, and they still count towards `SPAWNING.maxEnemies`.

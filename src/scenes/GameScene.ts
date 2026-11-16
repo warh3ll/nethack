@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CREDITS, ENEMY_SCALING, HORDES, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
+import { CREDITS, DENSITY, ENEMY_SCALING, HORDES, LEVELING, SPAWN_POINTS, SPAWNING, STARTING_SKILL, TOUCH_PROMPT } from '../data/balance';
 import { HACK } from '../data/objectives';
 import { SKILLS } from '../data/skills';
 import { playLevelUpFx } from '../effects/levelUpFx';
@@ -11,7 +11,7 @@ import { Atms, pickAtmPositions } from '../systems/Atms';
 import { generateCity, pickSeed } from '../systems/City';
 import { Navigation } from '../systems/Navigation';
 import { pickSpawnPoints } from '../systems/SpawnPoints';
-import { exitGroupAt, Spawner, spawnsPerSecond } from '../systems/Spawner';
+import { densityTargetAt, exitGroupAt, Spawner, spawnsPerSecond } from '../systems/Spawner';
 import { Factories } from '../systems/Factories';
 import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
@@ -96,6 +96,8 @@ export class GameScene extends Phaser.Scene {
   private nextSpawnAt = 0;
   /** Index of the next horde in HORDES.waves. */
   private nextHorde = 0;
+  /** Game time of the next target-density check (DENSITY). */
+  private nextDensityAt = 0;
   private hordeAlert!: HordeAlert;
   /** Scaled game clock (ms): runs slower than real time during hack typing. */
   private gameTime = 0;
@@ -127,6 +129,7 @@ export class GameScene extends Phaser.Scene {
     this.elapsedMs = 0;
     this.nextSpawnAt = 0;
     this.nextHorde = 0;
+    this.nextDensityAt = 0;
     this.gameTime = 0;
     this.appliedScale = 0; // forces the first update to set the time scale
     this.kills = 0;
@@ -397,6 +400,7 @@ export class GameScene extends Phaser.Scene {
     this.atms.update(gameDelta);
     this.spawnEnemies(this.gameTime);
     this.startHordes();
+    this.topUpDensity();
     this.spawner.update(this.gameTime);
     this.hordeAlert.update(this.gameTime);
     this.factories.update();
@@ -602,6 +606,25 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Starts the next horde once its run time comes (HORDES): alert, long flash at every nearby spawn point, then the enemies. */
+  /** Target density (DENSITY): counts the swarm around the player and opens extra spawn points ahead of them when short. */
+  private topUpDensity() {
+    if (this.gameTime < this.nextDensityAt) return;
+    this.nextDensityAt = this.gameTime + DENSITY.checkMs;
+    if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
+    const r2 = DENSITY.radius ** 2;
+    let nearby = this.spawner.waiting;
+    for (const obj of this.enemies.getChildren()) {
+      const e = obj as Enemy;
+      if (!e.active || e.hijacked || e.stats.guard || e.stats.stationary) continue;
+      if ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 <= r2) nearby++;
+    }
+    const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
+    const speed = v.length();
+    const heading = speed >= DENSITY.minSpeed ? { x: v.x / speed, y: v.y / speed } : null;
+    const seconds = this.elapsedMs / 1000;
+    this.spawner.topUp(this.gameTime, this.player.x, this.player.y, heading, densityTargetAt(seconds), nearby, () => this.rollEnemyType(seconds), exitGroupAt(seconds));
+  }
+
   private startHordes() {
     const wave = HORDES.waves[this.nextHorde];
     if (!wave || this.elapsedMs / 1000 < wave.atSec) return;

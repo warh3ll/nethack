@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { HORDES, SPAWN_POINTS, SPAWNING } from '../data/balance';
+import { DENSITY, HORDES, SPAWN_POINTS, SPAWNING } from '../data/balance';
 import { CITY } from '../data/city';
 import type { Enemy } from '../entities/Enemy';
 import type { SpawnPoint } from './SpawnPoints';
@@ -124,6 +124,49 @@ export class Spawner {
     this.pending.push({ point, types, startedAt: now, spawnAt: now + (factory ? s.factoryFlashMs : s.exitFlashMs) });
   }
 
+  /**
+   * Target density (DENSITY): `nearby` swarm enemies are around the player and `target` are wanted. Opens up to
+   * `DENSITY.maxOpensPerCheck` active spawn points until the shortfall is queued, favouring points in the direction
+   * of `heading` (a unit vector, or null when standing still). The target shrinks in quiet zones like the normal rate.
+   */
+  topUp(
+    now: number,
+    playerX: number,
+    playerY: number,
+    heading: { x: number; y: number } | null,
+    target: number,
+    nearby: number,
+    rollType: () => string,
+    exitGroup: { min: number; max: number },
+  ) {
+    const s = SPAWN_POINTS;
+    const options: { p: SpawnPoint; w: number }[] = [];
+    let base = 0;
+    for (const p of this.points) {
+      const range = p.kind === 'factory' ? s.factoryRange : s.exitRange;
+      const dx = p.x - playerX;
+      const dy = p.y - playerY;
+      const d = Math.hypot(dx, dy);
+      if (d < range.min || d > range.max || this.pending.some((q) => q.point === p)) continue;
+      const kindWeight = p.kind === 'factory' ? s.factoryWeight : 1;
+      base += kindWeight;
+      const ahead = heading ? Math.max(0, (dx * heading.x + dy * heading.y) / d) : 0;
+      options.push({ p, w: kindWeight * (1 + DENSITY.aheadBias * ahead) });
+    }
+    let missing = Math.round(target * Math.min(1, base / s.fullRateAt)) - nearby;
+    for (let opens = 0; missing > 0 && opens < DENSITY.maxOpensPerCheck && options.length > 0; opens++) {
+      const total = options.reduce((sum, o) => sum + o.w, 0);
+      let roll = Math.random() * total;
+      const i = Math.max(0, options.findIndex((o) => (roll -= o.w) < 0));
+      const point = options.splice(i, 1)[0].p;
+      const factory = point.kind === 'factory';
+      const group = factory ? s.factoryGroup : exitGroup;
+      const types = Array.from({ length: Phaser.Math.Between(group.min, group.max) }, rollType);
+      this.pending.push({ point, types, startedAt: now, spawnAt: now + (factory ? s.factoryFlashMs : s.exitFlashMs) });
+      missing -= types.length;
+    }
+  }
+
   update(now: number) {
     const s = SPAWN_POINTS;
     const t = CITY.tileSize;
@@ -167,4 +210,16 @@ export function exitGroupAt(seconds: number): { min: number; max: number } {
   let row = SPAWNING.exitGroup[0];
   for (const r of SPAWNING.exitGroup) if (seconds >= r.atSec) row = r;
   return row;
+}
+
+/** Target number of swarm enemies around the player at this run time (DENSITY.target, straight line between points). */
+export function densityTargetAt(seconds: number): number {
+  const pts = DENSITY.target;
+  if (seconds <= pts[0].atSec) return pts[0].count;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (seconds <= b.atSec) return a.count + ((b.count - a.count) * (seconds - a.atSec)) / (b.atSec - a.atSec);
+  }
+  return pts[pts.length - 1].count;
 }
