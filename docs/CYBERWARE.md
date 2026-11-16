@@ -61,7 +61,7 @@ Slot: Chest
 Cost: 450 credits
 Stats: 5% damage reduction.
 SHOP/BLUEPRINT: [SHOP]
-Details/decisions: id `softTissueShielding`. All damage-reduction percentages add up (passives and cyberware). Firewall changes from flat 1/2/3 to 3/6/9%, so Firewall 3 + Soft Tissue + Carbon Fiber = 24%. The minimum damage per hit still applies.
+Details/decisions: id `softTissueShielding`. All damage-reduction percentages add up (passives and cyberware). Firewall is a percentage too (now 8/15/22%), so Firewall 3 + Soft Tissue + Carbon Fiber = 37%. The minimum damage per hit still applies.
 
 Name: Auxilliary Discharge Plates
 Slot: Chest
