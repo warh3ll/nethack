@@ -72,7 +72,7 @@ Best done together, in this order:
 
 ### E. Enemies and difficulty
 
-- [ ] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6). Moved into J (Balance), steps 2 and 3
+- [x] Enemy difficulty scaling with the run clock beyond the Marksman chance: hp, damage, spawn rate (s6). Moved into J (Balance), steps 2 and 3
 - [ ] More enemy types joining over time (designs TBD): a fast one, a tank, an elite? Needs a design session (s6)
 - [ ] Decide whether difficulty also scales with objectives completed (open question in s7)
 - [x] Add the Dash mechanic for the player, pressing space will perform a dash, has to be in combination with a direction (any of the 8 directions)
@@ -162,7 +162,7 @@ Agreed order and approach (each step leaves the game playable):
 
 1. - [x] Multiply all health and damage numbers by 10, so that % upgrades aren't in the fractions (that often). Its own change with no feel change: player hp, regen, min damage taken, enemy hp, contact and bullet damage, every skill's damage, Defensive Matrix retaliation. Percentages, credits and XP stay as they are
 2. - [x] Enemy difficulty over the run clock (moved here from E): swarm enemies (anything from a factory or small exit, ATM waves included) spawn with +5% hp and +5% damage per minute of run time (`ENEMY_SCALING` in `balance.ts`). Objective guards, outposts and factory cores keep their fixed numbers
-3. - [ ] Door spawns should increase over time so that destroying factories aren't making it too easy. Replace the interval floor with a ramp that keeps rising to the end of the run (spawns per second at set times), and let small exits release more than one enemy later in the run
+3. - [x] Door spawns should increase over time so that destroying factories aren't making it too easy. The spawn rate now follows `SPAWNING.spawnRate` (1.1/s at the start, 2.5/s at 1:40, 3.5/s at 7:00, straight line between, held after) instead of stopping at 1:40, and small exits let out 1, then 1-2 from 3:00 and 1-3 from 5:00 (`SPAWNING.exitGroup`)
 4. - [ ] Reduce the power of skills across the board, improve passive numbers instead, there's currently no reason to pick a passive before a weapon (Claude does a first pass, Henrik balances after). Hardest cut on area skills' level 1 (Synaptic Overload, EMP Shock, Railgun); passives roughly OverClock 10/20/30%, Firewall 8/15/22%, Nanites about 3x
 5. - [ ] At 3, 5 and 7 minutes an "Incoming enemy horde" alert, increasing in intensity: 25, 50 and 75 enemies in the player's vicinity. Decided: after the alert, every active spawn point near the player flashes and lets out its share, so the horde comes from readable places (enemies never just appear)
 6. - [ ] Moving away feels empty outside the player's current location. Decided: target density, keep about N enemies (N grows over time) within a radius of the player and top up from spawn points when below it, favouring the direction the player is moving

@@ -11,7 +11,7 @@ import { Atms, pickAtmPositions } from '../systems/Atms';
 import { generateCity, pickSeed } from '../systems/City';
 import { Navigation } from '../systems/Navigation';
 import { pickSpawnPoints } from '../systems/SpawnPoints';
-import { Spawner } from '../systems/Spawner';
+import { exitGroupAt, Spawner, spawnsPerSecond } from '../systems/Spawner';
 import { Factories } from '../systems/Factories';
 import { generateRunObjectives, objectivePoints } from '../systems/RunObjectives';
 import { CreditChip } from '../entities/CreditChip';
@@ -596,14 +596,16 @@ export class GameScene extends Phaser.Scene {
   private spawnEnemies(time: number) {
     if (time < this.nextSpawnAt) return;
     const seconds = this.elapsedMs / 1000;
-    const interval = Math.max(SPAWNING.minIntervalMs, SPAWNING.startIntervalMs - seconds * SPAWNING.intervalDecayPerSecond);
+    const interval = 1000 / spawnsPerSecond(seconds);
     // Hacking draws enemies in a bit faster; every factory destroyed slows the whole map down.
-    this.nextSpawnAt = time + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
+    // Counted from when this spawn was due (not from this frame), so frame timing doesn't slow the rate down; after a long gap it restarts from now.
+    const due = time - this.nextSpawnAt < 1000 ? this.nextSpawnAt : time;
+    this.nextSpawnAt = due + (interval * (this.objectives.hacking ? HACK.spawnIntervalMultiplier : 1)) / this.factories.rateFactor;
 
     // Enemies behind a flashing door count towards the cap already.
     if (this.enemies.countActive(true) + this.spawner.waiting >= SPAWNING.maxEnemies) return;
     // The enemy comes out of a spawn point near the player (factories and small exits, see Spawner).
-    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds));
+    this.spawner.request(time, this.player.x, this.player.y, () => this.rollEnemyType(seconds), exitGroupAt(seconds));
   }
 
   /** Run-clock multipliers for swarm enemies spawned now (ENEMY_SCALING). */

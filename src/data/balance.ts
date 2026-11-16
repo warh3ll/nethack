@@ -237,12 +237,25 @@ export const ENEMIES: Record<string, EnemyType> = {
 }
 
 export const SPAWNING = {
-  /** Spawn interval at the start of a run. */
-  startIntervalMs: 900,
-  /** The interval shrinks toward this over time. */
-  minIntervalMs: 400,
-  /** How much the interval shrinks every second of the run. */
-  intervalDecayPerSecond: 5,
+  /**
+   * Spawns per second over the run clock (one spawn = one door or factory opening, see SPAWN_POINTS).
+   * Straight line between the points, and the last value holds after its time. The first two points match
+   * the old ramp (900 ms down to 400 ms at 1:40); from there it keeps rising so the late game stays busy.
+   */
+  spawnRate: [
+    { atSec: 0, perSec: 1.1 },
+    { atSec: 100, perSec: 2.5 },
+    { atSec: 420, perSec: 3.5 },
+  ],
+  /**
+   * How many enemies a small exit lets out at once, by run clock (both ends included, each rolls its own type).
+   * The last row whose `atSec` has passed applies. More per exit later on means destroyed factories matter less.
+   */
+  exitGroup: [
+    { atSec: 0, min: 1, max: 1 },
+    { atSec: 180, min: 1, max: 2 },
+    { atSec: 300, min: 1, max: 3 },
+  ],
   /** Hard cap on live enemies (performance safety net). */
   maxEnemies: 400,
   /** Enemy type spawned when no entry in `specialEnemies` wins its roll. */

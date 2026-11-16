@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SPAWN_POINTS } from '../data/balance';
+import { SPAWN_POINTS, SPAWNING } from '../data/balance';
 import { CITY } from '../data/city';
 import type { Enemy } from '../entities/Enemy';
 import type { SpawnPoint } from './SpawnPoints';
@@ -79,8 +79,9 @@ export class Spawner {
    * A spawn is due: pick one of the active spawn points (factories weigh more) and start its flash.
    * With fewer active points than `fullRateAt`, some requests are skipped, so sparse areas are quieter.
    * `rollType` is asked once per enemy, so every member of a factory's group rolls its own type.
+   * `exitGroup` is how many a small exit lets out right now (grows with the run clock, see SPAWNING.exitGroup).
    */
-  request(now: number, playerX: number, playerY: number, rollType: () => string) {
+  request(now: number, playerX: number, playerY: number, rollType: () => string, exitGroup: { min: number; max: number }) {
     const s = SPAWN_POINTS;
     const active: SpawnPoint[] = [];
     let weight = 0;
@@ -95,7 +96,8 @@ export class Spawner {
     let roll = Math.random() * weight;
     const point = active.find((p) => (roll -= p.kind === 'factory' ? s.factoryWeight : 1) < 0) ?? active[active.length - 1];
     const factory = point.kind === 'factory';
-    const count = factory ? Phaser.Math.Between(s.factoryGroup.min, s.factoryGroup.max) : 1;
+    const group = factory ? s.factoryGroup : exitGroup;
+    const count = Phaser.Math.Between(group.min, group.max);
     const types = Array.from({ length: count }, rollType);
     this.pending.push({ point, types, startedAt: now, spawnAt: now + (factory ? s.factoryFlashMs : s.exitFlashMs) });
   }
@@ -107,9 +109,9 @@ export class Spawner {
     this.pending = this.pending.filter((q) => {
       const factory = q.point.kind === 'factory';
       if (now >= q.spawnAt) {
-        // A group steps out side by side across the factory door, then the swarm shoves itself apart.
+        // A group steps out side by side across the door (narrower at a small exit), then the swarm shoves itself apart.
         q.types.forEach((type, i) => {
-          const spread = q.types.length > 1 ? (i / (q.types.length - 1) - 0.5) * t * 2 : 0;
+          const spread = q.types.length > 1 ? (i / (q.types.length - 1) - 0.5) * t * (factory ? 2 : 1) : 0;
           const enemy = this.spawn(q.point.x + spread, q.point.y, type);
           if (q.hunt) enemy?.provoke();
         });
@@ -124,4 +126,23 @@ export class Spawner {
       return true;
     });
   }
+}
+
+/** Swarm spawns per second at this run time (SPAWNING.spawnRate, straight line between points, last value holds). */
+export function spawnsPerSecond(seconds: number): number {
+  const pts = SPAWNING.spawnRate;
+  if (seconds <= pts[0].atSec) return pts[0].perSec;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (seconds <= b.atSec) return a.perSec + ((b.perSec - a.perSec) * (seconds - a.atSec)) / (b.atSec - a.atSec);
+  }
+  return pts[pts.length - 1].perSec;
+}
+
+/** How many enemies a small exit lets out at this run time (SPAWNING.exitGroup, last row whose time has passed). */
+export function exitGroupAt(seconds: number): { min: number; max: number } {
+  let row = SPAWNING.exitGroup[0];
+  for (const r of SPAWNING.exitGroup) if (seconds >= r.atSec) row = r;
+  return row;
 }
