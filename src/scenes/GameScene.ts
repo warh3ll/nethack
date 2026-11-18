@@ -749,7 +749,9 @@ export class GameScene extends Phaser.Scene {
     if (this.gameOver) return; // credits must only be banked once
     this.gameOver = true;
     this.physics.pause();
-    const bonus = won ? CREDITS.extractionBonus : 0;
+    const eb = CREDITS.extractionBonus;
+    const t = Phaser.Math.Clamp((this.elapsedMs / 1000 - eb.fullUntilSeconds) / (eb.minFromSeconds - eb.fullUntilSeconds), 0, 1);
+    const bonus = won ? Math.round(Phaser.Math.Linear(eb.max, eb.min, t)) : 0;
     this.credits += bonus;
     account.bankRun(this.credits, this.blueprints);
     this.drawHud();

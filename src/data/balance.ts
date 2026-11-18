@@ -153,7 +153,7 @@ export interface EnemyType {
 export const ENEMIES: Record<string, EnemyType> = {
   drone: {
     hp: 100,
-    speed: 85,
+    speed: 90,
     contactDamage: 80,
     xp: 1,
     credits: 1,
@@ -164,7 +164,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   // Ranged swarm enemy: walks up to `range` of the player, stops there and shoots. Slightly weaker than a drone.
   marksman: {
     hp: 80,
-    speed: 70,
+    speed: 90,
     contactDamage: 60,
     xp: 2,
     credits: 2,
@@ -174,7 +174,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     ranged: {
       damage: 60,
       speed: 260,
-      range: 350,
+      range: 400,
       cooldownMs: 2000,
       holdAtRange: true,
     },
@@ -337,9 +337,9 @@ export const DENSITY = {
 export const HORDES = {
   /** When each horde comes (run time in seconds) and how many enemies it brings. */
   waves: [
-    { atSec: 180, count: 25 },
-    { atSec: 300, count: 50 },
-    { atSec: 420, count: 75 },
+    { atSec: 120, count: 50 },
+    { atSec: 240, count: 75 },
+    { atSec: 360, count: 100 },
   ],
   /** Time between the alert going up and the enemies stepping out; the spawn points flash all along. */
   warningMs: 5000,
@@ -400,8 +400,11 @@ export const CREDITS = {
   magnetSpeed: 420,
   /** A chip this close to the player is collected. */
   collectRadius: 20,
-  /** Credits added to the run's total on a successful extraction. */
-  extractionBonus: 15,
+  /**
+   * Credits added to the run's total on a successful extraction. `max` up to `fullUntilSeconds` of run time,
+   * then a straight line down to `min` at `minFromSeconds`, and `min` after that.
+   */
+  extractionBonus: { max: 100, min: 15, fullUntilSeconds: 180, minFromSeconds: 360 },
 }
 
 /** Data caches scattered on the map. Rare on purpose; the compass and objective marker never point to them. */
