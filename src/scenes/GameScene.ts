@@ -398,6 +398,7 @@ export class GameScene extends Phaser.Scene {
     this.promptPanel.update(this.objectives.touchPrompt);
     this.shiftCamera(delta);
     this.atms.update(gameDelta);
+    this.tryStartLevelUp();
     this.spawnEnemies(this.gameTime);
     this.startHordes();
     this.topUpDensity();
@@ -536,7 +537,13 @@ export class GameScene extends Phaser.Scene {
     const gained = this.progression.addXp(amount);
     if (gained === 0) return;
     this.pendingLevelUps += gained;
-    if (this.levelingUp) return; // already showing the picker; the extra levels queue up
+    this.tryStartLevelUp();
+  }
+
+  /** Opens the picker for queued level-ups, but never in the middle of a hack input or an E hold: it waits until the player is done. */
+  private tryStartLevelUp() {
+    if (this.levelingUp || this.pendingLevelUps <= 0) return; // already showing the picker; extra levels queue up
+    if (this.objectives.busy || this.atms.decrypting) return;
     this.levelingUp = true;
     this.joystick.release();
     this.physics.pause();
