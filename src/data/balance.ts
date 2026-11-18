@@ -264,6 +264,7 @@ export const SPAWNING = {
    * Harder enemies sharing the same spawn pool: each spawn rolls these in order, and if none hits it
    * is a plain `enemyType`. The chance of each is `startChance` plus `chanceStep` for every
    * `stepSeconds` of run time (0.05 + 0.01 per 30 s = 5%, 6% at 0:30, ...), but never more than `maxChance`.
+   * Optional `fromSeconds`: the type can't spawn before this run time, and the steps count from there (so it ramps up from `startChance` at `fromSeconds`).
    * Keep the `maxChance` values adding up to less than 1, or plain enemies stop spawning.
    */
   specialEnemies: [
@@ -283,9 +284,10 @@ export const SPAWNING = {
     },
     {
       type: 'goon',
+      fromSeconds: 120,
       startChance: 0,
-      chanceStep: 0.025,
-      stepSeconds: 30,
+      chanceStep: 0.01,
+      stepSeconds: 60,
       maxChance: 0.05,
     },
   ],

@@ -671,7 +671,9 @@ export class GameScene extends Phaser.Scene {
   private rollEnemyType(seconds: number): string {
     let roll = Math.random();
     for (const s of SPAWNING.specialEnemies) {
-      const chance = Math.min(s.maxChance, s.startChance + s.chanceStep * Math.floor(seconds / s.stepSeconds));
+      const from = s.fromSeconds ?? 0;
+      if (seconds < from) continue;
+      const chance = Math.min(s.maxChance, s.startChance + s.chanceStep * Math.floor((seconds - from) / s.stepSeconds));
       if (roll < chance) return s.type;
       roll -= chance;
     }
