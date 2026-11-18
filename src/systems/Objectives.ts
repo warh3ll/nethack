@@ -324,6 +324,16 @@ export class Objectives {
     return (this.engaged !== null && !!this.engaged.hack?.typing) || this.cameraTyping;
   }
 
+  /** E (key or touch hold) was held on the last update. */
+  private eHeldLast = false;
+
+  /** True while the player is in the middle of an input: a hack prompt, a camera pole step, or holding E. A level-up waits for this to end. */
+  get busy() {
+    const prompt = this.engaged?.hack?.prompt != null;
+    const pole = this.polesInRange.some((p) => p.hack.started && !p.hack.done);
+    return this.typing || prompt || pole || this.eHeldLast;
+  }
+
   private onExtraction() {
     return Phaser.Math.Distance.Between(this.player.x, this.player.y, this.exit.x, this.exit.y) <= EXTRACTION.radius;
   }
@@ -345,6 +355,7 @@ export class Objectives {
     const ePressed = (Phaser.Input.Keyboard.JustDown(this.eKey) || this.tapE) && eOk;
     const eHeld = (this.eKey.isDown || this.holds.some((h) => h.held)) && eOk;
     this.tapE = false;
+    this.eHeldLast = eHeld;
 
     for (const e of this.entries) {
       if (e.done) continue;

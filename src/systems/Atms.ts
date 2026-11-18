@@ -65,6 +65,11 @@ export class Atms {
     return this.states.filter((s) => s.phase !== 'offline').map((s) => s.atm);
   }
 
+  /** True while a decryption is in progress (E held on an ATM). */
+  get decrypting() {
+    return this.states.some((s) => s.phase === 'idle' && s.holdMs > 0);
+  }
+
   /** Where the ATMs are (for keeping other things clear of them). */
   get positions(): Point[] {
     return this.states.map((s) => s.atm);
