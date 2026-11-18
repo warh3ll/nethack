@@ -427,7 +427,7 @@ export class GameScene extends Phaser.Scene {
       if (!e.active) continue;
       // Swarm stragglers far behind go back to the pool. Guards, outposts and hijacked allies stay.
       const far = (e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 > recycle;
-      if (far && !e.stats.guard && !e.stats.stationary && !e.hijacked) {
+      if (far && !e.guarding && !e.stats.stationary && !e.hijacked) {
         e.despawn();
         continue;
       }
@@ -436,7 +436,7 @@ export class GameScene extends Phaser.Scene {
       if (angle !== null && e.stats.ranged) {
         const r = e.stats.ranged;
         // Holographic Disruptors: shots at the player (not at a Rootkit decoy) go up to this many degrees off.
-        const atPlayer = !(decoy && !e.stats.guard);
+        const atPlayer = !(decoy && !e.guarding);
         const spread = this.progression.stats.enemyAimSpreadDeg;
         if (atPlayer && spread > 0) angle += Phaser.Math.DegToRad(Phaser.Math.FloatBetween(-spread, spread));
         (this.enemyBullets.get() as EnemyBullet | null)?.fire(e.x, e.y, angle, r.speed, e.shotDamage, r.range, e);
@@ -615,7 +615,7 @@ export class GameScene extends Phaser.Scene {
     let nearby = this.spawner.waiting;
     for (const obj of this.enemies.getChildren()) {
       const e = obj as Enemy;
-      if (!e.active || e.hijacked || e.stats.guard || e.stats.stationary) continue;
+      if (!e.active || e.hijacked || e.guarding || e.stats.stationary) continue;
       if ((e.x - this.player.x) ** 2 + (e.y - this.player.y) ** 2 <= r2) nearby++;
     }
     const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;

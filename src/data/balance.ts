@@ -132,7 +132,7 @@ export interface EnemyType {
   /** Scales the length of any stun on this enemy (default 1; 0.5 = half as long, 0 = immune). */
   stunMultiplier?: number
   /**
-   * Guards its spawn point instead of swarming. Stands still until the player comes within
+   * Only the objective Goon uses this (Enemy.setGuard); goons from the swarm pool ignore it and chase. Stands still until the player comes within
    * `aggroRadius`, chases while the player is within `leashRadius`, then walks back to its post.
    * Damaging it makes it chase regardless of distance.
    */
