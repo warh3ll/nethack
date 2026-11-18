@@ -129,6 +129,7 @@ export class Objectives {
       } else {
         e.dossier = new Dossier(scene, x, y);
         e.goon = spawnEnemy(x + ENCRYPTION_KEY.goonOffset.x, y + ENCRYPTION_KEY.goonOffset.y, 'goon');
+        e.goon?.setGuard();
       }
     }
     this.poles = pickPolePositions(city, [...this.mapPoints, ...caches]).map((p) => ({ pole: new CameraPole(scene, p.x, p.y), hack: new CameraHack(player.stats.hackSpeedMult) }));

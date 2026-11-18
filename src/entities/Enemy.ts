@@ -37,6 +37,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /** Guard post (guards only): where the enemy stands and returns to. */
   private homeX = 0;
   private homeY = 0;
+  /** True only for the objective Goon: it holds its post. Goons from the swarm pool chase like everyone else. */
+  guarding = false;
   private chasing = false;
   /** Set once a guard has been damaged: from then on it chases regardless of distance. */
   private provoked = false;
@@ -74,6 +76,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.hijacked = false;
     this.homeX = x;
     this.homeY = y;
+    this.guarding = false;
     this.chasing = false;
     this.provoked = false;
     this.nextShotAt = -1;
@@ -131,7 +134,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.clearTint();
     }
     if (this.stats.stationary) return this.setVelocity(0, 0);
-    const guard = this.stats.guard;
+    const guard = this.guarding ? this.stats.guard : undefined;
     if (!guard) {
       this.chasing = true;
       // A Rootkit decoy takes preference over the player for as long as it lives.
@@ -171,7 +174,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const ranged = this.stats.ranged;
     if (!ranged || this.hijacked) return null;
     // Swarm enemies shoot at the Rootkit decoy instead of the player while it lives.
-    if (decoy && !this.stats.guard) {
+    if (decoy && !this.guarding) {
       playerX = decoy.x;
       playerY = decoy.y;
     }
@@ -215,6 +218,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private applyStunTint() {
     this.stunTinted = true;
     this.setTint(0x2ef2ff).setTintMode(Phaser.TintModes.MULTIPLY);
+  }
+
+  /** Makes this enemy a guard (aggro and leash radii from its stats), standing at its current spot. Only the objective Goon does this. */
+  setGuard() {
+    this.guarding = !!this.stats.guard;
+    this.homeX = this.x;
+    this.homeY = this.y;
   }
 
   /** A guard that is provoked chases regardless of distance until it dies. */
