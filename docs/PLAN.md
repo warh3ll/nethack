@@ -68,7 +68,7 @@ Best done together, in this order:
 - [x] Ripdoc screen (`scenes/RipdocScene.ts`, [R] in the menu): list by slot on the left, silhouette with slot markers on the right (stacked on phones), buy with a confirm step, blueprint pieces hidden until found. Placeholder silhouette in `BootScene`; art for a piece goes in as texture `cyberware-<id>`
 - [x] Simple stat cyberware applied at run start through the same re-sum as passives (`Progression.recomputeStats`): damage reduction %, run speed, dash distance, magnet radius, targeting range, hacking speed. Firewall is now 3/6/9% and all damage-reduction percentages add up
 - [x] Cyberware with behaviour: proximity slow (faint ring shows the zone), aim spread on enemy shots, discharge zap (`systems/Discharge.ts`), ricochet, Optic HUD compass needle. Feel numbers in `CYBER_FX` (`src/data/cyberware.ts`); damage from cyberware shows on the results screen under the piece's name
-- [ ] Fast runs awards more credits, up to three minutes give 100% extra credits, at 7 minutes there is 0% extra in top of the default completion bonus
+- [x] Fast runs award more credits: the extraction bonus is 100 up to 3:00, falls in a straight line to 15 at 6:00 and stays at 15 after (`CREDITS.extractionBonus` in `balance.ts`, used in `GameScene.endRun`)
 
 ### E. Enemies and difficulty
 
