@@ -404,7 +404,12 @@ export const CREDITS = {
    * Credits added to the run's total on a successful extraction. `max` up to `fullUntilSeconds` of run time,
    * then a straight line down to `min` at `minFromSeconds`, and `min` after that.
    */
-  extractionBonus: { max: 100, min: 15, fullUntilSeconds: 180, minFromSeconds: 360 },
+  extractionBonus: {
+    max: 100,
+    min: 15,
+    fullUntilSeconds: 180,
+    minFromSeconds: 360,
+  },
 }
 
 /** Data caches scattered on the map. Rare on purpose; the compass and objective marker never point to them. */
@@ -480,7 +485,7 @@ export const LEVELING = {
    * about 188 / 1,394 / 8,858 / 55,072 / 341,221. Maxing every skill takes roughly 29 level-ups (level 30).
    * There is no level cap (GAME_DESIGN section 3): the curve getting steeper is what slows levelling down late.
    */
-  xpGrowth: 1.25,
+  xpGrowth: 1.5,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**
