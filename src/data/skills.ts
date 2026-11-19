@@ -83,6 +83,23 @@ export interface RootkitStats {
   explosionRadius: number
 }
 
+/** Stats for the Combat Drone: a hovering turret that follows the player and sprays the nearest enemy. */
+export interface DroneStats {
+  /** Damage per pellet. */
+  damage: number
+  /** Time (ms) between pellets. */
+  cooldownMs: number
+  projectileSpeed: number
+  /** Max targeting distance from the drone, and how far a pellet flies. */
+  range: number
+  /** Pellets fired before the drone has to reload. */
+  magazine: number
+  /** Time (ms) the reload takes. */
+  reloadMs: number
+  /** The drone hovers within this distance (px) of the player, drifting towards the nearest enemy. */
+  leashRadius: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -144,6 +161,13 @@ export interface RootkitSkill extends SkillBase {
   levels: RootkitStats[]
 }
 
+/** Hovering turret with its own movement, ammo and reload, see entities/CombatDrone.ts. */
+export interface DroneSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'drone'
+  levels: DroneStats[]
+}
+
 export interface PassiveSkill extends SkillBase {
   kind: 'passive'
   levels: PassiveStats[]
@@ -155,6 +179,7 @@ export type SkillData =
   | SynapticSkill
   | EmpSkill
   | RootkitSkill
+  | DroneSkill
   | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
@@ -165,7 +190,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xfff35c,
     levels: [
       {
-        damage: 25,
+        damage: 30,
         cooldownMs: 400,
         projectileSpeed: 700,
         pierce: 0,
@@ -174,7 +199,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 500,
       },
       {
-        damage: 30,
+        damage: 40,
         cooldownMs: 350,
         projectileSpeed: 700,
         pierce: 1,
@@ -183,7 +208,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 550,
       },
       {
-        damage: 35,
+        damage: 50,
         cooldownMs: 300,
         projectileSpeed: 700,
         pierce: 2,
@@ -203,7 +228,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x5fe08a,
     levels: [
       {
-        dps: 10,
+        dps: 20,
         cooldownMs: 3000,
         infectRange: 300,
         spreadRange: 200,
@@ -212,7 +237,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 18,
+        dps: 30,
         cooldownMs: 2500,
         infectRange: 300,
         spreadRange: 200,
@@ -221,7 +246,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 26,
+        dps: 40,
         cooldownMs: 2000,
         infectRange: 300,
         spreadRange: 200,
@@ -241,7 +266,7 @@ export const SKILLS: Record<string, SkillData> = {
     levels: [
       {
         damage: 150,
-        cooldownMs: 3000,
+        cooldownMs: 2500,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -252,7 +277,7 @@ export const SKILLS: Record<string, SkillData> = {
       },
       {
         damage: 175,
-        cooldownMs: 2600,
+        cooldownMs: 2250,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -263,7 +288,7 @@ export const SKILLS: Record<string, SkillData> = {
       },
       {
         damage: 200,
-        cooldownMs: 2200,
+        cooldownMs: 2000,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -282,7 +307,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xc77dff,
     levels: [
       {
-        damage: 20,
+        damage: 30,
         cooldownMs: 1100,
         projectileSpeed: 480,
         pierce: 0,
@@ -291,7 +316,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 320,
       },
       {
-        damage: 30,
+        damage: 40,
         cooldownMs: 1000,
         projectileSpeed: 480,
         pierce: 0,
@@ -300,7 +325,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 360,
       },
       {
-        damage: 40,
+        damage: 50,
         cooldownMs: 900,
         projectileSpeed: 500,
         pierce: 1,
@@ -319,7 +344,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x4d7cff,
     levels: [
       {
-        hackMs: 1200,
+        hackMs: 800,
         minRange: 75,
         maxRange: 450,
         damage: 80,
@@ -327,7 +352,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 4000,
       },
       {
-        hackMs: 1000,
+        hackMs: 700,
         minRange: 75,
         maxRange: 450,
         damage: 160,
@@ -335,7 +360,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 3500,
       },
       {
-        hackMs: 800,
+        hackMs: 600,
         minRange: 75,
         maxRange: 450,
         damage: 240,
@@ -372,7 +397,7 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 40,
         tickMs: 300,
-        explosionDamage: 100,
+        explosionDamage: 150,
         explosionRadius: 95,
       },
       {
@@ -382,7 +407,7 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 50,
         tickMs: 300,
-        explosionDamage: 125,
+        explosionDamage: 200,
         explosionRadius: 125,
       },
       {
@@ -392,8 +417,45 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 60,
         tickMs: 300,
-        explosionDamage: 150,
+        explosionDamage: 250,
         explosionRadius: 155,
+      },
+    ],
+  },
+  combatDrone: {
+    name: 'Combat Drone',
+    kind: 'weapon',
+    behavior: 'drone',
+    description:
+      'A personal combat drone, targeting the nearest enemy with a fast machine gun turret.',
+    color: 0xb784a7,
+    levels: [
+      {
+        damage: 8,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 4000,
+        leashRadius: 50,
+      },
+      {
+        damage: 12,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 3500,
+        leashRadius: 50,
+      },
+      {
+        damage: 16,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 3000,
+        leashRadius: 50,
       },
     ],
   },
@@ -466,6 +528,7 @@ export function getSkillStats(
   | SynapticStats
   | EmpStats
   | RootkitStats
+  | DroneStats
   | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
@@ -480,7 +543,8 @@ export function getWeaponStats(id: string, level: number): WeaponStats {
     skill.behavior === 'virus' ||
     skill.behavior === 'synaptic' ||
     skill.behavior === 'emp' ||
-    skill.behavior === 'rootkit'
+    skill.behavior === 'rootkit' ||
+    skill.behavior === 'drone'
   )
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
@@ -528,6 +592,17 @@ export function getRootkitStats(id: string, level: number): RootkitStats {
   )
     throw new Error(`"${id}" is not a rootkit skill`)
   return getSkillStats(id, level) as RootkitStats
+}
+
+export function getDroneStats(id: string, level: number): DroneStats {
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as DroneSkill).behavior === 'drone'
+    )
+  )
+    throw new Error(`"${id}" is not a drone skill`)
+  return getSkillStats(id, level) as DroneStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {
