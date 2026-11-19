@@ -182,7 +182,7 @@ export const ENEMIES: Record<string, EnemyType> = {
     },
   },
   heavy: {
-    hp: 450,
+    hp: 300,
     speed: 100,
     contactDamage: 120,
     xp: 3,
@@ -193,7 +193,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // Miniboss that guards the dossier in the Grab encryption key objective. Not part of the random swarm.
   goon: {
-    hp: 1500,
+    hp: 900,
     speed: 120,
     contactDamage: 200,
     xp: 15,
@@ -223,7 +223,7 @@ export const ENEMIES: Record<string, EnemyType> = {
   },
   // The part of a factory that can be shot, by its door. Destroying it shuts the factory down (SPAWN_POINTS).
   factoryCore: {
-    hp: 2500,
+    hp: 2000,
     speed: 0,
     contactDamage: 0,
     xp: 20,
@@ -489,7 +489,7 @@ export const LEVELING = {
    * about 188 / 1,394 / 8,858 / 55,072 / 341,221. Maxing every skill takes roughly 29 level-ups (level 30).
    * There is no level cap (GAME_DESIGN section 3): the curve getting steeper is what slows levelling down late.
    */
-  xpGrowth: 1.5,
+  xpGrowth: 1.3,
   /** Upgrade choices offered on each level-up. */
   choices: 3,
   /**

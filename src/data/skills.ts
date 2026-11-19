@@ -190,7 +190,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xfff35c,
     levels: [
       {
-        damage: 25,
+        damage: 30,
         cooldownMs: 400,
         projectileSpeed: 700,
         pierce: 0,
@@ -199,7 +199,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 500,
       },
       {
-        damage: 30,
+        damage: 40,
         cooldownMs: 350,
         projectileSpeed: 700,
         pierce: 1,
@@ -208,7 +208,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 550,
       },
       {
-        damage: 35,
+        damage: 50,
         cooldownMs: 300,
         projectileSpeed: 700,
         pierce: 2,
@@ -228,7 +228,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x5fe08a,
     levels: [
       {
-        dps: 10,
+        dps: 20,
         cooldownMs: 3000,
         infectRange: 300,
         spreadRange: 200,
@@ -237,7 +237,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 18,
+        dps: 30,
         cooldownMs: 2500,
         infectRange: 300,
         spreadRange: 200,
@@ -246,7 +246,7 @@ export const SKILLS: Record<string, SkillData> = {
         maxDurationMs: 10000,
       },
       {
-        dps: 26,
+        dps: 40,
         cooldownMs: 2000,
         infectRange: 300,
         spreadRange: 200,
@@ -266,7 +266,7 @@ export const SKILLS: Record<string, SkillData> = {
     levels: [
       {
         damage: 150,
-        cooldownMs: 3000,
+        cooldownMs: 2500,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -277,7 +277,7 @@ export const SKILLS: Record<string, SkillData> = {
       },
       {
         damage: 175,
-        cooldownMs: 2600,
+        cooldownMs: 2250,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -288,7 +288,7 @@ export const SKILLS: Record<string, SkillData> = {
       },
       {
         damage: 200,
-        cooldownMs: 2200,
+        cooldownMs: 2000,
         projectileSpeed: 1800,
         pierce: 99,
         projectiles: 1,
@@ -307,7 +307,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0xc77dff,
     levels: [
       {
-        damage: 20,
+        damage: 30,
         cooldownMs: 1100,
         projectileSpeed: 480,
         pierce: 0,
@@ -316,7 +316,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 320,
       },
       {
-        damage: 30,
+        damage: 40,
         cooldownMs: 1000,
         projectileSpeed: 480,
         pierce: 0,
@@ -325,7 +325,7 @@ export const SKILLS: Record<string, SkillData> = {
         range: 360,
       },
       {
-        damage: 40,
+        damage: 50,
         cooldownMs: 900,
         projectileSpeed: 500,
         pierce: 1,
@@ -344,7 +344,7 @@ export const SKILLS: Record<string, SkillData> = {
     color: 0x4d7cff,
     levels: [
       {
-        hackMs: 1200,
+        hackMs: 800,
         minRange: 75,
         maxRange: 450,
         damage: 80,
@@ -352,7 +352,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 4000,
       },
       {
-        hackMs: 1000,
+        hackMs: 700,
         minRange: 75,
         maxRange: 450,
         damage: 160,
@@ -360,7 +360,7 @@ export const SKILLS: Record<string, SkillData> = {
         cooldownMs: 3500,
       },
       {
-        hackMs: 800,
+        hackMs: 600,
         minRange: 75,
         maxRange: 450,
         damage: 240,
@@ -397,7 +397,7 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 40,
         tickMs: 300,
-        explosionDamage: 100,
+        explosionDamage: 150,
         explosionRadius: 95,
       },
       {
@@ -407,7 +407,7 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 50,
         tickMs: 300,
-        explosionDamage: 125,
+        explosionDamage: 200,
         explosionRadius: 125,
       },
       {
@@ -417,7 +417,7 @@ export const SKILLS: Record<string, SkillData> = {
         count: 1,
         contactDamage: 60,
         tickMs: 300,
-        explosionDamage: 150,
+        explosionDamage: 250,
         explosionRadius: 155,
       },
     ],
@@ -430,9 +430,33 @@ export const SKILLS: Record<string, SkillData> = {
       'A personal combat drone, targeting the nearest enemy with a fast machine gun turret.',
     color: 0xb784a7,
     levels: [
-      { damage: 5, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
-      { damage: 8, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
-      { damage: 11, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
+      {
+        damage: 8,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 4000,
+        leashRadius: 50,
+      },
+      {
+        damage: 12,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 3500,
+        leashRadius: 50,
+      },
+      {
+        damage: 16,
+        cooldownMs: 100,
+        projectileSpeed: 1500,
+        range: 300,
+        magazine: 100,
+        reloadMs: 3000,
+        leashRadius: 50,
+      },
     ],
   },
   firewall: {
