@@ -54,6 +54,8 @@ export const DAMAGE_NUMBERS = {
   jitterX: 8,
   /** Hits on one enemy from the same skill within this time add up into one number. */
   mergeMs: 120,
+  /** Per-skill override of `mergeMs`: fast guns would otherwise flood the screen with numbers. */
+  mergeMsBySkill: { combatDrone: 500 } as Record<string, number>,
   /** Max numbers on screen at once (the oldest is recycled beyond this). */
   poolSize: 80,
 }

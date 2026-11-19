@@ -83,6 +83,23 @@ export interface RootkitStats {
   explosionRadius: number
 }
 
+/** Stats for the Combat Drone: a hovering turret that follows the player and sprays the nearest enemy. */
+export interface DroneStats {
+  /** Damage per pellet. */
+  damage: number
+  /** Time (ms) between pellets. */
+  cooldownMs: number
+  projectileSpeed: number
+  /** Max targeting distance from the drone, and how far a pellet flies. */
+  range: number
+  /** Pellets fired before the drone has to reload. */
+  magazine: number
+  /** Time (ms) the reload takes. */
+  reloadMs: number
+  /** The drone hovers within this distance (px) of the player, drifting towards the nearest enemy. */
+  leashRadius: number
+}
+
 /**
  * Bonuses a passive gives at one level. Each row is the passive's TOTAL bonus at that level
  * (not the step from the previous level). Bonuses from all passives are added together.
@@ -144,6 +161,13 @@ export interface RootkitSkill extends SkillBase {
   levels: RootkitStats[]
 }
 
+/** Hovering turret with its own movement, ammo and reload, see entities/CombatDrone.ts. */
+export interface DroneSkill extends SkillBase {
+  kind: 'weapon'
+  behavior: 'drone'
+  levels: DroneStats[]
+}
+
 export interface PassiveSkill extends SkillBase {
   kind: 'passive'
   levels: PassiveStats[]
@@ -155,6 +179,7 @@ export type SkillData =
   | SynapticSkill
   | EmpSkill
   | RootkitSkill
+  | DroneSkill
   | PassiveSkill
 
 export const SKILLS: Record<string, SkillData> = {
@@ -397,6 +422,19 @@ export const SKILLS: Record<string, SkillData> = {
       },
     ],
   },
+  combatDrone: {
+    name: 'Combat Drone',
+    kind: 'weapon',
+    behavior: 'drone',
+    description:
+      'A personal combat drone, targeting the nearest enemy with a fast machine gun turret.',
+    color: 0xb784a7,
+    levels: [
+      { damage: 5, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
+      { damage: 8, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
+      { damage: 11, cooldownMs: 100, projectileSpeed: 1500, range: 300, magazine: 100, reloadMs: 4000, leashRadius: 50 },
+    ],
+  },
   firewall: {
     name: 'Firewall',
     kind: 'passive',
@@ -466,6 +504,7 @@ export function getSkillStats(
   | SynapticStats
   | EmpStats
   | RootkitStats
+  | DroneStats
   | PassiveStats {
   const skill = SKILLS[id]
   if (!skill) throw new Error(`Unknown skill "${id}"`)
@@ -480,7 +519,8 @@ export function getWeaponStats(id: string, level: number): WeaponStats {
     skill.behavior === 'virus' ||
     skill.behavior === 'synaptic' ||
     skill.behavior === 'emp' ||
-    skill.behavior === 'rootkit'
+    skill.behavior === 'rootkit' ||
+    skill.behavior === 'drone'
   )
     throw new Error(`"${id}" is not a projectile weapon skill`)
   return getSkillStats(id, level) as WeaponStats
@@ -528,6 +568,17 @@ export function getRootkitStats(id: string, level: number): RootkitStats {
   )
     throw new Error(`"${id}" is not a rootkit skill`)
   return getSkillStats(id, level) as RootkitStats
+}
+
+export function getDroneStats(id: string, level: number): DroneStats {
+  if (
+    !(
+      SKILLS[id]?.kind === 'weapon' &&
+      (SKILLS[id] as DroneSkill).behavior === 'drone'
+    )
+  )
+    throw new Error(`"${id}" is not a drone skill`)
+  return getSkillStats(id, level) as DroneStats
 }
 
 export function getPassiveStats(id: string, level: number): PassiveStats {

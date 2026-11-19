@@ -31,7 +31,7 @@ export class DamageNumbers {
     const color = SKILLS[skillId]?.color ?? (isCyberwareId(skillId) ? CYBER_COLOR : DAMAGE_NUMBERS.defaultColor);
     const now = this.scene.time.now;
     const live = this.pool.find(
-      (e) => e.text.visible && e.enemy === enemy && e.color === color && now - e.born < DAMAGE_NUMBERS.mergeMs,
+      (e) => e.text.visible && e.enemy === enemy && e.color === color && now - e.born < (DAMAGE_NUMBERS.mergeMsBySkill[skillId] ?? DAMAGE_NUMBERS.mergeMs),
     );
     if (live) {
       live.total += amount;

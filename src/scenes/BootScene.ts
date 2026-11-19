@@ -66,6 +66,16 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture(`bullet-${key}`, w, 4).clear();
     }
 
+    // Combat Drone: a mauve flying disc seen at an angle (dome on top, dark underside, running lights). 40 x 24.
+    const droneColor = SKILLS.combatDrone.color;
+    g.fillStyle(0x4a3447).fillEllipse(20, 15, 38, 12);
+    g.fillStyle(droneColor).fillEllipse(20, 12, 38, 12);
+    g.lineStyle(1, 0xe3c4d8, 0.8).strokeEllipse(20, 12, 36, 10);
+    g.fillStyle(0xe3c4d8).fillEllipse(20, 8, 16, 8);
+    g.fillStyle(0x2ef2ff).fillCircle(6, 13, 1.5).fillCircle(34, 13, 1.5);
+    g.fillStyle(0xff4a2e).fillCircle(20, 17, 1.5);
+    g.generateTexture('combat-drone', 40, 24).clear();
+
     // Blob shadow: a soft black ellipse, faded to nothing at the edge.
     const blob = this.textures.createCanvas('shadow-blob', 64, 32)!;
     const ctx = blob.getContext();

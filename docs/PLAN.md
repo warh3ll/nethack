@@ -46,6 +46,7 @@ Roughly in the order I'd do them. Each is a few sessions' worth at most and leav
 - [x] Black ICE became Defensive Matrix: a shield that absorbs a hit and recharges, plus retaliation on every touch, with shield and spike animations (s5)
 - [x] Both weapon skills and passive skills should only have 3 levels. Old levels 1, 3 and 5 kept; Virus spread and Rootkit hijack stay at 1 at every level, and Synaptic Overload hack time is 500/400/300 ms
 - [x] Uncapped player level with a rising XP curve: x1.2 per level (`LEVELING.xpGrowth`) (s5)
+- [x] Combat Drone, an 8th damage skill (roster stays TBD in the design doc): a hovering turret within 50 px of the player, 100 ms between pellets, 100-shot magazine and a 4 s reload with a small bar. `entities/CombatDrone.ts`, stats in `skills.ts`, placeholder `combat-drone` texture in `BootScene.ts`; damage numbers merge per 500 ms (`DAMAGE_NUMBERS.mergeMsBySkill`)
 
 ### C. Data caches
 
